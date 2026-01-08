@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {Geist, Geist_Mono, Manrope} from "next/font/google";
 import "./globals.css";
+import {Providers} from "@/app/providers";
 
 const manrope = Manrope({
     variable: '--font-manrope',
@@ -32,7 +33,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

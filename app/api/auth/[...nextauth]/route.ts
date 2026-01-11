@@ -9,7 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
     try {
-        const res = await fetch(`${API_URL}/auth/refresh`, {
+        const res = await fetch(`${API_URL}/v1/auth/refresh`, {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -65,7 +65,7 @@ export const authOptions: AuthOptions = {
                 }
 
                 try {
-                    const res = await fetch(`${API_URL}/auth/login`, {
+                    const res = await fetch(`${API_URL}/v1/auth/login`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -132,7 +132,7 @@ export const authOptions: AuthOptions = {
 
                     console.log("selected Role: ", selectedRole);
 
-                    const res = await fetch(`${API_URL}/auth/provider`, {
+                    const res = await fetch(`${API_URL}/v1/auth/provider`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

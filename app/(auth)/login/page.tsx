@@ -60,7 +60,7 @@ export default function LoginPage() {
             })
 
             if (result?.error) {
-                throw new Error(result. error)
+                throw new Error(result.error)
             }
 
             router.replace("/dashboard")

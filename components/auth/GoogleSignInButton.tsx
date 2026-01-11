@@ -34,6 +34,7 @@ export default function GoogleSignInButton() {
             });
         } catch (error) {
             console.error("Google sign-in error:", error);
+        } finally {
             setIsLoading(false);
             setShowRoleModal(false);
         }

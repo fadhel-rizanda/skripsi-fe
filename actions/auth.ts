@@ -10,24 +10,10 @@ export interface RegisterResult {
         password: string
     }
 }
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export async function registerUser(input: RegisterFormData): Promise<RegisterResult> {
-    let data: unknown
-
-    if (input instanceof FormData) {
-        data = {
-            name: input.get("name"),
-            email: input.get("email"),
-            role: input.get("role"),
-            password: input.get("password"),
-            password_confirmation: input.get("password_confirmation"),
-        }
-    } else {
-        data = input
-    }
-
-    const validatedFields = registerSchema.safeParse(data)
+    const validatedFields = registerSchema.safeParse(input)
 
     if (!validatedFields.success) {
         return {
@@ -40,7 +26,7 @@ export async function registerUser(input: RegisterFormData): Promise<RegisterRes
     const { password_confirmation, ...registerData } = validatedFields.data
 
     try {
-        const res = await fetch(`${API_URL}/auth/register`, {
+        const res = await fetch(`${API_URL}/v1/auth/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -2,9 +2,9 @@ import {UserProfile} from "@/types";
 
 declare module "next-auth" {
     interface User extends UserProfile {
-        accessToken:  string
+        accessToken: string
         refreshToken: string
-        expiresAt:  number
+        expiresAt: number
         refreshExpiresAt: number
     }
 

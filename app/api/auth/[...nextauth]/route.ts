@@ -2,7 +2,8 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import NextAuth from "next-auth/next"
 import {JWT} from "next-auth/jwt";
-import {AuthOptions, User} from "next-auth";
+import {AuthOptions} from "next-auth";
+import { cookies } from 'next/headers'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
@@ -47,10 +48,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
             error: "RefreshAccessTokenError",
         }
     }
-}
-
-interface UserRole extends User{
-    selectedRole?: string;
 }
 
 export const authOptions: AuthOptions = {
@@ -129,9 +126,13 @@ export const authOptions: AuthOptions = {
         async signIn({ user, account }) {
             if (account?.provider === "google") {
                 try {
-                    const selectedRole = (user as UserRole).selectedRole || "adopter"
+                    // const selectedRole = (user as UserRole).selectedRole || "adopter"
+                    const cookieStore = await cookies()
+                    const selectedRole = cookieStore.get('selectedRole')?.value || 'adopter'
 
-                    const res = await fetch(`${API_URL}/api/v1/auth/provider`, {
+                    console.log("selected Role: ", selectedRole);
+
+                    const res = await fetch(`${API_URL}/auth/provider`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -167,6 +168,8 @@ export const authOptions: AuthOptions = {
                     user.refreshToken = data.data.refresh_token
                     user.expiresAt = Date.now() + data.data.expires_in * 1000
                     user.refreshExpiresAt = Date.now() + data.data.refresh_expires_in * 1000
+
+                    cookieStore.delete('selectedRole')
 
                     return true
                 } catch (error) {

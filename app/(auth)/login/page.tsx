@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
-import { Icon } from "@iconify/react"
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -146,19 +146,7 @@ export default function LoginPage() {
                                     </div>
                                 </div>
 
-                                <Button
-                                    type="button"
-                                    variant={"outline"}
-                                    className="w-full flex items-center justify-center gap-3 px-4 py-2 rounded-lg"
-                                    onClick={() =>
-                                        signIn("google", {
-                                            callbackUrl: "/dashboard",
-                                        })
-                                    }
-                                >
-                                    <Icon icon="logos:google-icon" width={20} height={20} />
-                                    Continue with Google
-                                </Button>
+                                <GoogleSignInButton/>
                                 <Button variant="link" className="w-full" asChild>
                                     <Link href="/">Back to Home</Link>
                                 </Button>

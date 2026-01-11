@@ -8,202 +8,178 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Loader2, AlertCircle } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { registerUser } from "@/actions/auth"
-import { registerSchema} from "@/schemas/auth.schema";
-
+import { registerSchema } from "@/schemas/auth.schema"
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 
 type FormValues = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
-    const router = useRouter()
-    const [error, setError] = useState("")
-    const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-    const form = useForm<FormValues>({
-        resolver: zodResolver(registerSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            role: "adopter",
-            password: "",
-            password_confirmation: "",
-        },
+  const form = useForm<FormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      role: "adopter",
+      password: "",
+      password_confirmation: "",
+    },
+  })
+
+  const onSubmit = (data: FormValues) => {
+    setError("")
+
+    startTransition(async () => {
+      try {
+        const result = await registerUser(data)
+
+        if (!result.success) {
+          setError(result.error || "Registration failed")
+          return
+        }
+
+        if (result.credentials) {
+          const signInResult = await signIn("credentials", {
+            email: result.credentials.email,
+            password: result.credentials.password,
+            redirect: false,
+          })
+
+          if (signInResult?.error) {
+            router.push("/login")
+            return
+          }
+
+          router.replace("/dashboard")
+          router.refresh()
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unexpected error")
+      }
     })
+  }
 
-    const onSubmit = async (data: FormValues) => {
-        setError("")
+  return (
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-10 space-y-6"
+    >
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </div>
+      )}
 
-        startTransition(async () => {
-            try {
-                const result = await registerUser(data)
+      {/* Username */}
+      <div>
+        <label className="text-sm font-medium text-gray-700">Username</label>
+        <input
+          {...form.register("name")}
+          placeholder="ex: budy"
+          disabled={isPending}
+          className="mt-1 w-full rounded-lg border px-4 py-3"
+        />
+        <p className="text-xs text-red-500 mt-1">
+          {form.formState.errors.name?.message}
+        </p>
+      </div>
 
-                if (!result.success) {
-                    setError(result.error || "Registration failed")
-                    return
-                }
+      {/* Email */}
+      <div>
+        <label className="text-sm font-medium text-gray-700">Email address</label>
+        <input
+          {...form.register("email")}
+          type="email"
+          placeholder="you@example.com"
+          disabled={isPending}
+          className="mt-1 w-full rounded-lg border px-4 py-3"
+        />
+        <p className="text-xs text-red-500 mt-1">
+          {form.formState.errors.email?.message}
+        </p>
+      </div>
 
-                if (result.credentials) {
-                    const signInResult = await signIn("credentials", {
-                        email: result.credentials.email,
-                        password: result.credentials.password,
-                        redirect: false,
-                    })
+      {/* Passwords */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium text-gray-700">Password</label>
+          <input
+            {...form.register("password")}
+            type="password"
+            placeholder="••••••••"
+            disabled={isPending}
+            className="mt-1 w-full rounded-lg border px-4 py-3"
+          />
+        </div>
 
-                    if (signInResult?.error) {
-                        setError("Registration successful, but auto-login failed. Please login manually.")
-                        setTimeout(() => {
-                            router.push("/login")
-                        }, 2000)
-                        return
-                    }
+        <div>
+          <label className="text-sm font-medium text-gray-700">
+            Confirm Password
+          </label>
+          <input
+            {...form.register("password_confirmation")}
+            type="password"
+            placeholder="••••••••"
+            disabled={isPending}
+            className="mt-1 w-full rounded-lg border px-4 py-3"
+          />
+        </div>
+      </div>
 
-                    if (signInResult?.ok) {
-                        // Step 3: Redirect to dashboard
-                        router.replace("/dashboard")
-                        router.refresh()
-                    }
-                }
-            } catch (err) {
-                console.error("Registration error:", err)
-                setError(err instanceof Error ? err.message : "An unexpected error occurred")
-            }
-        })
-    }
+      {/* Role selector */}
+      <div>
+        <label className="text-sm font-medium text-gray-700">
+          Select your role
+        </label>
+        <div className="mt-2 grid grid-cols-2 gap-4">
+          {(["adopter", "provider"] as const).map((role) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => form.setValue("role", role)}
+              className={`rounded-lg border py-3 font-medium transition
+                ${
+                  form.watch("role") === role
+                    ? "bg-blue-600 text-white"
+                    : "bg-white hover:bg-gray-50"
+                }`}
+            >
+              {role === "adopter" ? "Adopter" : "Provider"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {error && (
-                    <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
+      {/* Remember */}
+      <label className="flex items-center gap-2 text-sm text-gray-600">
+        <input type="checkbox" className="rounded" />
+        Remember me
+      </label>
 
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="John Doe"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={isPending}
+        className="w-full bg-black text-white py-3 rounded-lg flex justify-center"
+      >
+        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Continue
+      </button>
 
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="email"
-                                    placeholder="john@example.com"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-gray-200" />
+        <span className="text-xs text-gray-400">Or continue with</span>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
 
-                <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                disabled={isPending}
-                            >
-                                <FormControl className="w-full">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="adopter">Adopter</SelectItem>
-                                    <SelectItem value="provider">Provider</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="password_confirmation"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <Button type="submit" className="w-full" disabled={isPending}>
-                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isPending ? "Creating..." : "Create Account"}
-                </Button>
-            </form>
-        </Form>
-    )
+      {/* Google */}
+      <GoogleSignInButton />
+    </form>
+  )
 }

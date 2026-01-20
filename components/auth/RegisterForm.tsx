@@ -8,202 +8,215 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Loader2, AlertCircle } from "lucide-react"
 
+import { registerUser } from "@/actions/auth"
+import { registerSchema } from "@/schemas/auth.schema"
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { registerUser } from "@/actions/auth"
-import { registerSchema} from "@/schemas/auth.schema";
+import SelectRoleDialog from "@/components/auth/SelectRoleDialog"
 
 
 type FormValues = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
-    const router = useRouter()
-    const [error, setError] = useState("")
-    const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const [error, setError] = useState("")
+  const [isPending, startTransition] = useTransition()
 
-    const form = useForm<FormValues>({
-        resolver: zodResolver(registerSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            role: "adopter",
-            password: "",
-            password_confirmation: "",
-        },
+  const form = useForm<FormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      role: "adopter",
+      password: "",
+      password_confirmation: "",
+    },
+  })
+
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false)
+  const [selectedRole, setSelectedRole] =
+    useState<"adopter" | "provider">("adopter")
+
+
+  const onSubmit = () => {
+    setRoleDialogOpen(true)
+  }
+
+  const handleRegisterWithRole = () => {
+    form.setValue("role", selectedRole)
+    setRoleDialogOpen(false)
+
+    startTransition(async () => {
+      try {
+        const data = form.getValues()
+        const result = await registerUser(data)
+
+        if (!result.success) {
+          setError(result.error || "Registration failed")
+          return
+        }
+
+        if (result.credentials) {
+          const signInResult = await signIn("credentials", {
+            email: result.credentials.email,
+            password: result.credentials.password,
+            redirect: false,
+          })
+
+          if (signInResult?.error) {
+            router.push("/login")
+            return
+          }
+
+          router.replace("/dashboard")
+          router.refresh()
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unexpected error")
+      }
     })
+  }
 
-    const onSubmit = async (data: FormValues) => {
-        setError("")
+  return (
+    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-10">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-        startTransition(async () => {
-            try {
-                const result = await registerUser(data)
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-                if (!result.success) {
-                    setError(result.error || "Registration failed")
-                    return
-                }
+          {/* Username */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="ex: budy"
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                if (result.credentials) {
-                    const signInResult = await signIn("credentials", {
-                        email: result.credentials.email,
-                        password: result.credentials.password,
-                        redirect: false,
-                    })
+          {/* Email */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email address</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                    if (signInResult?.error) {
-                        setError("Registration successful, but auto-login failed. Please login manually.")
-                        setTimeout(() => {
-                            router.push("/login")
-                        }, 2000)
-                        return
-                    }
+          {/* Password */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      disabled={isPending}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                    if (signInResult?.ok) {
-                        // Step 3: Redirect to dashboard
-                        router.replace("/dashboard")
-                        router.refresh()
-                    }
-                }
-            } catch (err) {
-                console.error("Registration error:", err)
-                setError(err instanceof Error ? err.message : "An unexpected error occurred")
-            }
-        })
-    }
+            <FormField
+              control={form.control}
+              name="password_confirmation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      disabled={isPending}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {error && (
-                    <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
+          {/* Remember me */}
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input type="checkbox" className="rounded" />
+            Remember me
+          </label>
 
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="John Doe"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+          {/* Submit */}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Continue
+          </Button>
 
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="email"
-                                    placeholder="john@example.com"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
 
-                <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                disabled={isPending}
-                            >
-                                <FormControl className="w-full">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="adopter">Adopter</SelectItem>
-                                    <SelectItem value="provider">Provider</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">
+              Or continue with
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
 
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+          {/* Google */}
+          <GoogleSignInButton />
 
-                <FormField
-                    control={form.control}
-                    name="password_confirmation"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    {...field}
-                                    disabled={isPending}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+        </form>
+      </Form>
 
-                <Button type="submit" className="w-full" disabled={isPending}>
-                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isPending ? "Creating..." : "Create Account"}
-                </Button>
-            </form>
-        </Form>
-    )
+      <SelectRoleDialog
+        open={roleDialogOpen}
+        onOpenChange={setRoleDialogOpen}
+        selectedRole={selectedRole}
+        onRoleChange={setSelectedRole}
+        onConfirm={handleRegisterWithRole}
+        isLoading={isPending}
+      />
+
+    </div>
+  )
 }

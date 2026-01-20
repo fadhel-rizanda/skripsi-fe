@@ -22,7 +22,5 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
-
-    
   )
 }

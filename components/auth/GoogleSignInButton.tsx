@@ -13,12 +13,15 @@ export default function GoogleSignInButton() {
 
   const handleConfirm = async () => {
     setIsLoading(true);
-    document.cookie = `selectedRole=${role}; path=/; max-age=300; SameSite=Lax`;
-
-    await signIn("google", { callbackUrl: "/dashboard" });
-
-    setIsLoading(false);
-    setOpen(false);
+    try {
+      document.cookie = `selectedRole=${role}; path=/; max-age=300; SameSite=Lax`;
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      // Consider showing an error message to the user
+      setIsLoading(false);
+      setOpen(false);
+    }
   };
 
   return (

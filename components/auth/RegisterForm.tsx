@@ -23,7 +23,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import SelectRoleDialog from "@/components/auth/SelectRoleDialog"
+
 
 type FormValues = z.infer<typeof registerSchema>
 
@@ -43,11 +44,22 @@ export function RegisterForm() {
     },
   })
 
-  const onSubmit = (data: FormValues) => {
-    setError("")
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false)
+  const [selectedRole, setSelectedRole] =
+    useState<"adopter" | "provider">("adopter")
+
+
+  const onSubmit = () => {
+    setRoleDialogOpen(true)
+  }
+
+  const handleRegisterWithRole = () => {
+    form.setValue("role", selectedRole)
+    setRoleDialogOpen(false)
 
     startTransition(async () => {
       try {
+        const data = form.getValues()
         const result = await registerUser(data)
 
         if (!result.success) {
@@ -168,55 +180,6 @@ export function RegisterForm() {
             />
           </div>
 
-          {/* Role */}
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Select your role</FormLabel>
-
-                <FormControl>
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="grid grid-cols-2 gap-4"
-                    disabled={isPending}
-                  >
-                    <FormItem>
-                      <FormControl>
-                        <RadioGroupItem value="adopter" className="peer hidden" />
-                      </FormControl>
-                      <FormLabel
-                        className="flex cursor-pointer items-center justify-center rounded-lg border py-4 font-medium
-                                  peer-data-[state=checked]:bg-blue-600
-                                  peer-data-[state=checked]:text-white"
-                      >
-                        Adopter
-                      </FormLabel>
-                    </FormItem>
-
-                    <FormItem>
-                      <FormControl>
-                        <RadioGroupItem value="provider" className="peer hidden" />
-                      </FormControl>
-                      <FormLabel
-                        className="flex cursor-pointer items-center justify-center rounded-lg border py-4 font-medium
-                                  peer-data-[state=checked]:bg-green-600
-                                  peer-data-[state=checked]:text-white"
-                      >
-                        Provider
-                      </FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-
           {/* Remember me */}
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input type="checkbox" className="rounded" />
@@ -228,6 +191,7 @@ export function RegisterForm() {
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Continue
           </Button>
+
 
           {/* Divider */}
           <div className="flex items-center gap-4">
@@ -243,6 +207,16 @@ export function RegisterForm() {
 
         </form>
       </Form>
+
+      <SelectRoleDialog
+        open={roleDialogOpen}
+        onOpenChange={setRoleDialogOpen}
+        selectedRole={selectedRole}
+        onRoleChange={setSelectedRole}
+        onConfirm={handleRegisterWithRole}
+        isLoading={isPending}
+      />
+
     </div>
   )
 }

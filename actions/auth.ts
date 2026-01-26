@@ -1,37 +1,40 @@
-"use server"
-
-import {RegisterFormData, registerSchema} from "@/schemas/auth.schema";
-
-export interface RegisterResult {
+export interface VerifyOtpResult {
     success: boolean
     error?: string
-    credentials?: {
-        email: string
-        password: string
-    }
 }
+
+export interface ResendOtpResult {
+    success: boolean
+    error?: string
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-export async function registerUser(input: RegisterFormData): Promise<RegisterResult> {
-    const validatedFields = registerSchema.safeParse(input)
-
-    if (!validatedFields.success) {
+export async function verifyOtp(token: string, accessToken: string): Promise<VerifyOtpResult> {
+    if (!token) {
         return {
             success: false,
-            error: validatedFields.error.issues[0].message,
+            error: "Activation code is required",
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_confirmation, ...registerData } = validatedFields.data
+    if (!accessToken) {
+        return {
+            success: false,
+            error: "You must be logged in to verify",
+        }
+    }
 
     try {
-        const res = await fetch(`${API_URL}/v1/auth/register`, {
+        const res = await fetch(`${API_URL}/v1/auth/activation-code/verify`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`,
             },
-            body: JSON.stringify(registerData),
+            body: JSON.stringify({
+                token,
+            }),
         })
 
         const result = await res.json()
@@ -39,19 +42,53 @@ export async function registerUser(input: RegisterFormData): Promise<RegisterRes
         if (!res.ok || result.error) {
             return {
                 success: false,
-                error: result.message || "Registration failed. Please try again.",
+                error: result.message || "Verification failed",
             }
         }
 
         return {
             success: true,
-            credentials: {
-                email: registerData.email,
-                password: registerData.password,
-            }
         }
     } catch (err) {
-        console.error("Registration error:", err)
+        console.error("OTP verification error:", err)
+        return {
+            success: false,
+            error: err instanceof Error ? err.message : "An unexpected error occurred",
+        }
+    }
+}
+
+export async function resendOtp(accessToken: string): Promise<ResendOtpResult> {
+    if (!accessToken) {
+        return {
+            success: false,
+            error: "You must be logged in to resend code",
+        }
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/v1/auth/activation-code/resend`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`,
+            },
+        })
+
+        const result = await res.json()
+
+        if (!res.ok || result.error) {
+            return {
+                success: false,
+                error: result.message || "Failed to resend code",
+            }
+        }
+
+        return {
+            success: true,
+        }
+    } catch (err) {
+        console.error("Resend OTP error:", err)
         return {
             success: false,
             error: err instanceof Error ? err.message : "An unexpected error occurred",

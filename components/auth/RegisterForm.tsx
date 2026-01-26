@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Loader2, AlertCircle } from "lucide-react"
 
-import { registerUser } from "@/actions/auth"
+import { registerUser } from "@/actions/auth.server"
 import { registerSchema } from "@/schemas/auth.schema"
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 
@@ -79,7 +79,8 @@ export function RegisterForm() {
             return
           }
 
-          router.replace("/dashboard")
+          // router.replace(`/verify-otp?email=${encodeURIComponent(result.credentials.email)}`)
+          router.replace(`/dashboard`)
           router.refresh()
         }
       } catch (err) {

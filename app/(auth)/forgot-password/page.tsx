@@ -10,6 +10,7 @@ type Step = "email" | "otp" | "reset"
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<Step>("email")
   const [email, setEmail] = useState("")
+  const [token, setToken] = useState("")
 
   return (
     <div 
@@ -37,12 +38,15 @@ export default function ForgotPasswordPage() {
         {step === "otp" && (
             <VerifyOtpCard
             email={email}
-            onSuccess={() => setStep("reset")}
+            onSuccess={(token) => {
+                setToken(token)
+                setStep("reset")
+            }}
             />
         )}
 
         {step === "reset" && (
-            <ResetPasswordCard email={email} />
+            <ResetPasswordCard email={email} token={token} />
         )}
     </div>
   )

@@ -1,0 +1,48 @@
+"use client"
+
+import { useState } from "react"
+import SendEmailCard from "@/components/auth/forgot-pass/SendEmailCard"
+import VerifyOtpCard from "@/components/auth/forgot-pass/VerifyOTPCard"
+import ResetPasswordCard from "@/components/auth/forgot-pass/ResetPasswordCard"
+
+type Step = "email" | "otp" | "reset"
+
+export default function ForgotPasswordPage() {
+  const [step, setStep] = useState<Step>("email")
+  const [email, setEmail] = useState("")
+  const [token, setToken] = useState("")
+
+  return (
+    <div 
+      className="flex flex-col min-h-screen items-center justify-center gap-6 p-10 bg-cover bg-center bg-[url('/assets/bg-img-dog.png')]"
+    >
+        <div className="flex flex-col text-center gap-2">
+            <h1 className="text-3xl font-bold text-white">Forgot your password?</h1>
+            <p className="text-white">Relax, we got you!</p>
+        </div>
+        
+        {step === "email" && (
+            <SendEmailCard
+            onSuccess={(email) => {
+                setEmail(email)
+                setStep("otp")
+            }}
+            />
+        )}
+
+        {step === "otp" && (
+            <VerifyOtpCard
+            email={email}
+            onSuccess={(token) => {
+                setToken(token)
+                setStep("reset")
+            }}
+            />
+        )}
+
+        {step === "reset" && (
+            <ResetPasswordCard email={email} token={token} />
+        )}
+    </div>
+  )
+}

@@ -12,17 +12,17 @@ import { verifyOtp, resendOtp } from "@/actions/auth"
 
 export default function OtpVerificationCard() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const email = searchParams.get("email") || ""
   const { data: session } = useSession() // Get session
   
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [resending, setResending] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   const handleVerify = async () => {
     setError("")
+    setSuccessMessage("")
     setLoading(true)
 
     try {
@@ -42,7 +42,7 @@ export default function OtpVerificationCard() {
       // Success - redirect to dashboard
       router.push("/dashboard?verified=true")
     } catch (err) {
-      setError("An unexpected error occurred")
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
       setLoading(false)
     }
@@ -50,6 +50,7 @@ export default function OtpVerificationCard() {
 
   const handleResend = async () => {
     setError("")
+    setSuccessMessage("")
     setResending(true)
 
     try {
@@ -67,9 +68,9 @@ export default function OtpVerificationCard() {
       }
 
       // Show success message
-      alert("OTP has been resent to your email")
+      setSuccessMessage("OTP has been resent to your email")
     } catch (err) {
-      setError("An unexpected error occurred")
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
       setResending(false)
     }
@@ -89,6 +90,12 @@ export default function OtpVerificationCard() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {successMessage && (
+            <Alert className="border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100">
+              <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           )}
 

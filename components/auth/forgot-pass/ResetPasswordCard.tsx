@@ -53,7 +53,7 @@ export default function ResetPasswordCard({ email, token }: Props) {
       // Success - redirect to login
       router.push("/login?reset=success")
     } catch (err) {
-      setError("An unexpected error occurred")
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
       setLoading(false)
     }

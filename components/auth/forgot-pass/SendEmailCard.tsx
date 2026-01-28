@@ -38,7 +38,7 @@ export default function SendEmailCard({ onSuccess }: Props) {
 
       onSuccess(email)
     } catch (err) {
-      setError("An unexpected error occurred")
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
       setLoading(false)
     }

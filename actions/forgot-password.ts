@@ -3,11 +3,6 @@ export interface ForgotPasswordResult {
     error?: string
 }
 
-export interface VerifyResetTokenResult {
-    success: boolean
-    error?: string
-}
-
 export interface ResetPasswordResult {
     success: boolean
     error?: string
@@ -15,7 +10,6 @@ export interface ResetPasswordResult {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-// Step 1: Send reset code to email
 export async function sendForgotPasswordEmail(email: string): Promise<ForgotPasswordResult> {
     if (!email) {
         return {
@@ -54,10 +48,6 @@ export async function sendForgotPasswordEmail(email: string): Promise<ForgotPass
     }
 }
 
-// Step 2: Verify the OTP token (optional - the backend doesn't have a separate verify endpoint)
-// We'll verify it when resetting the password
-
-// Step 3: Reset password with token
 export async function resetPassword(
     email: string,
     token: string,

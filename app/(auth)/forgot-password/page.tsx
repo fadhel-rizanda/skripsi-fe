@@ -14,12 +14,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div 
-      className="flex flex-col min-h-screen items-center justify-center gap-6 p-10"
-      style={{
-        backgroundImage: "url('/assets/bg-img-dog.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="flex flex-col min-h-screen items-center justify-center gap-6 p-10 bg-cover bg-center bg-[url('/assets/bg-img-dog.png')]"
     >
         <div className="flex flex-col text-center gap-2">
             <h1 className="text-3xl font-bold text-white">Forgot your password?</h1>

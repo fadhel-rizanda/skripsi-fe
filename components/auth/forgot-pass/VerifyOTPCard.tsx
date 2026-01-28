@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
+import { sendForgotPasswordEmail } from "@/actions/forgot-password"
 
 interface Props {
   email: string
@@ -16,24 +17,33 @@ export default function VerifyOtpCard({ email, onSuccess }: Props) {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-
+  
   const handleVerify = () => {
     if (!otp || otp.length < 6) {
       setError("Please enter a valid code")
       return
     }
 
-    // Pass the token to the next step (reset password)
-    // Backend will verify the token when resetting password
     onSuccess(otp)
   }
 
-  const handleResend = async () => {
-    // You can reuse the sendForgotPasswordEmail function here
-    setError("")
-    // Import and call sendForgotPasswordEmail(email) if needed
-    alert("Code resent to your email")
+const [successMessage, setSuccessMessage] = useState("")
+
+const handleResend = async () => {
+  setLoading(true)
+  setError("")
+  setSuccessMessage("")
+  
+  const result = await sendForgotPasswordEmail(email)
+  
+  if (result.success) {
+    setSuccessMessage("Code resent successfully to your email")
+  } else {
+    setError(result.error || "Failed to resend code")
   }
+  
+  setLoading(false)
+}
 
   return (
     <div className="w-full max-w-lg flex items-center justify-center">
@@ -49,6 +59,12 @@ export default function VerifyOtpCard({ email, onSuccess }: Props) {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {successMessage && (
+            <Alert className="border-green-500 bg-green-50 text-green-900">
+              <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           )}
 

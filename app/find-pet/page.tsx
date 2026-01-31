@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Navbar } from "@/components/navbar/Navbar";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 
 export default function FindPetPage() {
@@ -10,9 +11,9 @@ export default function FindPetPage() {
   const total = 100;
 
   return (
-    <main className="mx-auto py-8 min-h-screen flex flex-col justify-between" style={{ backgroundColor: '#E7F3E7' }}>
+    <main className="mx-auto py min-h-screen flex flex-col justify-between" style={{ backgroundColor: '#E7F3E7' }}>
       {/* Header */}
-      <header className="mb-6"></header>
+      <header className="mb-6"><Navbar /></header>
 
       {/* Body */}
       <section className="flex-1 mb-6 flex flex-col items-center justify-center">
@@ -25,7 +26,7 @@ export default function FindPetPage() {
       </section>
 
       {/* Footer (Pagination) */}
-      <footer>
+      <footer className="pb-8 pt-4">
         <PaginationBar
           current_page={page}
           total={total}

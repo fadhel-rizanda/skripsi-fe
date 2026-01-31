@@ -1,36 +1,143 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+// Pastikan path import ini benar
 import { Navbar } from "@/components/navbar/Navbar";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
+import { PetCard } from "@/components/card/PetCard";
+
+type Pet = {
+  id: string | number;
+  name: string;
+  type_of_animal_name: string;
+  age: number | string;
+  age_unit: string;
+  profile_picture: string;
+};
+
+// Tambahan type untuk Filter (opsional, sesuaikan kebutuhan)
+type FilterState = {
+  type?: string;
+  type_of_animal_id?: string;
+  age?: string;
+  tag?: string;
+  personality_tag_id?: string;
+};
 
 export default function FindPetPage() {
+  // State Management
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  // Contoh data statis, ganti dengan data dari API
-  const total = 100;
+  const [pets, setPets] = useState<Pet[]>([]);
+  
+  // Total data dari database (bukan panjang array saat ini)
+  const [totalData, setTotalData] = useState(0); 
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  // State untuk filter
+  const [filters, setFilters] = useState<FilterState>({});
+
+  useEffect(() => {
+    async function fetchPets() {
+      setLoading(true);
+      setError("");
+      
+      try {
+        // PERBAIKAN: Mengirim query params ke API
+        // Kirim hanya param yang dibutuhkan backend
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (filters.age) queryParams.set("age", filters.age);
+        if (filters.type_of_animal_id) queryParams.set("type_of_animal_id", filters.type_of_animal_id);
+        if (filters.personality_tag_id) queryParams.set("personality_tag_id", filters.personality_tag_id);
+
+        const res = await fetch(`/api/pet?${queryParams}`);
+        
+        if (!res.ok) throw new Error("Failed to fetch pets");
+        
+        const responseJson = await res.json();
+        
+        // Gunakan total dari backend jika ada, fallback ke data.length
+        setPets(Array.isArray(responseJson.data) ? responseJson.data : []);
+        setTotalData(
+          typeof responseJson.total === "number"
+            ? responseJson.total
+            : responseJson.meta?.total || responseJson.data.length || 0
+        );
+
+      } catch (err) {
+        console.error(err);
+        setError("Gagal memuat data hewan. Silakan coba lagi nanti.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Fetch dijalankan setiap kali page, limit, atau filters berubah
+    fetchPets();
+  }, [page, limit, filters]); 
+
+  // Handler untuk mengubah filter (nanti dipassing ke PetFilterBar)
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setPage(1); // Reset ke halaman 1 setiap kali filter berubah
+  };
 
   return (
-    <main className="mx-auto py min-h-screen flex flex-col justify-between" style={{ backgroundColor: '#E7F3E7' }}>
-      {/* Header */}
-      <header className="mb-6"><Navbar /></header>
+    // PERBAIKAN: Mengganti style inline dengan Tailwind arbitrary value
+    <main className="mx-auto min-h-screen flex flex-col justify-between bg-[#E7F3E7]">
+      
+      <header className="mb-6">
+        <Navbar />
+      </header>
 
-      {/* Body */}
-      <section className="flex-1 mb-6 flex flex-col items-center justify-center">
-        <h2 className="text-[48px] font-bold mb-2 text-center">Find Your New Best Friend</h2>
-        <p className="text-[18px] font-normal text-center max-w-2xl mb-4">
-          Browse our adorable and adoptable pets. Your new companion is just a click<br />
-          away. Use the filters to find the perfect match for your family.
-        </p>
-        <PetFilterBar />
+      <section className="flex-1 mb-4 flex flex-col items-center w-full gap-4 px-4">
+        {/* Heading Section */}
+        <div className="flex flex-col items-center text-center">
+          <h2 className="text-3xl md:text-[48px] font-bold mb-2">Find Your New Best Friend</h2>
+          <p className="text-base md:text-[18px] font-normal max-w-2xl mb-4 text-gray-700">
+            Browse our adorable and adoptable pets. Your new companion is just a click
+            away. Use the filters to find the perfect match for your family.
+          </p>
+        </div>
+
+        {/* Filter Section */}
+        <div className="w-full flex justify-center mb-2">
+          {/* Perlu passing props onFilterChange ke komponen ini */}
+          <PetFilterBar onFilterChange={handleFilterChange} />
+        </div>
+
+        {/* Content Section */}
+        <div className="w-full flex flex-wrap justify-center gap-6 min-h-[300px]">
+          {loading && <div className="text-lg font-medium text-gray-600">Loading friends...</div>}
+          
+          {error && <div className="text-red-500 font-medium">{error}</div>}
+          
+          {!loading && !error && pets.length === 0 && (
+            <div className="text-gray-500 italic">Tidak ada hewan yang ditemukan dengan filter ini.</div>
+          )}
+
+          {!loading && !error && pets.map((pet) => (
+            <PetCard
+              key={pet.id}
+              name={pet.name}
+              type={pet.type_of_animal_name}
+              age={`${pet.age} ${pet.age_unit}`}
+              imageUrl={pet.profile_picture}
+            />
+          ))}
+        </div>
       </section>
 
-      {/* Footer (Pagination) */}
       <footer className="pb-8 pt-4">
         <PaginationBar
           current_page={page}
-          total={total}
+          total={totalData} // Gunakan total dari backend
           per_page={limit}
           onPageChange={setPage}
           onRowsPerPageChange={setLimit}

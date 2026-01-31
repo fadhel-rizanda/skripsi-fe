@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/navbar/Navbar";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
+import { PetFilterBar } from "@/components/filter/PetFilterBar";
 
 export default function FindPetPage() {
   const [page, setPage] = useState(1);
@@ -22,7 +23,7 @@ export default function FindPetPage() {
           Browse our adorable and adoptable pets. Your new companion is just a click<br />
           away. Use the filters to find the perfect match for your family.
         </p>
-        {/* Konten pencarian dan daftar hewan akan ditambahkan di sini */}
+        <PetFilterBar />
       </section>
 
       {/* Footer (Pagination) */}

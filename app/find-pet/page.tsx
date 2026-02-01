@@ -22,7 +22,8 @@ type FilterState = {
   type_of_animal_id?: string;
   age?: string;
   tag?: string;
-  personality_tag_id?: string;
+  tag_personality_id?: string;
+  search?: string;
 };
 
 export default function FindPetPage() {
@@ -46,7 +47,6 @@ export default function FindPetPage() {
       setError("");
       
       try {
-        // PERBAIKAN: Mengirim query params ke API
         // Kirim hanya param yang dibutuhkan backend
         const queryParams = new URLSearchParams({
           page: page.toString(),
@@ -54,7 +54,8 @@ export default function FindPetPage() {
         });
         if (filters.age) queryParams.set("age", filters.age);
         if (filters.type_of_animal_id) queryParams.set("type_of_animal_id", filters.type_of_animal_id);
-        if (filters.personality_tag_id) queryParams.set("personality_tag_id", filters.personality_tag_id);
+        if (filters.tag_personality_id) queryParams.set("tag_personality_id", filters.tag_personality_id);
+        if (filters.search) queryParams.set("search", filters.search);
 
         const res = await fetch(`/api/pet?${queryParams}`);
         

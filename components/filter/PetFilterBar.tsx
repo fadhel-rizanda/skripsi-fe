@@ -7,10 +7,10 @@ import { useState } from "react";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {
-  name?: string;
+  search?: string;
   age?: string;
   type_of_animal_id?: string;
-  personality_tag_id?: string;
+  tag_personality_id?: string;
 };
 
 type PetFilterBarProps = {
@@ -35,10 +35,10 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
         <Search className="w-5 h-5 text-gray-400 mr-2" />
         <input
           type="text"
-          name="name"
+          name="search"
           placeholder="Search by name..."
           className="bg-transparent outline-none border-none w-full text-gray-700 placeholder:text-gray-400"
-          value={filters.name || ""}
+          value={filters.search || ""}
           onChange={handleChange}
         />
       </div>
@@ -70,9 +70,9 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
         <NativeSelectOption value="senior">Senior</NativeSelectOption>
       </NativeSelect>
       <NativeSelect
-        name="personality_tag_id"
+        name="tag_personality_id"
         className="bg-[#F6F8F6] border rounded-md px-3 py-2 w-48 text-gray-700 focus:outline-none"
-        value={filters.personality_tag_id || ""}
+        value={filters.tag_personality_id || ""}
         onChange={handleChange}
       >
         <NativeSelectOption value="">Tags</NativeSelectOption>

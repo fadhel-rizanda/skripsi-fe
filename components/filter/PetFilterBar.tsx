@@ -30,8 +30,8 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   };
 
   return (
-    <div className="w-full max-w-[54rem] mx-auto bg-white rounded-lg p-2 md:p-3 lg:p-4 flex flex-nowrap gap-1 md:gap-3 lg:gap-4 items-center shadow border">
-      <div className="flex items-center bg-[#F6F8F6] border rounded-md px-1.5 md:px-3 py-1.5 md:py-2 w-28 md:w-48 lg:w-52 flex-shrink-0">
+    <div className="w-full max-w-[52rem] mx-auto bg-white rounded-lg p-1.5 md:p-2 lg:p-2.5 flex flex-nowrap gap-1 md:gap-2.5 lg:gap-3 items-center shadow border">
+      <div className="flex items-center bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-28 md:w-48 lg:w-52 flex-shrink-0">
         <Search className="w-3.5 h-3.5 md:w-5 lg:w-5 text-gray-400 mr-1 md:mr-2" />
         <input
           type="text"
@@ -44,7 +44,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       </div>
       <NativeSelect
         name="type_of_animal_id"
-        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-3 py-1.5 md:py-2 w-28 md:w-48 lg:w-52 h-8 md:h-9 lg:h-10 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
+        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-28 md:w-48 lg:w-52 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
         value={filters.type_of_animal_id || ""}
         onChange={handleChange}
       >
@@ -59,7 +59,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       </NativeSelect>
       <NativeSelect
         name="age"
-        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-3 py-1.5 md:py-2 w-22 md:w-40 lg:w-44 h-8 md:h-9 lg:h-10 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
+        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-22 md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
         value={filters.age || ""}
         onChange={handleChange}
       >
@@ -71,7 +71,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       </NativeSelect>
       <NativeSelect
         name="tag_personality_id"
-        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-3 py-1.5 md:py-2 w-18 md:w-48 lg:w-44 h-8 md:h-9 lg:h-10 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
+        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-18 md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
         value={filters.tag_personality_id || ""}
         onChange={handleChange}
       >

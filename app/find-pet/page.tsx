@@ -93,7 +93,7 @@ export default function FindPetPage() {
     // PERBAIKAN: Mengganti style inline dengan Tailwind arbitrary value
     <main className="mx-auto min-h-screen flex flex-col justify-between bg-[#E7F3E7]">
       
-      <header className="mb-6">
+      <header className="sticky top-0 z-50 mb-6">
         <Navbar />
       </header>
 
@@ -114,7 +114,7 @@ export default function FindPetPage() {
         </div>
 
         {/* Content Section */}
-        <div className="w-full flex flex-wrap justify-center gap-6 min-h-[300px]">
+        <div className="w-full max-w-5xl mx-auto flex flex-wrap justify-center gap-6 min-h-[300px]">
           {loading && <div className="text-lg font-medium text-gray-600">Loading friends...</div>}
           
           {error && <div className="text-red-500 font-medium">{error}</div>}

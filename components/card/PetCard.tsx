@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
     Card,
@@ -16,13 +15,13 @@ interface PetCardProps {
 
 export function PetCard({ name, type, age, imageUrl }: PetCardProps) {
   return (
-    <Card className="w-full md:w-48 lg:w-56 rounded-xl md:rounded-2xl overflow-hidden shadow bg-white flex flex-row md:flex-col p-0">
+    <Card className="w-70 md:w-48 lg:w-56 rounded-lg overflow-hidden shadow bg-white flex flex-row md:flex-col p-0">
       <div className="w-24 md:w-full h-20 md:h-36 lg:h-40 relative flex-shrink-0">
         <Image
           src={imageUrl}
           alt={name}
           fill
-          className="object-cover rounded-l-xl md:rounded-l-none md:rounded-t-2xl"
+          className="object-cover rounded-l-lg md:rounded-l-none md:rounded-t-lg"
           sizes="(max-width: 768px) 96px, (max-width: 1024px) 192px, 224px"
           priority
         />

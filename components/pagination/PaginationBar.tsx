@@ -56,74 +56,86 @@ export function PaginationBar({
 
   return (
     <div className="w-full flex justify-center">
-        <div className="pagination-bar-container flex items-center gap-2 max-w-fit w-full">
+      <div className="pagination-bar-container flex items-center gap-1 md:gap-2 lg:gap-6 max-w-fit w-full text-xs md:text-sm lg:text-base">
         <Field orientation="horizontal" className="w-fit">
-        <FieldLabel htmlFor="select-rows-per-page">Rows per page</FieldLabel>
-        <Select
-          defaultValue={per_page.toString()}
-          onValueChange={v => onRowsPerPageChange && onRowsPerPageChange(Number(v))}>
-          <SelectTrigger className="w-20" id="select-rows-per-page">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent align="start">
-            <SelectGroup>
-              {rowsPerPageOptions.map(opt => (
-                <SelectItem key={opt} value={opt.toString()}>{opt}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </Field>
-        <Pagination className="mx-0 w-auto">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={e => {
-                e.preventDefault();
-                if (onPageChange && current_page > 1) onPageChange(current_page - 1);
-              }}
-              aria-disabled={current_page === 1}
-              className={current_page === 1 ? 'pointer-events-none opacity-50' : ''}
-            />
-          </PaginationItem>
-          {pageNumbers.map((num) =>
-            typeof num === 'string' && num.startsWith('ellipsis') ? (
-              <PaginationItem key={num}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            ) : (
-              <PaginationItem key={num}>
-                <PaginationLink
-                  href="#"
-                  isActive={num === current_page}
-                  className={num === current_page ? 'bg-black text-white' : ''}
-                  onClick={e => {
-                    e.preventDefault();
-                    if (onPageChange && num !== current_page) onPageChange(Number(num));
-                  }}
-                >
-                  {num}
-                </PaginationLink>
-              </PaginationItem>
-            )
-          )}
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={e => {
-                e.preventDefault();
-                if (onPageChange && current_page < totalPages) onPageChange(current_page + 1);
-              }}
-              aria-disabled={current_page === totalPages}
-              className={current_page === totalPages ? 'pointer-events-none opacity-50' : ''}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-        <div className="text-sm text-muted-foreground text-right">
-        Showing <span className="font-bold">{start}</span> to <span className="font-bold">{end}</span> of <span className="font-bold">{total}</span>
-      </div>
+          <FieldLabel htmlFor="select-rows-per-page" className="text-xs md:text-sm lg:text-base whitespace-nowrap">Rows per page</FieldLabel>
+          <Select
+            defaultValue={per_page.toString()}
+            onValueChange={v => onRowsPerPageChange && onRowsPerPageChange(Number(v))}
+          >
+            <SelectTrigger className="w-12 md:w-20 lg:w-28 h-6 md:h-8 lg:h-10 text-xs md:text-sm lg:text-base px-1 md:px-2 lg:px-4" id="select-rows-per-page">
+              <SelectValue className="text-xs md:text-sm lg:text-base" />
+            </SelectTrigger>
+            <SelectContent align="start" className="text-xs md:text-sm lg:text-base">
+              <SelectGroup>
+                {rowsPerPageOptions.map(opt => (
+                  <SelectItem key={opt} value={opt.toString()} className="text-xs md:text-sm lg:text-base px-1 md:px-2 lg:px-4 py-1 md:py-2 lg:py-3 h-6 md:h-8 lg:h-10">
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Pagination className="mx-2 w-auto text-xs md:text-sm lg:text-base">
+          <PaginationContent className="gap-x-4 md:gap-x-6 lg:gap-x-8">
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (onPageChange && current_page > 1) onPageChange(current_page - 1);
+                }}
+                aria-disabled={current_page === 1}
+                className={
+                  (current_page === 1 ? 'pointer-events-none opacity-50 ' : '') +
+                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base'
+                }
+              />
+            </PaginationItem>
+            {pageNumbers.map((num) =>
+              typeof num === 'string' && num.startsWith('ellipsis') ? (
+                <PaginationItem key={num} className="min-w-0 p-0 h-6 md:h-8 lg:h-10">
+                  <PaginationEllipsis className="h-4 md:h-6 lg:h-8 w-4 md:w-6 lg:w-8" />
+                </PaginationItem>
+              ) : (
+                <PaginationItem key={num} className="min-w-0 p-0 h-6 md:h-8 lg:h-10">
+                  <PaginationLink
+                    href="#"
+                    isActive={num === current_page}
+                    className={
+                      (num === current_page ? 'bg-black text-white ' : '') +
+                      'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base min-w-0'
+                    }
+                    onClick={e => {
+                      e.preventDefault();
+                      if (onPageChange && num !== current_page) onPageChange(Number(num));
+                    }}
+                  >
+                    {num}
+                  </PaginationLink>
+                </PaginationItem>
+              )
+            )}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  if (onPageChange && current_page < totalPages) onPageChange(current_page + 1);
+                }}
+                aria-disabled={current_page === totalPages}
+                className={
+                  (current_page === totalPages ? 'pointer-events-none opacity-50 ' : '') +
+                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base'
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+        <div className="text-xs md:text-sm lg:text-base text-muted-foreground text-right whitespace-nowrap">
+          Showing <span className="font-bold">{start}</span> to <span className="font-bold">{end}</span> of <span className="font-bold">{total}</span>
+        </div>
       </div>
     </div>
   );

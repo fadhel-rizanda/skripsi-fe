@@ -3,6 +3,7 @@ export interface UserProfile {
     name: string
     email: string
     role: Role
+    channels: string[]
     avatar?: string
 }
 

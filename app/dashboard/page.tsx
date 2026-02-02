@@ -31,6 +31,15 @@ export default async function DashboardPage() {
                         ))}
                     </ul>
                 </div>
+
+                <div>
+                    <p className="font-semibold">Channels:</p>
+                    <ul className="list-inside list-disc">
+                        {session.user.channels.map((id) => (
+                            <li key={id}>{id}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
             <LogoutButton/>

@@ -100,6 +100,7 @@ export const authOptions: AuthOptions = {
                         refreshToken: data.data.refresh_token,
                         expiresAt: Date.now() + data.data.expires_in * 1000,
                         refreshExpiresAt: Date.now() + data.data.refresh_expires_in * 1000,
+                        channels: user.channels,
                     }
                 } catch (error: unknown) {
                     console.error("Login error:", error)
@@ -168,6 +169,7 @@ export const authOptions: AuthOptions = {
                     user.refreshToken = data.data.refresh_token
                     user.expiresAt = Date.now() + data.data.expires_in * 1000
                     user.refreshExpiresAt = Date.now() + data.data.refresh_expires_in * 1000
+                    user.channels = userData.channels || []
 
                     cookieStore.delete('selectedRole')
 
@@ -193,6 +195,7 @@ export const authOptions: AuthOptions = {
                     email: user.email ?? "",
                     role: user.role,
                     avatar: user.avatar,
+                    channels: user.channels ?? [],
                 }
             }
 

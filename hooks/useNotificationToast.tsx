@@ -5,13 +5,8 @@ import { useSession } from "next-auth/react"
 import { getEcho } from "@/lib/echo"
 import { toast } from "sonner"
 import { Icon } from "@iconify/react"
-
-const CHANNEL_EVENT_MAP: Record<string, string> = {
-    notification: "notification.sent",
-    chat: "message.sent",
-    community: "community.updated",
-    adoption: "adoption.updated",
-}
+import {Channel} from "@/types";
+import {Notification} from "@/types/notification";
 
 const CHANNEL_ICON_MAP: Record<string, string> = {
     notification: "ph:bell",
@@ -32,21 +27,19 @@ export function useNotificationToast() {
 
         const subscriptions: { channelName: string; eventName: string }[] = []
 
-        session.user.channels.forEach((channelName) => {
-            const prefix = channelName.split(".")[0]
-            const eventName = CHANNEL_EVENT_MAP[prefix]
-            if (!eventName) return
+        session.user.channels.forEach(({ name: channelName, event: eventName }: Channel) => {
+            if (!channelName || !eventName) return
 
             const channel = echo.private(channelName)
 
-            channel.listen(`.${eventName}`, (data: any) => {
-                const iconName = CHANNEL_ICON_MAP[prefix]
+            channel.listen(`.${eventName}`, (data: Notification) => {
+                const iconName = CHANNEL_ICON_MAP[data.reference_by]
 
                 toast(data.title || "Notification", {
                     description: data.message || "",
                     duration: 5000,
                     icon: iconName ? <Icon icon={iconName} className="opacity-50 h-4 w-4" /> : undefined,
-            })
+                })
             })
 
             subscriptions.push({ channelName, eventName })

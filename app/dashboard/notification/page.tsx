@@ -3,45 +3,50 @@
 import { useState, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { getEcho } from "@/lib/echo"
-
-interface Notification {
-    id: string
-    title?: string
-    message?: string
-    created_at?: string
-}
+import {Channel} from "@/types";
+import {Notification} from "@/types/notification";
 
 export default function NotificationPage() {
     const { data: session } = useSession()
     const [notifications, setNotifications] = useState<Notification[]>([])
-    const processedIds = useRef<Set<string>>(new Set()) // ← TAMBAH INI
+    const processedIds = useRef<Set<string>>(new Set())
 
     useEffect(() => {
-        if (!session?.accessToken || !session.user?.id) return
+        if (!session?.accessToken || !session.user?.channels) return
 
         const echo = getEcho(session.accessToken)
         if (!echo) return
 
-        const channelName = `notification.${session.user.id}`
+        const subscriptions: { channelName: string; eventName: string }[] = []
 
-        echo.private(channelName)
-            .listen(".notification.sent", (data: Notification) => {
+        session.user.channels.forEach(({ name: channelName, event: eventName }: Channel) => {
+            if (!channelName || !eventName) return
+
+            const channel = echo.private(channelName)
+
+            channel.listen(`.${eventName}`, (data: Notification) => {
                 console.log("Received:", data)
 
+                if (!data.id) return // skip if no id
                 if (processedIds.current.has(data.id)) {
                     console.log("Duplicate notification ignored:", data.id)
                     return
                 }
 
                 processedIds.current.add(data.id)
-
                 setNotifications((prev) => [data, ...prev])
             })
 
+            subscriptions.push({ channelName, eventName })
+        })
+
         return () => {
-            echo.leave(channelName)
+            subscriptions.forEach(({ channelName, eventName }) => {
+                echo.private(channelName).stopListening(`.${eventName}`)
+                echo.leave(`private-${channelName}`)
+            })
         }
-    }, [session?.accessToken, session?.user?.id])
+    }, [session?.accessToken, session?.user?.channels])
 
     if (!session) return <p>Loading...</p>
 
@@ -53,11 +58,16 @@ export default function NotificationPage() {
             ) : (
                 <ul className="space-y-2">
                     {notifications.map((notif) => (
-                        <li key={notif.id} className="border p-3 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow">
+                        <li
+                            key={notif.id}
+                            className="border p-3 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
+                        >
                             <p className="font-semibold text-lg">{notif.title || "Notification"}</p>
                             <p className="text-gray-700">{notif.message || JSON.stringify(notif)}</p>
                             <p className="text-xs text-gray-400 mt-2">
-                                {notif.created_at ? new Date(notif.created_at).toLocaleString() : "Just now"}
+                                {notif.created_at
+                                    ? new Date(notif.created_at).toLocaleString()
+                                    : "Just now"}
                             </p>
                         </li>
                     ))}

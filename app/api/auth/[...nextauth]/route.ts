@@ -169,7 +169,7 @@ export const authOptions: AuthOptions = {
                     user.refreshToken = data.data.refresh_token
                     user.expiresAt = Date.now() + data.data.expires_in * 1000
                     user.refreshExpiresAt = Date.now() + data.data.refresh_expires_in * 1000
-                    user.channels = userData.channels || []
+                    user.channels = userData.channels
 
                     cookieStore.delete('selectedRole')
 

@@ -3,7 +3,7 @@ export interface UserProfile {
     name: string
     email: string
     role: Role
-    channels: string[]
+    channels: Channel[]
     avatar?: string
 }
 
@@ -16,4 +16,9 @@ export interface Role {
 export interface Permission {
     id: string
     name: string
+}
+
+export interface Channel {
+    name: string
+    event: string
 }

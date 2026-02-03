@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { NavbarLandingPage } from "@/components/navbar/NavbarLandingPage";
+import { NavbarLandingPage } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/footer/Footer";
 import { Heart, PawPrint, Users, MessageCircle, Share2, ThumbsUp, Lock } from "lucide-react";
 

@@ -18,10 +18,8 @@ type Pet = {
 
 // Tambahan type untuk Filter (opsional, sesuaikan kebutuhan)
 type FilterState = {
-  type?: string;
   type_of_animal_id?: string;
   age?: string;
-  tag?: string;
   tag_personality_id?: string;
   search?: string;
 };
@@ -120,16 +118,17 @@ export default function FindPetPage() {
           {error && <div className="text-red-500 font-medium">{error}</div>}
           
           {!loading && !error && pets.length === 0 && (
-            <div className="text-gray-500 italic">Tidak ada hewan yang ditemukan dengan filter ini.</div>
+            <div className="text-gray-500 italic">No pets found with these filters.</div>
           )}
 
-          {!loading && !error && pets.map((pet) => (
+          {!loading && !error && pets.map((pet, index) => (
             <PetCard
               key={pet.id}
               name={pet.name}
               type={pet.type_of_animal_name}
               age={`${pet.age} ${pet.age_unit}`}
               imageUrl={pet.profile_picture}
+              priority={index < 4}
             />
           ))}
         </div>

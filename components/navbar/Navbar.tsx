@@ -19,7 +19,7 @@ export function Navbar() {
           height={32}
           className="mr-2"
         />
-          <span className="font-bold text-green-700" style={{ fontSize: 24 }}>Pawsitive</span>
+        <span className="font-bold text-green-700 text-2xl">Pawsitive</span>
       </div>
       <div className="flex-1 flex justify-center">
         <NavigationMenu>

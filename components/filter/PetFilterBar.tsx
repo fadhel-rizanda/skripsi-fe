@@ -88,7 +88,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       </NativeSelect>
       <NativeSelect
         name="age"
-        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-22 md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
+        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-[5.5rem] md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
         value={filters.age || ""}
         onChange={handleChange}
       >
@@ -101,7 +101,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       </NativeSelect>
       <NativeSelect
         name="tag_personality_id"
-        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-18 md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
+        className="bg-[#F6F8F6] border rounded-md px-1.5 md:px-2.5 py-1 md:py-1.5 w-[4.5rem] md:w-40 lg:w-44 h-7 md:h-8 lg:h-9 text-[10px] md:text-sm lg:text-base text-gray-700 focus:outline-none flex-shrink-0"
         value={filters.tag_personality_id || ""}
         onChange={handleChange}
       >

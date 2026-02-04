@@ -40,6 +40,8 @@ export default function FindPetPage() {
   const [filters, setFilters] = useState<FilterState>({});
 
   useEffect(() => {
+    const abortController = new AbortController();
+    
     async function fetchPets() {
       setLoading(true);
       setError("");
@@ -55,7 +57,9 @@ export default function FindPetPage() {
         if (filters.tag_personality_id) queryParams.set("tag_personality_id", filters.tag_personality_id);
         if (filters.search) queryParams.set("search", filters.search);
 
-        const res = await fetch(`/api/pet?${queryParams}`);
+        const res = await fetch(`/api/pet?${queryParams}`, {
+          signal: abortController.signal,
+        });
         
         if (!res.ok) throw new Error("Failed to fetch pets");
         
@@ -70,6 +74,10 @@ export default function FindPetPage() {
         );
 
       } catch (err) {
+        // Ignore abort errors
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
         console.error(err);
         setError("Gagal memuat data hewan. Silakan coba lagi nanti.");
       } finally {
@@ -79,6 +87,11 @@ export default function FindPetPage() {
 
     // Fetch dijalankan setiap kali page, limit, atau filters berubah
     fetchPets();
+    
+    // Cleanup: abort ongoing request if dependencies change
+    return () => {
+      abortController.abort();
+    };
   }, [page, limit, filters]); 
 
   // Handler untuk mengubah filter (nanti dipassing ke PetFilterBar)
@@ -107,7 +120,6 @@ export default function FindPetPage() {
 
         {/* Filter Section */}
         <div className="w-full flex justify-center mb-2">
-          {/* Perlu passing props onFilterChange ke komponen ini */}
           <PetFilterBar onFilterChange={handleFilterChange} />
         </div>
 

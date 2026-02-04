@@ -33,7 +33,7 @@ export function PaginationBar({
   onRowsPerPageChange,
   rowsPerPageOptions = [10, 25, 50, 100],
 }: PaginationBarProps) {
-  // Hitung total halaman
+  // Ensure there is always at least 1 page (even when total is 0) so the pagination UI remains consistent
   const totalPages = Math.max(1, Math.ceil(total / per_page));
 
   // Generate page numbers for display (simple logic, can be improved for large pages)

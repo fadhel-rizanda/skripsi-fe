@@ -87,10 +87,10 @@ export function PaginationBar({
                   if (onPageChange && current_page > 1) onPageChange(current_page - 1);
                 }}
                 aria-disabled={current_page === 1}
-                className={
-                  (current_page === 1 ? 'pointer-events-none opacity-50 ' : '') +
-                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base'
-                }
+                className={cn(
+                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base',
+                  current_page === 1 && 'pointer-events-none opacity-50'
+                )}
               />
             </PaginationItem>
             {pageNumbers.map((num) =>

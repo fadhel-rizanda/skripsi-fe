@@ -107,7 +107,6 @@ export default function FindPetPage() {
 
         {/* Filter Section */}
         <div className="w-full flex justify-center mb-2">
-          {/* Perlu passing props onFilterChange ke komponen ini */}
           <PetFilterBar onFilterChange={handleFilterChange} />
         </div>
 

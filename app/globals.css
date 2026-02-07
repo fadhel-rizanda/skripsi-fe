@@ -80,6 +80,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --chat-bg: 145 45% 96%;
+  --chat-me: 142 71% 45%;
+  --chat-me-text: 0 0% 100%;
+  --chat-other: 0 0% 100%;
+  --chat-border: 0 0% 90%;
 }
 
 .dark {

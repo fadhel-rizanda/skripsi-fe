@@ -78,7 +78,7 @@ export default function FindPetPage() {
   }, [page, limit, filters]); 
 
   // Handler untuk mengubah filter (nanti dipassing ke PetFilterBar)
-  const handleFilterChange = (newFilters: FilterState) => {
+  const handleFilterChange = (newFilters: PetFilterState) => {
     setFilters(newFilters);
     setPage(1); // Reset ke halaman 1 setiap kali filter berubah
   };

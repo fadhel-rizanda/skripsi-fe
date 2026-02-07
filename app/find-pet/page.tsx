@@ -79,7 +79,7 @@ export default function FindPetPage() {
           return;
         }
         console.error(err);
-        setError("Gagal memuat data hewan. Silakan coba lagi nanti.");
+        setError("Failed to load pet data. Please try again later.");
       } finally {
         setLoading(false);
       }

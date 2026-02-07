@@ -38,7 +38,8 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
     if (tagPersonalityId) filters.tag_personality_id = tagPersonalityId;
 
     onFilterChange(filters);
-  }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId, onFilterChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId]);
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-1.5 sm:p-2 md:p-2.5 lg:p-2.5 flex flex-nowrap gap-1.5 sm:gap-2 md:gap-3 lg:gap-3 items-center shadow border overflow-x-auto">

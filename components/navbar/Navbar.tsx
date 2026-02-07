@@ -120,10 +120,18 @@ export function Navbar() {
 
       {/* Right Icons */}
       <div className="flex justify-end items-center gap-2 sm:gap-4 ml-auto">
-        <button aria-label="View notifications" className="hover:bg-gray-200 rounded-full p-1.5 sm:p-2 transition-colors">
+        <button 
+          type="button"
+          aria-label="View notifications" 
+          className="hover:bg-gray-200 rounded-full p-1.5 sm:p-2 transition-colors"
+        >
           <Icon icon="heroicons:bell" className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
         </button>
-        <button aria-label="View user profile" className="hover:bg-gray-200 rounded-full p-1 transition-colors">
+        <button 
+          type="button"
+          aria-label="View user profile" 
+          className="hover:bg-gray-200 rounded-full p-1 transition-colors"
+        >
           <Icon icon="heroicons:user-circle" className="w-7 h-7 sm:w-8 sm:h-8 text-black" />
         </button>
       </div>

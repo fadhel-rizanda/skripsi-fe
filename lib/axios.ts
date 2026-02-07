@@ -1,0 +1,28 @@
+import axios, {AxiosError} from "axios";
+import {getSession} from "next-auth/react";
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use(async (config) => {
+  const session = await getSession()
+    if (session?.accessToken) {
+      config.headers.Authorization = `Bearer ${session.accessToken}`;
+    }
+    return config;
+})
+
+export default api;
+
+export const handleApiError = (error: unknown) => {
+  if (error instanceof AxiosError && error.response?.status === 422) {
+    return error.response.data.errors;
+  }
+  return { message: "Something went wrong. Please try again." };
+};

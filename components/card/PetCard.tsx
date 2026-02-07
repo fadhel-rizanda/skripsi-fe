@@ -16,7 +16,7 @@ interface PetCardProps {
 
 export function PetCard({ name, type, age, imageUrl, priority = false }: PetCardProps) {
   return (
-    <Card className="w-[17.5rem] md:w-48 lg:w-56 rounded-lg overflow-hidden shadow bg-white flex flex-row md:flex-col p-0">
+    <Card className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-row md:flex-col p-0">
       <div className="w-24 md:w-full h-20 md:h-36 lg:h-40 relative flex-shrink-0">
         <Image
           src={imageUrl}

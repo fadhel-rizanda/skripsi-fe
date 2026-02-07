@@ -124,13 +124,13 @@ export default function FindPetPage() {
         </div>
 
         {/* Content Section */}
-        <div className="w-full max-w-5xl mx-auto flex flex-wrap justify-center gap-6 min-h-[300px]">
-          {loading && <div className="text-lg font-medium text-gray-600">Loading friends...</div>}
+        <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[300px]">
+          {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center">Loading friends...</div>}
           
-          {error && <div className="text-red-500 font-medium">{error}</div>}
+          {error && <div className="col-span-full text-red-500 font-medium text-center">{error}</div>}
           
           {!loading && !error && pets.length === 0 && (
-            <div className="text-gray-500 italic">No pets found with these filters.</div>
+            <div className="col-span-full text-gray-500 italic text-center">No pets found with these filters.</div>
           )}
 
           {!loading && !error && pets.map((pet, index) => (

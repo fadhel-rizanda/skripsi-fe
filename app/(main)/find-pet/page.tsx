@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/navbar/Navbar";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
 import { PetCard } from "@/components/card/PetCard";
@@ -70,12 +69,7 @@ export default function FindPetPage() {
   return (
     // PERBAIKAN: Mengganti style inline dengan Tailwind arbitrary value
     <main className="mx-auto min-h-screen flex flex-col justify-between bg-[#E7F3E7]">
-      
-      <header className="sticky top-0 z-50 mb-6">
-        <Navbar />
-      </header>
-
-      <section className="flex-1 mb-4 flex flex-col items-center w-full gap-4 px-4">
+      <section className="flex-1 mb-4 flex flex-col items-center w-full gap-4 px-4 mt-6">
         {/* Heading Section */}
         <div className="flex flex-col items-center text-center">
           <h2 className="font-[family-name:var(--font-plus-jakarta-sans)] text-3xl md:text-[48px] font-bold mb-2">Find Your New Best Friend</h2>

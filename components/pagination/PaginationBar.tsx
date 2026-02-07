@@ -63,7 +63,7 @@ export function PaginationBar({
         <Field orientation="horizontal" className="w-fit">
           <FieldLabel htmlFor="select-rows-per-page" className="text-xs sm:text-xs md:text-sm lg:text-base whitespace-nowrap">Rows per page</FieldLabel>
           <Select
-            defaultValue={per_page.toString()}
+            value={per_page.toString()}
             onValueChange={v => onRowsPerPageChange && onRowsPerPageChange(Number(v))}
           >
             <SelectTrigger className="w-12 sm:w-16 md:w-20 lg:w-28 h-6 sm:h-7 md:h-8 lg:h-9 text-xs sm:text-xs md:text-sm lg:text-base px-1 sm:px-1.5 md:px-2 lg:px-4" id="select-rows-per-page">

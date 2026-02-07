@@ -1,28 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// Pastikan path import ini benar
 import { Navbar } from "@/components/navbar/Navbar";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
 import { PetCard } from "@/components/card/PetCard";
-
-type Pet = {
-  id: string | number;
-  name: string;
-  type_of_animal_name: string;
-  age: number | string;
-  age_unit: string;
-  profile_picture: string;
-};
-
-// Tambahan type untuk Filter (opsional, sesuaikan kebutuhan)
-type FilterState = {
-  type_of_animal_id?: string;
-  age?: string;
-  tag_personality_id?: string;
-  search?: string;
-};
+import { Pet, PetFilterState } from "@/types/pet";
 
 export default function FindPetPage() {
   // State Management
@@ -37,7 +20,7 @@ export default function FindPetPage() {
   const [error, setError] = useState("");
   
   // State untuk filter
-  const [filters, setFilters] = useState<FilterState>({});
+  const [filters, setFilters] = useState<PetFilterState>({});
 
   useEffect(() => {
     const abortController = new AbortController();

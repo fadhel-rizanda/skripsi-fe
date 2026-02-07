@@ -54,7 +54,7 @@ export function PaginationBar({
   }
 
   // Calculate showing range
-  const start = (current_page - 1) * per_page + 1;
+  const start = total > 0 ? (current_page - 1) * per_page + 1 : 0;
   const end = Math.min(current_page * per_page, total);
 
   return (

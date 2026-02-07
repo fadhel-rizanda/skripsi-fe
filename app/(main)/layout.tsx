@@ -3,7 +3,7 @@
 import { useNotificationToast } from "@/hooks/useNotificationToast"
 import { Toaster } from "sonner"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
     useNotificationToast()
 
     return (

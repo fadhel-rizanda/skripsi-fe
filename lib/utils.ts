@@ -4,3 +4,11 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export const isValidUrl = (url: string) => {
+  try {
+    return url.startsWith('https://');
+  } catch {
+    return false;
+  }
+};

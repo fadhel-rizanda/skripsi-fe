@@ -5,8 +5,9 @@ import { useSession } from "next-auth/react"
 import { getEcho } from "@/lib/echo"
 import { toast } from "sonner"
 import { Icon } from "@iconify/react"
-import {Channel} from "@/types";
-import {Notification} from "@/types/notification";
+import { Channel } from "@/types";
+import { usePathname } from "next/navigation";
+import {useChatStore} from "@/store/useChatStore";
 
 const CHANNEL_ICON_MAP: Record<string, string> = {
     notification: "ph:bell",
@@ -17,6 +18,9 @@ const CHANNEL_ICON_MAP: Record<string, string> = {
 
 export function useNotificationToast() {
     const { data: session } = useSession()
+    const pathname = usePathname();
+    const currentUserId = session?.user?.id;
+    const { triggerRefresh } = useChatStore();
 
     useEffect(() => {
         if (!session?.accessToken) return
@@ -32,15 +36,25 @@ export function useNotificationToast() {
 
             const channel = echo.private(channelName)
 
-            channel.listen(`.${eventName}`, (data: Notification) => {
-                const iconName = CHANNEL_ICON_MAP[data.reference_by]
+            channel.listen(`.${eventName}`, (data: any) => {
+                const messageData = data.data;
 
-                toast(data.title || "Notification", {
-                    description: data.message || "",
+                if (!messageData) return;
+                if (messageData.sender?.id === currentUserId) return;
+                if (messageData.chat_id) {
+                    triggerRefresh();
+                    const isCurrentlyInThisChat = pathname.includes(messageData.chat_id);
+
+                    if (isCurrentlyInThisChat) return;
+                }
+                const iconName = CHANNEL_ICON_MAP[messageData.reference_by]
+
+                toast(messageData.sender?.name || "New Message", {
+                    description: messageData.content || "Sent an attachment",
                     duration: 5000,
                     icon: iconName ? <Icon icon={iconName} className="opacity-50 h-4 w-4" /> : undefined,
-                })
-            })
+                });
+            });
 
             subscriptions.push({ channelName, eventName })
         })
@@ -48,8 +62,8 @@ export function useNotificationToast() {
         return () => {
             subscriptions.forEach(({ channelName, eventName }) => {
                 echo.private(channelName).stopListening(`.${eventName}`)
-                echo.leave(`private-${channelName}`)
+                echo.leave(channelName)
             })
         }
-    }, [session?.accessToken, session?.user?.channels])
+    }, [session?.accessToken, session?.user.channels, pathname, currentUserId, triggerRefresh])
 }

@@ -94,6 +94,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
                 const attachmentValidation = PresignedUrlSchema.safeParse(attachmentPayload);
                 if (!attachmentValidation.success) {
                     console.error(attachmentValidation.error.issues);
+                    toast.error(attachmentValidation.error.message);
                     return;
                 }
                 const presignedResponse = await attachmentService.getPresignedUrl(attachmentValidation.data);
@@ -112,6 +113,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
             const messageValidation = SendMessageSchema.safeParse(messagePayload);
             if (!messageValidation.success) {
                 console.error(messageValidation.error.issues);
+                toast.error(messageValidation.error.message);
                 return;
             }
             const response = await chatService.sendMessage(chat?.id, messageValidation.data);
@@ -184,6 +186,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
                 shouldAutoScrollRef.current = true;
             } catch (error) {
                 console.error("Failed to fetch messages:", error);
+                toast.error("Failed to load messages. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -228,7 +231,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
             });
 
         return () => {
-            echo.leave(channelName);
+            echo.leave(`private-${channelName}`)
         };
     }, [chat?.id, session?.accessToken]);
 
@@ -316,7 +319,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
                                                 className="rounded-full object-cover"
                                                 sizes="32px"
                                                 onError={(e) => {
-                                                    console.error("Image failed to load:", chat.users[0].avatar);
+                                                    console.error("Image failed to load:", m.sender.avatar);
                                                 }}
                                             />
                                         ) : (

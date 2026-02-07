@@ -3,12 +3,11 @@
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import {useParams} from "next/navigation";
-import {Chat} from "@/types/chat";
 import {useChatStore} from "@/store/useChatStore";
 
-export default function ChatLayout({children,}: { children: React.ReactNode; }) {
+export default function ChatLayout({children}: { children: React.ReactNode; }) {
     const params = useParams();
-    const chatId = params?.id || params?.userId;
+    const chatId = params?.userId;
     const { chats } = useChatStore();
     const activeChat = chats.find((c) => c.id === chatId);
     return (
@@ -19,7 +18,7 @@ export default function ChatLayout({children,}: { children: React.ReactNode; }) 
             {/* Chat Area */}
             <main className="flex-1 bg-[hsl(var(--chat-bg))]">
                 {params?.userId ? (
-                    <ChatWindow chat={activeChat as Chat}/>
+                    activeChat ? <ChatWindow chat={activeChat}/> : <div>Chat not found.</div>
                 ) : (children)}
             </main>
         </div>

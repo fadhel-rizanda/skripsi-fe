@@ -24,15 +24,14 @@ export default function NotificationPage() {
 
             const channel = echo.private(channelName)
 
-            channel.listen(`.${eventName}`, (data: Notification) => {
+            channel.listen(`.${eventName}`, (payload: { data: Notification }) => {
+                const data = payload.data;
                 console.log("Received:", data)
-
                 if (!data.id) return // skip if no id
                 if (processedIds.current.has(data.id)) {
                     console.log("Duplicate notification ignored:", data.id)
                     return
                 }
-
                 processedIds.current.add(data.id)
                 setNotifications((prev) => [data, ...prev])
             })

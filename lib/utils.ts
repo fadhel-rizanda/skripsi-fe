@@ -6,8 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const isValidUrl = (url: string) => {
+  if (!url) return false;
   try {
-    return url.startsWith('https://');
+    new URL(url);
+    return url.startsWith('http://') || url.startsWith('https://');
   } catch {
     return false;
   }

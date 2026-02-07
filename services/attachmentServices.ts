@@ -34,7 +34,7 @@ export const attachmentService = {
         const response = await axios.get(url, {
             responseType: 'blob',
             headers: { "Content-Type": mime_type },
-            onUploadProgress: (progressEvent) => {
+            onDownloadProgress: (progressEvent) => {
                 if (onProgress && progressEvent.total) {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     onProgress(percentCompleted);

@@ -62,7 +62,7 @@ export function useNotificationToast() {
         return () => {
             subscriptions.forEach(({ channelName, eventName }) => {
                 echo.private(channelName).stopListening(`.${eventName}`)
-                echo.leave(channelName)
+                echo.leave(`private-${channelName}`)
             })
         }
     }, [session?.accessToken, session?.user.channels, pathname, currentUserId, triggerRefresh])

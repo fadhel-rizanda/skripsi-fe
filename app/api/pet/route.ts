@@ -37,7 +37,6 @@ export async function GET(req: NextRequest) {
 
     // Handle non-OK responses
     if (!phpRes.ok) {
-    if (!phpRes.ok) {
       // Log the detailed error on the server for debugging
       const errorText = await phpRes.text();
       console.error(`Backend error [${phpRes.status}]:`, errorText);
@@ -48,19 +47,17 @@ export async function GET(req: NextRequest) {
         status: phpRes.status
       }, { status: phpRes.status });
     }
-    }
 
     const data = await phpRes.json();
     return NextResponse.json(data, { status: phpRes.status });
     
   } catch (error) {
+    // Log detailed error on server for debugging
     console.error('[API Route] Error:', error);
     
+    // Return generic error message to client
     return NextResponse.json(
-      { 
-        message: "Failed to fetch pets from backend",
-        error: error instanceof Error ? error.message : String(error)
-      }, 
+      { message: "An error occurred while fetching pets. Please try again later." }, 
       { status: 500 }
     );
   }

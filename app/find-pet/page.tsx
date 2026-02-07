@@ -6,6 +6,7 @@ import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
 import { PetCard } from "@/components/card/PetCard";
 import { Pet, PetFilterState } from "@/types/pet";
+import { petService } from "@/services/petServices";
 
 export default function FindPetPage() {
   // State Management
@@ -30,31 +31,14 @@ export default function FindPetPage() {
       setError("");
       
       try {
-        // Kirim hanya param yang dibutuhkan backend
-        const queryParams = new URLSearchParams({
-          page: page.toString(),
-          limit: limit.toString(),
-        });
-        if (filters.age) queryParams.set("age", filters.age);
-        if (filters.type_of_animal_id) queryParams.set("type_of_animal_id", filters.type_of_animal_id);
-        if (filters.tag_personality_id) queryParams.set("tag_personality_id", filters.tag_personality_id);
-        if (filters.search) queryParams.set("search", filters.search);
-
-        const res = await fetch(`/api/pet?${queryParams}`, {
-          signal: abortController.signal,
+        const response = await petService.getPetsPublic({
+          page,
+          limit,
+          ...filters
         });
         
-        if (!res.ok) throw new Error("Failed to fetch pets");
-        
-        const responseJson = await res.json();
-        
-        // Gunakan total dari backend jika ada, fallback ke data.length
-        setPets(Array.isArray(responseJson.data) ? responseJson.data : []);
-        setTotalData(
-          typeof responseJson.total === "number"
-            ? responseJson.total
-            : responseJson.meta?.total || responseJson.data.length || 0
-        );
+        setPets(Array.isArray(response.data) ? response.data : []);
+        setTotalData(response.total || 0);
 
       } catch (err) {
         // Ignore abort errors

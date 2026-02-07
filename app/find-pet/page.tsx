@@ -35,7 +35,7 @@ export default function FindPetPage() {
           page,
           limit,
           ...filters
-        });
+        }, abortController.signal);
         
         setPets(Array.isArray(response.data) ? response.data : []);
         setTotalData(response.total || 0);

@@ -20,7 +20,7 @@ interface PetListParams extends PetFilterState {
 
 export const petService = {
   // Get list of pets via Next.js API route (no auth, public access)
-  getPetsPublic: async (params?: PetListParams): Promise<PetListResponse> => {
+  getPetsPublic: async (params?: PetListParams, signal?: AbortSignal): Promise<PetListResponse> => {
     const queryParams = new URLSearchParams();
     
     if (params?.page) queryParams.set("page", params.page.toString());
@@ -33,7 +33,7 @@ export const petService = {
     const queryString = queryParams.toString();
     const url = `/api/pet${queryString ? `?${queryString}` : ''}`;
     
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
     
     if (!response.ok) {
       throw new Error('Failed to fetch pets');

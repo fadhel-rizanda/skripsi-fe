@@ -37,19 +37,17 @@ export async function GET(req: NextRequest) {
 
     // Handle non-OK responses
     if (!phpRes.ok) {
+    if (!phpRes.ok) {
+      // Log the detailed error on the server for debugging
       const errorText = await phpRes.text();
-      let errorData;
-      
-      try {
-        errorData = JSON.parse(errorText);
-      } catch {
-        errorData = { 
-          message: `Backend error: ${phpRes.status} ${phpRes.statusText}`,
-          error: errorText 
-        };
-      }
-      
-      return NextResponse.json(errorData, { status: phpRes.status });
+      console.error(`Backend error [${phpRes.status}]:`, errorText);
+
+      // Return a generic error message to the client
+      return NextResponse.json({
+        message: "An error occurred while fetching data from the backend.",
+        status: phpRes.status
+      }, { status: phpRes.status });
+    }
     }
 
     const data = await phpRes.json();

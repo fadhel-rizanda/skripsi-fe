@@ -57,20 +57,20 @@ export function PaginationBar({
 
   return (
     <div className="w-full flex justify-center">
-      <div className="pagination-bar-container flex items-center gap-1 md:gap-2 lg:gap-6 max-w-fit w-full text-xs md:text-sm lg:text-base">
+      <div className="pagination-bar-container flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-6 max-w-fit w-full text-xs sm:text-xs md:text-sm lg:text-base">
         <Field orientation="horizontal" className="w-fit">
-          <FieldLabel htmlFor="select-rows-per-page" className="text-xs md:text-sm lg:text-base whitespace-nowrap">Rows per page</FieldLabel>
+          <FieldLabel htmlFor="select-rows-per-page" className="text-xs sm:text-xs md:text-sm lg:text-base whitespace-nowrap">Rows per page</FieldLabel>
           <Select
             defaultValue={per_page.toString()}
             onValueChange={v => onRowsPerPageChange && onRowsPerPageChange(Number(v))}
           >
-            <SelectTrigger className="w-12 md:w-20 lg:w-28 h-6 md:h-8 lg:h-10 text-xs md:text-sm lg:text-base px-1 md:px-2 lg:px-4" id="select-rows-per-page">
-              <SelectValue className="text-xs md:text-sm lg:text-base" />
+            <SelectTrigger className="w-12 sm:w-16 md:w-20 lg:w-28 h-6 sm:h-7 md:h-8 lg:h-9 text-xs sm:text-xs md:text-sm lg:text-base px-1 sm:px-1.5 md:px-2 lg:px-4" id="select-rows-per-page">
+              <SelectValue className="text-xs sm:text-xs md:text-sm lg:text-base" />
             </SelectTrigger>
-            <SelectContent align="start" className="text-xs md:text-sm lg:text-base">
+            <SelectContent align="start" className="text-xs sm:text-xs md:text-sm lg:text-base">
               <SelectGroup>
                 {rowsPerPageOptions.map(opt => (
-                  <SelectItem key={opt} value={opt.toString()} className="text-xs md:text-sm lg:text-base px-1 md:px-2 lg:px-4 py-1 md:py-2 lg:py-3 h-6 md:h-8 lg:h-10">
+                  <SelectItem key={opt} value={opt.toString()} className="text-xs sm:text-xs md:text-sm lg:text-base px-1 sm:px-1.5 md:px-2 lg:px-4 py-1 sm:py-1.5 md:py-2 lg:py-2 h-6 sm:h-7 md:h-8 lg:h-9">
                     {opt}
                   </SelectItem>
                 ))}
@@ -78,8 +78,8 @@ export function PaginationBar({
             </SelectContent>
           </Select>
         </Field>
-        <Pagination className="mx-2 w-auto text-xs md:text-sm lg:text-base">
-          <PaginationContent className="gap-x-4 md:gap-x-6 lg:gap-x-8">
+        <Pagination className="mx-2 w-auto text-xs sm:text-xs md:text-sm lg:text-base">
+          <PaginationContent className="gap-x-4 sm:gap-x-5 md:gap-x-6 lg:gap-x-8">
             <PaginationItem>
               <PaginationPrevious
                 href="#"
@@ -89,24 +89,24 @@ export function PaginationBar({
                 }}
                 aria-disabled={current_page === 1}
                 className={cn(
-                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base',
+                  'h-6 sm:h-7 md:h-8 lg:h-9 w-6 sm:w-7 md:w-8 lg:w-9 flex items-center justify-center rounded px-0 sm:px-1 md:px-2 lg:px-4 text-xs sm:text-xs md:text-sm lg:text-base',
                   current_page === 1 && 'pointer-events-none opacity-50'
                 )}
               />
             </PaginationItem>
             {pageNumbers.map((num) =>
               typeof num === 'string' && num.startsWith('ellipsis') ? (
-                <PaginationItem key={num} className="min-w-0 p-0 h-6 md:h-8 lg:h-10">
-                  <PaginationEllipsis className="h-4 md:h-6 lg:h-8 w-4 md:w-6 lg:w-8" />
+                <PaginationItem key={num} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
+                  <PaginationEllipsis className="h-4 sm:h-5 md:h-6 lg:h-7 w-4 sm:w-5 md:w-6 lg:w-7" />
                 </PaginationItem>
               ) : (
-                <PaginationItem key={num} className="min-w-0 p-0 h-6 md:h-8 lg:h-10">
+                <PaginationItem key={num} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
                   <PaginationLink
                     href="#"
                     isActive={num === current_page}
                     className={
                       (num === current_page ? 'bg-black text-white ' : '') +
-                      'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base min-w-0'
+                      'h-6 sm:h-7 md:h-8 lg:h-9 w-6 sm:w-7 md:w-8 lg:w-9 px-0 sm:px-1 md:px-2 lg:px-4 text-xs sm:text-xs md:text-sm lg:text-base min-w-0'
                     }
                     onClick={e => {
                       e.preventDefault();
@@ -128,13 +128,13 @@ export function PaginationBar({
                 aria-disabled={current_page === totalPages}
                 className={
                   (current_page === totalPages ? 'pointer-events-none opacity-50 ' : '') +
-                  'h-6 md:h-8 lg:h-10 w-6 md:w-8 lg:w-10 flex items-center justify-center rounded px-0 md:px-2 lg:px-4 text-xs md:text-sm lg:text-base'
+                  'h-6 sm:h-7 md:h-8 lg:h-9 w-6 sm:w-7 md:w-8 lg:w-9 flex items-center justify-center rounded px-0 sm:px-1 md:px-2 lg:px-4 text-xs sm:text-xs md:text-sm lg:text-base'
                 }
               />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
-        <div className="text-xs md:text-sm lg:text-base text-muted-foreground text-right whitespace-nowrap">
+        <div className="text-xs sm:text-xs md:text-sm lg:text-base text-muted-foreground text-right whitespace-nowrap">
           Showing <span className="font-bold">{start}</span> to <span className="font-bold">{end}</span> of <span className="font-bold">{total}</span>
         </div>
       </div>

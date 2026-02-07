@@ -111,8 +111,8 @@ export default function FindPetPage() {
       <section className="flex-1 mb-4 flex flex-col items-center w-full gap-4 px-4">
         {/* Heading Section */}
         <div className="flex flex-col items-center text-center">
-          <h2 className="text-3xl md:text-[48px] font-bold mb-2">Find Your New Best Friend</h2>
-          <p className="text-base md:text-[18px] font-normal max-w-2xl mb-4 text-gray-700">
+          <h2 className="font-[family-name:var(--font-plus-jakarta-sans)] text-3xl md:text-[48px] font-bold mb-2">Find Your New Best Friend</h2>
+          <p className="font-[family-name:var(--font-plus-jakarta-sans)] text-base md:text-[18px] font-normal max-w-2xl mb-4 text-gray-700">
             Browse our adorable and adoptable pets. Your new companion is just a click
             away. Use the filters to find the perfect match for your family.
           </p>
@@ -124,13 +124,13 @@ export default function FindPetPage() {
         </div>
 
         {/* Content Section */}
-        <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[300px]">
-          {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center">Loading friends...</div>}
+        <div className="w-full max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 min-h-[300px]">
+          {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center font-[family-name:var(--font-plus-jakarta-sans)]">Loading friends...</div>}
           
-          {error && <div className="col-span-full text-red-500 font-medium text-center">{error}</div>}
+          {error && <div className="col-span-full text-red-500 font-medium text-center font-[family-name:var(--font-plus-jakarta-sans)]">{error}</div>}
           
           {!loading && !error && pets.length === 0 && (
-            <div className="col-span-full text-gray-500 italic text-center">No pets found with these filters.</div>
+            <div className="col-span-full text-gray-500 italic text-center font-[family-name:var(--font-plus-jakarta-sans)]">No pets found with these filters.</div>
           )}
 
           {!loading && !error && pets.map((pet, index) => (

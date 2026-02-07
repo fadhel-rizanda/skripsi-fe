@@ -24,7 +24,6 @@ export default function FindPetPage() {
 
   useEffect(() => {
     const abortController = new AbortController();
-    const isLatestRequest = true;
     
     async function fetchPets() {
       setLoading(true);
@@ -49,11 +48,6 @@ export default function FindPetPage() {
         
         const responseJson = await res.json();
         
-        // Only update state if this is still the latest request
-        if (!isLatestRequest) {
-          return;
-        }
-        
         // Gunakan total dari backend jika ada, fallback ke data.length
         setPets(Array.isArray(responseJson.data) ? responseJson.data : []);
         setTotalData(
@@ -67,12 +61,9 @@ export default function FindPetPage() {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        // Only update error state if this is still the latest request
-        if (!isLatestRequest) {
-          return;
-        }
         console.error(err);
-        setError("Failed to load pet data.");
+        setError("Failed to load pet data. Please try again later.");
+      } finally {
         setLoading(false);
       }
     }

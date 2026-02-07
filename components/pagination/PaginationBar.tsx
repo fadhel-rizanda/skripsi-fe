@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
+type PageItem = number | { type: 'ellipsis'; key: string };
+
 interface PaginationBarProps {
   current_page: number;
   total: number;
@@ -38,16 +40,16 @@ export function PaginationBar({
   const totalPages = Math.max(1, Math.ceil(total / per_page));
 
   // Generate page numbers for display (simple logic, can be improved for large pages)
-  const pageNumbers = [];
+  const pageNumbers: PageItem[] = [];
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
   } else {
     if (current_page <= 4) {
-      pageNumbers.push(1, 2, 3, 4, 5, 'ellipsis-1', totalPages - 1, totalPages);
+      pageNumbers.push(1, 2, 3, 4, 5, { type: 'ellipsis', key: 'ellipsis-1' }, totalPages - 1, totalPages);
     } else if (current_page >= totalPages - 3) {
-      pageNumbers.push(1, 2, 'ellipsis-1', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      pageNumbers.push(1, 2, { type: 'ellipsis', key: 'ellipsis-1' }, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
     } else {
-      pageNumbers.push(1, 'ellipsis-1', current_page - 1, current_page, current_page + 1, 'ellipsis-2', totalPages);
+      pageNumbers.push(1, { type: 'ellipsis', key: 'ellipsis-1' }, current_page - 1, current_page, current_page + 1, { type: 'ellipsis', key: 'ellipsis-2' }, totalPages);
     }
   }
 
@@ -94,26 +96,26 @@ export function PaginationBar({
                 )}
               />
             </PaginationItem>
-            {pageNumbers.map((num) =>
-              typeof num === 'string' && num.startsWith('ellipsis') ? (
-                <PaginationItem key={num} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
+            {pageNumbers.map((item) =>
+              typeof item === 'object' ? (
+                <PaginationItem key={item.key} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
                   <PaginationEllipsis className="h-4 sm:h-5 md:h-6 lg:h-7 w-4 sm:w-5 md:w-6 lg:w-7" />
                 </PaginationItem>
               ) : (
-                <PaginationItem key={num} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
+                <PaginationItem key={item} className="min-w-0 p-0 h-6 sm:h-7 md:h-8 lg:h-9">
                   <PaginationLink
                     href="#"
-                    isActive={num === current_page}
+                    isActive={item === current_page}
                     className={
-                      (num === current_page ? 'bg-black text-white ' : '') +
+                      (item === current_page ? 'bg-black text-white ' : '') +
                       'h-6 sm:h-7 md:h-8 lg:h-9 w-6 sm:w-7 md:w-8 lg:w-9 px-0 sm:px-1 md:px-2 lg:px-4 text-xs sm:text-xs md:text-sm lg:text-base min-w-0'
                     }
                     onClick={e => {
                       e.preventDefault();
-                      if (onPageChange && num !== current_page) onPageChange(Number(num));
+                      if (onPageChange && item !== current_page) onPageChange(item);
                     }}
                   >
-                    {num}
+                    {item}
                   </PaginationLink>
                 </PaginationItem>
               )

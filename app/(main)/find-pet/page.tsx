@@ -68,8 +68,8 @@ export default function FindPetPage() {
 
   return (
     // PERBAIKAN: Mengganti style inline dengan Tailwind arbitrary value
-    <main className="mx-auto min-h-screen flex flex-col justify-between bg-[#E7F3E7]">
-      <section className="flex-1 mb-4 flex flex-col items-center w-full gap-4 px-4 mt-6">
+    <main className="mx-auto min-h-screen flex flex-col bg-[#E7F3E7]">
+      <section className="mb-4 flex flex-col items-center w-full gap-4 px-4 mt-6">
         {/* Heading Section */}
         <div className="flex flex-col items-center text-center">
           <h2 className="font-[family-name:var(--font-plus-jakarta-sans)] text-3xl md:text-[48px] font-bold mb-2">Find Your New Best Friend</h2>
@@ -85,7 +85,7 @@ export default function FindPetPage() {
         </div>
 
         {/* Content Section */}
-        <div className="w-full max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 min-h-[300px]">
+        <div className="w-full max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
           {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center font-[family-name:var(--font-plus-jakarta-sans)]">Loading friends...</div>}
           
           {error && <div className="col-span-full text-red-500 font-medium text-center font-[family-name:var(--font-plus-jakarta-sans)]">{error}</div>}
@@ -107,7 +107,7 @@ export default function FindPetPage() {
         </div>
       </section>
 
-      <footer className="pb-8 pt-4">
+      <footer className="mt-auto pb-8 pt-4">
         <PaginationBar
           current_page={page}
           total={totalData} // Gunakan total dari backend

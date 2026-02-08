@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     });
 
     const queryString = validParams.toString();
-    const url = `${API_URL}/api/v1/pets${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_URL}/v1/pets${queryString ? `?${queryString}` : ''}`;
 
     // Forward only whitelisted params to backend PHP API
     const phpRes = await fetch(url, {

@@ -1,5 +1,5 @@
 import axios, {AxiosError} from "axios";
-import {getSession} from "next-auth/react";
+import {getSession, signOut} from "next-auth/react";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -17,6 +17,21 @@ api.interceptors.request.use(async (config) => {
     }
     return config;
 })
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          if (typeof window !== "undefined") {
+            await signOut({ redirect: false });
+            window.location.href = "/login?error=unauthorized";
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
+);
 
 export default api;
 

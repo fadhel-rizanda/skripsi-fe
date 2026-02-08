@@ -5,8 +5,17 @@ let echoInstance: Echo<any> | null = null
 let currentToken: string | null = null
 
 const getEnv = (key: string): string => {
-    const value = process.env[key];
-    if (!value) throw new Error(`Environment variable ${key} is missing!`);
+    const envVars: Record<string, string | undefined> = {
+        NEXT_PUBLIC_REVERB_APP_KEY: process.env.NEXT_PUBLIC_REVERB_APP_KEY,
+        NEXT_PUBLIC_REVERB_HOST: process.env.NEXT_PUBLIC_REVERB_HOST,
+        NEXT_PUBLIC_REVERB_PORT: process.env.NEXT_PUBLIC_REVERB_PORT,
+        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    };
+
+    const value = envVars[key];
+    if (!value) {
+        throw new Error(`Environment variable ${key} is missing!`)
+    }
     return value;
 };
 

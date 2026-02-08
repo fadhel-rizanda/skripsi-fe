@@ -5,7 +5,7 @@ import { getToken } from 'next-auth/jwt'
 export async function middleware(request: NextRequest) {
     const token = await getToken({
         req: request,
-        secret: process.env.NEXTAUTH_SECRET
+        secret: process.env.NEXTAUTH_SECRET || (() => { throw new Error("NEXTAUTH_SECRET is not defined"); })()
     })
 
     const { pathname } = request.nextUrl

@@ -1,19 +1,5 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+"use client";
 
-export default async function FindPetLayout({ children }: { children: React.ReactNode }) {
-    const session = await getServerSession(authOptions)
-
-    // Redirect ke login jika tidak ada session
-    if (!session) {
-        redirect("/login")
-    }
-
-    // Redirect ke login jika token expired
-    if (session.error === "RefreshAccessTokenError") {
-        redirect("/login?error=session-expired")
-    }
-
+export default function FindPetLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>
 }

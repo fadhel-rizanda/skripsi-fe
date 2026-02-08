@@ -28,7 +28,7 @@ export function PetCard({ name, type, age, imageUrl, priority = false }: PetCard
 
   return (
     <Card className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-col p-0 h-full">
-      <div className="w-full h-40 sm:h-36 md:h-36 lg:h-40 relative flex-shrink-0">
+      <div className="w-full h-32 sm:h-36 md:h-36 lg:h-40 relative flex-shrink-0">
         {hasValidImage ? (
           <Image
             src={imageUrl}
@@ -44,9 +44,9 @@ export function PetCard({ name, type, age, imageUrl, priority = false }: PetCard
           </div>
         )}
       </div>
-      <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3.5rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">
-        <CardTitle className="text-sm sm:text-sm md:text-base lg:text-lg text-gray-900 line-clamp-1">{name}</CardTitle>
-        <CardDescription className="text-xs sm:text-xs md:text-xs lg:text-sm text-gray-600 line-clamp-1">{type}, {age}</CardDescription>
+      <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">
+        <CardTitle className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-900 line-clamp-1">{name}</CardTitle>
+        <CardDescription className="text-[10px] sm:text-[10px] md:text-xs lg:text-sm text-gray-600 line-clamp-1">{type}, {age}</CardDescription>
       </CardContent>
     </Card>
   );

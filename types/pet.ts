@@ -7,6 +7,39 @@ export interface Pet {
   profile_picture: string;
 }
 
+export interface PetDetail {
+  type_of_animal_id: string;
+  size: string;
+  name: string;
+  date_of_birth: string;
+  gender: string;
+  about: string;
+  breed: string;
+  special_needs: boolean;
+  profile_pictures: PetProfilePicture[];
+  physique_tags: PetTag[];
+  personality_tags: PetTag[];
+  additional_records: PetAdditionalRecord[];
+}
+
+export interface PetProfilePicture {
+  id: string | number;
+  public_url: string;
+}
+
+export interface PetTag {
+  id: string | number;
+  name: string;
+}
+
+export interface PetAdditionalRecord {
+  id: string | number;
+  public_url: string;
+  filename: string;
+  mime_type: string;
+  path: string;
+}
+
 export interface PetFilterState {
   type_of_animal_id?: string;
   age?: string;

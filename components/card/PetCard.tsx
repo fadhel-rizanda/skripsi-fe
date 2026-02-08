@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -7,6 +10,7 @@ import {
 } from "@/components/ui/card";
 
 interface PetCardProps {
+  id: string | number;
   name: string;
   type: string;
   age: string;
@@ -23,11 +27,27 @@ const isValidUrl = (url: string) => {
   }
 };
 
-export function PetCard({ name, type, age, imageUrl, priority = false }: PetCardProps) {
+export function PetCard({ id, name, type, age, imageUrl, priority = false }: PetCardProps) {
   const hasValidImage = imageUrl && isValidUrl(imageUrl);
+  const router = useRouter();
+
+  const handleOpenDetail = () => {
+    router.push(`/detail-pet?id=${encodeURIComponent(String(id))}`);
+  };
 
   return (
-    <Card className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-col p-0 h-full">
+    <Card
+      className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-col p-0 h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+      onClick={handleOpenDetail}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleOpenDetail();
+        }
+      }}
+    >
       <div className="w-full h-32 sm:h-36 md:h-36 lg:h-40 relative flex-shrink-0">
         {hasValidImage ? (
           <Image

@@ -97,6 +97,7 @@ export default function FindPetPage() {
           {!loading && !error && pets.map((pet, index) => (
             <PetCard
               key={pet.id}
+              id={pet.id}
               name={pet.name}
               type={pet.type_of_animal_name}
               age={`${pet.age} ${pet.age_unit}`}

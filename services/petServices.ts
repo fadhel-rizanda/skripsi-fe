@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { Pet, PetFilterState } from "@/types/pet";
+import { Pet, PetDetail, PetFilterState } from "@/types/pet";
 
 interface PetListResponse {
   data: Pet[];
@@ -10,7 +10,7 @@ interface PetListResponse {
 }
 
 interface PetDetailResponse {
-  data: Pet;
+  data: PetDetail;
 }
 
 interface PetListParams extends PetFilterState {
@@ -49,7 +49,7 @@ export const petService = {
   },
 
   // Get single pet detail by ID
-  getPetById: async (id: string | number): Promise<Pet> => {
+  getPetById: async (id: string | number): Promise<PetDetail> => {
     const response = await api.get<PetDetailResponse>(`/v1/pets/${id}`);
     return response.data.data;
   },
@@ -77,6 +77,12 @@ export const petService = {
     const response = await api.get("/v1/pets", {
       params: { ...params, search: query }
     });
+    return response.data;
+  },
+
+  // Adopt a pet
+  adoptPet: async (petId: string | number, note?: string) => {
+    const response = await api.post(`/v1/pets/${petId}/adopt`, { note });
     return response.data;
   },
 };

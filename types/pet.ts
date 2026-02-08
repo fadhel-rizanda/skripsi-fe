@@ -11,7 +11,8 @@ export interface PetDetail {
   type_of_animal_id: string;
   size: string;
   name: string;
-  date_of_birth: string;
+  age: number | string;
+  age_unit: string;
   gender: string;
   about: string;
   breed: string;

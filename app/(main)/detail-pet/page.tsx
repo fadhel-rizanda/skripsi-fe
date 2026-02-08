@@ -87,27 +87,6 @@ export default function DetailPetPage() {
     return animalType?.label || typeId;
   };
 
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let ageYears = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      ageYears--;
-    }
-
-    if (ageYears < 1) {
-      const months = monthDiff < 0 ? 12 + monthDiff : monthDiff;
-      return `${months} month${months !== 1 ? "s" : ""}`;
-    }
-
-    return `${ageYears} year${ageYears !== 1 ? "s" : ""}`;
-  };
-
   const nextImage = () => {
     if (pet && pet.profile_pictures.length > 0) {
       setSelectedImageIndex(
@@ -261,7 +240,7 @@ export default function DetailPetPage() {
                     <span className="p-2 rounded-lg bg-green-100">
                       <Calendar className="h-4 w-4 text-green-600" />
                     </span>
-                    <span>Age: {calculateAge(pet.date_of_birth)}</span>
+                    <span>Age: {pet.age} {pet.age_unit}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">

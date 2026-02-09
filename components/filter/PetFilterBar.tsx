@@ -60,40 +60,39 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-2.5 sm:p-3 flex flex-row flex-nowrap gap-2.5 sm:gap-3 items-center overflow-x-auto scrollbar-thin shadow-sm border border-gray-200">
+    <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-2 sm:p-3 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 items-stretch sm:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
       <SearchInput
         name="search"
         value={search}
         onChange={setSearch}
         placeholder="Search by name..."
-        className="min-w-[140px] max-w-[180px]"
+        className="w-full sm:w-auto"
       />
-      <FilterSelect
-        name="type_of_animal_id"
-        value={typeOfAnimalId}
-        onChange={setTypeOfAnimalId}
-        options={animalTypeOptions}
-        placeholder="Type of Animal"
-        isLoading={isLoadingTypes}
-        className="min-w-[120px] max-w-[160px]"
-      />
-      <FilterSelect
-        name="age"
-        value={age}
-        onChange={setAge}
-        options={ageOptions}
-        placeholder="Any Age"
-        className="min-w-[100px] max-w-[140px]"
-      />
-      <FilterSelect
-        name="tag_personality_id"
-        value={tagPersonalityId}
-        onChange={setTagPersonalityId}
-        options={tagPersonalityOptions}
-        placeholder="Tags"
-        isLoading={isLoadingTags}
-        className="min-w-[100px] max-w-[140px]"
-      />
+      <div className="flex flex-row flex-nowrap gap-2 sm:gap-3 overflow-x-auto scrollbar-hide sm:overflow-visible">
+        <FilterSelect
+          name="type_of_animal_id"
+          value={typeOfAnimalId}
+          onChange={setTypeOfAnimalId}
+          options={animalTypeOptions}
+          placeholder="Type of Animal"
+          isLoading={isLoadingTypes}
+        />
+        <FilterSelect
+          name="age"
+          value={age}
+          onChange={setAge}
+          options={ageOptions}
+          placeholder="Any Age"
+        />
+        <FilterSelect
+          name="tag_personality_id"
+          value={tagPersonalityId}
+          onChange={setTagPersonalityId}
+          options={tagPersonalityOptions}
+          placeholder="Tags"
+          isLoading={isLoadingTags}
+        />
+      </div>
     </div>
   );
 }

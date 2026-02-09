@@ -41,7 +41,7 @@ export function FilterSelect({
     >
       <SelectTrigger
         size="sm"
-        className={`bg-[#F6F8F6] border-gray-300 h-auto px-2 py-1.5 sm:px-2.5 sm:py-1.5 w-auto min-w-[130px] sm:min-w-[160px] text-xs sm:text-sm ${className}`}
+        className={`bg-[#F6F8F6] border-gray-300 h-[28px] sm:h-[32px] px-1.5 py-1 sm:px-2.5 sm:py-1.5 w-auto min-w-[140px] sm:min-w-[160px] text-[10px] sm:text-xs ${className}`}
       >
         <SelectValue placeholder={isLoading ? "Loading..." : placeholder} />
       </SelectTrigger>

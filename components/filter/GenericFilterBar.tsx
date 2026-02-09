@@ -14,7 +14,7 @@ export function GenericFilterBar({
   className = "",
 }: GenericFilterBarProps) {
   return (
-    <div className={`w-full max-w-3xl mx-auto bg-white rounded-lg p-2 sm:p-3 flex flex-row flex-nowrap gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch] ${className}`}>
+    <div className={`w-full max-w-3xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center overflow-x-auto scrollbar-hide [-webkit-overflow-scrolling:touch] shadow-sm border border-gray-200 ${className}`}>
       {children}
     </div>
   );

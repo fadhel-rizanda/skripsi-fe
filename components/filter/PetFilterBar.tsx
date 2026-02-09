@@ -59,15 +59,15 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-2 sm:p-3 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 items-stretch sm:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
+    <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
       <SearchInput
         name="search"
         value={search}
         onChange={setSearch}
         placeholder="Search by name..."
-        className="w-full sm:w-auto"
+        className="w-full md:w-auto"
       />
-      <div className="flex flex-row flex-nowrap gap-2 sm:gap-3 overflow-x-auto scrollbar-hide sm:overflow-visible">
+      <div className="flex flex-row flex-nowrap gap-2 md:gap-2.5 lg:gap-3 overflow-x-auto scrollbar-hide md:overflow-visible md:flex-1 md:justify-start">
         <FilterSelect
           name="type_of_animal_id"
           value={typeOfAnimalId}

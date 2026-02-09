@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { AGE_RANGES } from "@/lib/constants/pet";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
-import { SearchInput } from "./SearchInput";
-import { FilterSelect, FilterOption } from "./FilterSelect";
+import { SearchInput, FilterSelect, type FilterOption } from ".";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {

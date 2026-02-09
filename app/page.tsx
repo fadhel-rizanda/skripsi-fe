@@ -1,14 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-// import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/footer/Footer";
 import { Icon } from "@iconify/react";
 
 export default function Home() {
     return (
         <>
-        {/* <Navbar /> */}
         <main className="min-h-screen">
 
             {/* Hero Section */}
@@ -105,7 +103,7 @@ export default function Home() {
 
                     <div className="relative">
                         {/* Connecting Line */}
-                        <div className="hidden md:block absolute top-16 left-0 right-0 h-0.5 bg-gray-300" style={{ top: '60px' }} />
+                        <div className="hidden md:block absolute top-16 left-0 right-0 h-0.5 bg-gray-300" />
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                             {/* Step 1: Browse Pets */}

@@ -106,6 +106,7 @@ export function Footer() {
           <p className="text-sm text-gray-400">
             © 2026 Pawsitive. All rights reserved.
           </p>
+          {/* TODO: Update links when pages are ready */}
           <div className="flex gap-6 text-sm">
             <Button variant="link" className="h-auto p-0 text-gray-400 hover:text-green-500 text-sm font-normal" asChild>
               <Link href="/privacy">Privacy Policy</Link>

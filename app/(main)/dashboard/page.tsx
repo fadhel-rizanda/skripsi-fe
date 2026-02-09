@@ -2,6 +2,7 @@ import {getServerSession} from "next-auth"
 import {redirect} from "next/navigation"
 import {authOptions} from "@/app/api/auth/[...nextauth]/route"
 import LogoutButton from "../../../components/auth/LogoutButton"
+import PermissionButton from "@/components/test/PermissionButton";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions)
@@ -53,6 +54,9 @@ export default async function DashboardPage() {
                     </div>
                 )}
             </div>
+
+            {/*contoh permission*/}
+            <PermissionButton/>
 
             <LogoutButton/>
         </div>

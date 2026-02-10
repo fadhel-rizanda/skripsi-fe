@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Whitelist of allowed query parameters
 const ALLOWED_PARAMS = [
@@ -12,44 +12,53 @@ const ALLOWED_PARAMS = [
   'tag_personality_id'
 ] as const;
 
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
+// Server-side pet service for API routes
+const petService = {
+  getPets: async (params: Record<string, string>) => {
+    const queryParams = new URLSearchParams();
     
-    // Filter and validate query parameters
-    const validParams = new URLSearchParams();
-    ALLOWED_PARAMS.forEach((param) => {
-      const value = searchParams.get(param);
-      if (value) {
-        validParams.set(param, value);
+    // Build query string from params
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && ALLOWED_PARAMS.includes(key as typeof ALLOWED_PARAMS[number])) {
+        queryParams.set(key, value);
       }
     });
 
-    const queryString = validParams.toString();
+    const queryString = queryParams.toString();
     const url = `${API_URL}/v1/pets${queryString ? `?${queryString}` : ''}`;
 
-    // Forward only whitelisted params to backend PHP API
-    const phpRes = await fetch(url, {
+    const response = await fetch(url, {
       headers: {
         'Accept': 'application/json',
       },
     });
 
-    // Handle non-OK responses
-    if (!phpRes.ok) {
-      // Log the detailed error on the server for debugging
-      const errorText = await phpRes.text();
-      console.error(`Backend error [${phpRes.status}]:`, errorText);
-
-      // Return a generic error message to the client
-      return NextResponse.json({
-        message: "An error occurred while fetching data from the backend.",
-        status: phpRes.status
-      }, { status: phpRes.status });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Backend error [${response.status}]:`, errorText);
+      throw new Error(`Failed to fetch pets: ${response.status}`);
     }
 
-    const data = await phpRes.json();
-    return NextResponse.json(data, { status: phpRes.status });
+    return await response.json();
+  }
+};
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    
+    // Extract and validate query parameters
+    const params: Record<string, string> = {};
+    ALLOWED_PARAMS.forEach((param) => {
+      const value = searchParams.get(param);
+      if (value) {
+        params[param] = value;
+      }
+    });
+
+    // Use petService to fetch data
+    const data = await petService.getPets(params);
+    return NextResponse.json(data);
     
   } catch (error) {
     // Log detailed error on server for debugging

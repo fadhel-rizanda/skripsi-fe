@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { isValidUrl } from "@/lib/utils"
 
 interface ProfileDropdownProps {
   user: UserProfile
@@ -24,7 +25,7 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-          {user.avatar ? (
+          {user.avatar && isValidUrl(user.avatar) ? (
             <Image
               src={user.avatar}
               alt={user.name}

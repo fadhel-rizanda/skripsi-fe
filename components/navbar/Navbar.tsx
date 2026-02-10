@@ -98,22 +98,30 @@ export function Navbar() {
 
         {/* Desktop Navigation Menu */}
         <div className="hidden lg:flex flex-1 justify-center">
-          <NavigationMenu>
-            <NavigationMenuList className="flex gap-6 xl:gap-8 w-auto">
-              {menuItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={item.href}
-                      className="whitespace-nowrap hover:text-green-700 hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent font-medium transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
+          {status === "loading" ? (
+            <div className="flex gap-6 xl:gap-8">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-5 w-24" />
               ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+            </div>
+          ) : (
+            <NavigationMenu>
+              <NavigationMenuList className="flex gap-6 xl:gap-8 w-auto">
+                {menuItems.map((item) => (
+                  <NavigationMenuItem key={item.href}>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href={item.href}
+                        className="whitespace-nowrap hover:text-green-700 hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent font-medium transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
         </div>
 
         {/* Desktop Right side - Auth buttons or User menu */}

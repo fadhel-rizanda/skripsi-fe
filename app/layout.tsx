@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import {Geist, Geist_Mono, Manrope, Plus_Jakarta_Sans} from "next/font/google";
+import {Geist, Geist_Mono, Manrope} from "next/font/google";
 import "./globals.css";
 import {Providers} from "@/app/providers";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-    variable: '--font-plus-jakarta-sans',
-    subsets: ['latin'],
-})
 
 const manrope = Manrope({
     variable: '--font-manrope',
@@ -36,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${manrope.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${manrope.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

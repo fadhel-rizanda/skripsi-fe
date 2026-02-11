@@ -10,15 +10,12 @@ import { petService } from "@/services/petServices";
 export default function FindPetPage() {
   // State Management
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [perPage, setPerPage] = useState(15);
   const [pets, setPets] = useState<Pet[]>([]);
-  
   // Total data dari database (bukan panjang array saat ini)
   const [totalData, setTotalData] = useState(0); 
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
   // State untuk filter
   const [filters, setFilters] = useState<PetFilterState>({});
   const requestIdRef = useRef(0);
@@ -26,23 +23,19 @@ export default function FindPetPage() {
   useEffect(() => {
     const abortController = new AbortController();
     const currentRequestId = ++requestIdRef.current;
-    
     async function fetchPets() {
       setLoading(true);
       setError("");
-      
       try {
         const response = await petService.getPetsPublic({
-          page,
-          limit,
+          page: page,
+          per_page: perPage,
           ...filters
         }, abortController.signal);
-
         if (requestIdRef.current === currentRequestId) {
           setPets(Array.isArray(response.data) ? response.data : []);
           setTotalData(response.total || 0);
         }
-
       } catch (err) {
         // Ignore abort errors
         if (err instanceof Error && err.name === 'AbortError') {
@@ -56,15 +49,13 @@ export default function FindPetPage() {
         }
       }
     }
-
-    // Fetch dijalankan setiap kali page, limit, atau filters berubah
+    // Fetch dijalankan setiap kali page, perPage, atau filters berubah
     fetchPets();
-    
     // Cleanup: abort ongoing request if dependencies change
     return () => {
       abortController.abort();
     };
-  }, [page, limit, filters]); 
+  }, [page, perPage, filters]); 
 
   // Handler untuk mengubah filter (nanti dipassing ke PetFilterBar)
   const handleFilterChange = (newFilters: PetFilterState) => {
@@ -116,10 +107,11 @@ export default function FindPetPage() {
       <footer className="mt-auto pb-8 pt-4">
         <PaginationBar
           current_page={page}
-          total={totalData} // Gunakan total dari backend
-          per_page={limit}
+          total={totalData}
+          per_page={perPage}
           onPageChange={setPage}
-          onRowsPerPageChange={setLimit}
+          onDataPerPageChange={setPerPage}
+          dataPerPageOptions={[25, 50, 100]}
         />
       </footer>
     </main>

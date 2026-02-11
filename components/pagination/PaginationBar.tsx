@@ -20,23 +20,24 @@ import { cn } from "@/lib/utils";
 type PageItem = number | { type: 'ellipsis'; key: string };
 
 interface PaginationBarProps {
-  current_page: number;
-  total: number;
-  per_page: number;
-  onPageChange?: (page: number) => void;
-  onRowsPerPageChange?: (rows: number) => void;
-  rowsPerPageOptions?: number[];
+    current_page: number;
+    total: number;
+    per_page: number;
+    onPageChange?: (page: number) => void;
+    onDataPerPageChange?: (jumlah: number) => void;
+    dataPerPageOptions?: number[];
 }
+
 export function PaginationBar({
-  current_page,
-  total,
-  per_page,
-  onPageChange,
-  onRowsPerPageChange,
-  rowsPerPageOptions = [10, 25, 50, 100],
+    current_page,
+    total,
+    per_page,
+    onPageChange,
+    onDataPerPageChange,
+    dataPerPageOptions = [10, 25, 50, 100],
 }: PaginationBarProps) {
-  // Ensure there is always at least 1 page (even when total is 0) so the pagination UI remains consistent
-  const totalPages = Math.max(1, Math.ceil(total / per_page));
+    // Gunakan per_page sebagai jumlah data per halaman
+    const totalPages = Math.max(1, Math.ceil(total / per_page));
 
     // Generate page numbers for display
     const pageNumbers: PageItem[] = [];
@@ -61,28 +62,28 @@ export function PaginationBar({
         }
     }
 
-  // Calculate showing range
-  const start = total > 0 ? (current_page - 1) * per_page + 1 : 0;
-  const end = Math.min(current_page * per_page, total);
+    // Calculate showing range
+    const start = total > 0 ? (current_page - 1) * per_page + 1 : 0;
+    const end = Math.min(current_page * per_page, total);
 
     return (
         <div className="w-full flex items-center justify-center">
             <div className="w-fit border-t border-gray-200 bg-white rounded-lg">
                 <div
                     className="max-w-1/2 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
-                    {/* Rows per page selector */}
+                    {/* Data per page selector */}
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-700 whitespace-nowrap">Rows per page:</span>
+                        <span className="text-sm text-gray-700 whitespace-nowrap">Data per page:</span>
                         <Select
                             value={per_page.toString()}
-                            onValueChange={v => onRowsPerPageChange && onRowsPerPageChange(Number(v))}
+                            onValueChange={v => onDataPerPageChange && onDataPerPageChange(Number(v))}
                         >
                             <SelectTrigger className="w-20 h-9 text-sm">
                                 <SelectValue/>
                             </SelectTrigger>
                             <SelectContent align="start">
                                 <SelectGroup>
-                                    {rowsPerPageOptions.map(opt => (
+                                    {dataPerPageOptions.map(opt => (
                                         <SelectItem key={opt} value={opt.toString()}>
                                             {opt}
                                         </SelectItem>

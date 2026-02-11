@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect, useRef} from "react";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
 import { PetCard } from "@/components/card/PetCard";
@@ -21,9 +21,11 @@ export default function FindPetPage() {
   
   // State untuk filter
   const [filters, setFilters] = useState<PetFilterState>({});
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     const abortController = new AbortController();
+    const currentRequestId = ++requestIdRef.current;
     
     async function fetchPets() {
       setLoading(true);
@@ -35,9 +37,11 @@ export default function FindPetPage() {
           limit,
           ...filters
         }, abortController.signal);
-        
-        setPets(Array.isArray(response.data) ? response.data : []);
-        setTotalData(response.total || 0);
+
+        if (requestIdRef.current === currentRequestId) {
+          setPets(Array.isArray(response.data) ? response.data : []);
+          setTotalData(response.total || 0);
+        }
 
       } catch (err) {
         // Ignore abort errors
@@ -47,7 +51,9 @@ export default function FindPetPage() {
         console.error(err);
         setError("Failed to load pet data. Please try again later.");
       } finally {
-        setLoading(false);
+        if (requestIdRef.current === currentRequestId) {
+          setLoading(false);
+        }
       }
     }
 
@@ -86,7 +92,7 @@ export default function FindPetPage() {
 
         {/* Content Section */}
         <div className="w-full max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
-          {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center font-sans">Loading friends...</div>}
+          {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center font-sans">Loading pets...</div>}
           
           {error && <div className="col-span-full text-red-500 font-medium text-center font-sans">{error}</div>}
           

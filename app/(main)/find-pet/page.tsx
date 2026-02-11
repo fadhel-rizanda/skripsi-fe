@@ -10,7 +10,7 @@ import { petService } from "@/services/petServices";
 export default function FindPetPage() {
   // State Management
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(15);
+  const [perPage, setPerPage] = useState<number|undefined>(undefined);
   const [pets, setPets] = useState<Pet[]>([]);
   // Total data dari database (bukan panjang array saat ini)
   const [totalData, setTotalData] = useState(0); 
@@ -35,6 +35,8 @@ export default function FindPetPage() {
         if (requestIdRef.current === currentRequestId) {
           setPets(Array.isArray(response.data) ? response.data : []);
           setTotalData(response.total || 0);
+          // Set perPage dari backend jika FE belum punya nilai
+          if (typeof response.per_page === 'number' && perPage === undefined) setPerPage(response.per_page);
         }
       } catch (err) {
         // Ignore abort errors
@@ -108,10 +110,10 @@ export default function FindPetPage() {
         <PaginationBar
           current_page={page}
           total={totalData}
-          per_page={perPage}
+          per_page={perPage ?? 15}
           onPageChange={setPage}
           onDataPerPageChange={setPerPage}
-          dataPerPageOptions={[25, 50, 100]}
+          dataPerPageOptions={[15, 25, 50, 100]}
         />
       </footer>
     </main>

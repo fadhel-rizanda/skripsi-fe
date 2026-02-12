@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { AGE_RANGES } from "@/lib/constants/pet";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useFilterOptions } from "@/hooks/useFilterOptions";
+import {useTagsOptions} from "@/hooks/useFilterOptions";
 import { SearchInput, FilterSelect, type FilterOption } from ".";
+import {Button} from "@/components/ui/button";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {
@@ -23,8 +24,8 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   const [tagPersonalityId, setTagPersonalityId] = useState("");
 
   // Fetch options from API
-  const { options: animalTypes, isLoading: isLoadingTypes } = useFilterOptions("type_of_animal");
-  const { options: tagPersonalities, isLoading: isLoadingTags } = useFilterOptions("personality");
+  const { options: animalTypes, isLoading: isLoadingTypes } = useTagsOptions("type_of_animal");
+  const { options: tagPersonalities, isLoading: isLoadingTags } = useTagsOptions("personality");
 
   // Convert to FilterOption format
   const animalTypeOptions: FilterOption[] = animalTypes.map((type) => ({
@@ -45,6 +46,13 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   // Debounce search input to avoid excessive API calls
   const debouncedSearch = useDebounce(search, 500);
 
+  const handleReset = ()=>{
+    setSearch("");
+    setAge("");
+    setTypeOfAnimalId("");
+    setTagPersonalityId("");
+  }
+
   // Trigger onFilterChange when debounced search or other filters change
   useEffect(() => {
     const filters: FilterState = {};
@@ -59,7 +67,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
       <SearchInput
         name="search"
         value={search}
@@ -91,6 +99,9 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
           placeholder="Tags"
           isLoading={isLoadingTags}
         />
+        {(search || age || typeOfAnimalId || tagPersonalityId) && (
+            <Button type="button" onClick={handleReset} className="h-8 w-8">x</Button>
+        )}
       </div>
     </div>
   );

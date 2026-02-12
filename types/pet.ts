@@ -5,6 +5,14 @@ export interface Pet {
   age: number | string;
   age_unit: string;
   profile_picture: string;
+  size: string;
+  date_of_birth: string;
+  gender: string;
+    about: string;
+    breed: string;
+    special_needs: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface PetFilterState {

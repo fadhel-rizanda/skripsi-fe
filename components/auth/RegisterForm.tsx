@@ -58,34 +58,44 @@ export function RegisterForm() {
     setRoleDialogOpen(false)
 
     startTransition(async () => {
-      try {
-        const data = form.getValues()
-        const result = await registerUser(data)
+        try {
+            setError("") // Clear previous errors
+            const data = form.getValues()
+            const result = await registerUser(data)
 
-        if (!result.success) {
-          setError(result.error || "Registration failed")
-          return
+            if (!result.success) {
+                setError(result.error || "Registration failed")
+                return
+            }
+
+            // Auto login after successful registration
+            if (result.credentials) {
+                const signInResult = await signIn("credentials", {
+                    email: result.credentials.email,
+                    password: result.credentials.password,
+                    redirect: false,
+                })
+
+                if (signInResult?.error) {
+                    setError("Registration successful but login failed. Please login manually.")
+                    setTimeout(() => router.push("/login"), 2000)
+                    return
+                }
+
+                if (signInResult?.ok) {
+                    // Redirect to dashboard after successful login
+                    router.push("/dashboard")
+
+                    // Redirect to verify-otp page with email parameter
+                    // router.push(`/verify-otp?email=${encodeURIComponent(result.credentials.email)}`)
+
+                    router.refresh()
+                }
+            }
+        } catch (err) {
+            console.error("Registration error:", err)
+            setError(err instanceof Error ? err.message : "Unexpected error")
         }
-
-        if (result.credentials) {
-          const signInResult = await signIn("credentials", {
-            email: result.credentials.email,
-            password: result.credentials.password,
-            redirect: false,
-          })
-
-          if (signInResult?.error) {
-            router.push("/login")
-            return
-          }
-
-          // router.replace(`/verify-otp?email=${encodeURIComponent(result.credentials.email)}`)
-          router.replace(`/dashboard`)
-          router.refresh()
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unexpected error")
-      }
     })
   }
 

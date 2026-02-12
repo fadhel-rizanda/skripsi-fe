@@ -15,7 +15,7 @@ interface PetDetailResponse {
 
 interface PetListParams extends PetFilterState {
   page?: number;
-  limit?: number;
+  per_page?: number;
 }
 
 export const petService = {
@@ -24,7 +24,7 @@ export const petService = {
     const queryParams = new URLSearchParams();
     
     if (params?.page) queryParams.set("page", params.page.toString());
-    if (params?.limit) queryParams.set("limit", params.limit.toString());
+    if (params?.per_page) queryParams.set("per_page", params.per_page.toString());
     if (params?.age) queryParams.set("age", params.age);
     if (params?.type_of_animal_id) queryParams.set("type_of_animal_id", params.type_of_animal_id);
     if (params?.tag_personality_id) queryParams.set("tag_personality_id", params.tag_personality_id);

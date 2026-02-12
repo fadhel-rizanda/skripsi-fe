@@ -43,8 +43,13 @@ export async function registerUser(input: RegisterFormData): Promise<RegisterRes
             }
         }
 
+        // Return credentials untuk auto login
         return {
             success: true,
+            credentials: {
+                email: registerData.email,
+                password: registerData.password,
+            }
         }
     } catch (err) {
         console.error("Registration error:", err)

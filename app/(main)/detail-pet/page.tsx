@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { petService } from "@/services/petServices";
 import { PetDetail } from "@/types/pet";
+import { generalService, Tag as AnimalTag } from "@/services/generalServices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,7 +29,7 @@ import {
   Download,
 } from "lucide-react";
 import EditPetForm from "./EditPetForm";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export default function DetailPetPage() {
   const searchParams = useSearchParams();
@@ -40,6 +41,7 @@ export default function DetailPetPage() {
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
   const { data: session } = useSession();
   // Support both shapes: `session.user.role` can be a string or an object { name }
@@ -82,6 +84,21 @@ export default function DetailPetPage() {
     }
   }, [pet, selectedImageIndex]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const types = await generalService.getAnimalTypes();
+        if (mounted) setAnimalTypes(types);
+      } catch (err) {
+        console.error("Failed to load animal types", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleAdoption = async () => {
     if (!pet) return;
     try {
@@ -106,7 +123,11 @@ export default function DetailPetPage() {
     }
   };
 
-  const getAnimalTypeName = (typeId: string | number) => String(typeId);
+  const getAnimalTypeName = (typeId: string | number) => {
+    const idStr = String(typeId);
+    const found = animalTypes.find((t) => String(t.id) === idStr);
+    return found ? found.name : idStr;
+  };
 
   const renderGenderIcon = (gender?: string) => {
     if (!gender) return <Heart className="h-4 w-4 text-green-600" />;
@@ -395,9 +416,10 @@ export default function DetailPetPage() {
                         Edit Information
                       </Button>
                     </DialogTrigger>
-                      <DialogContent>
-                        <EditPetForm pet={{ ...pet, id: pet.id ?? petId ?? "" }} onClose={() => setDialogOpen(false)} />
-                      </DialogContent>
+                    <DialogContent>
+                      <DialogTitle>Edit Pet</DialogTitle>
+                      <EditPetForm pet={{ ...pet, id: pet.id ?? petId ?? "" }} onClose={() => setDialogOpen(false)} />
+                    </DialogContent>
                   </Dialog>
                 ) : (
                   <Button

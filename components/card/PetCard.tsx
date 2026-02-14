@@ -65,10 +65,11 @@ export function PetCard({ id, name, type, age, imageUrl, extraImages, priority =
             <span className="text-gray-500 text-sm">No Image</span>
           </div>
         )}
-        {extraCount > 1 && (
+        {extraImages && extraImages.length > 0 && (
           <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
-            +{extraCount - 1}
+            +{extraImages.length}
           </div>
+        )}
         )}
       </div>
       <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">

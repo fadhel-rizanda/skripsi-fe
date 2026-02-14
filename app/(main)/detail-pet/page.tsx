@@ -367,7 +367,7 @@ export default function DetailPetPage() {
                           className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
                         >
                           <a
-                            href={record.public_url}
+href={record.public_url && (/^https?:\/\//.test(record.public_url) ? record.public_url : '#')}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-3 flex-1 min-w-0"

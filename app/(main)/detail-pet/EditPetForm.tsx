@@ -352,7 +352,6 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
                       <SelectContent>
                         <SelectItem value="male">Male</SelectItem>
                         <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Unknown</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

@@ -12,6 +12,7 @@ import { attachmentService } from "@/services/attachmentServices";
 import { Form, FormItem, FormControl } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -70,8 +71,6 @@ const FileUploadItem = ({ filename, url, }: { filename: string; url: string }) =
     </a>
   </div>
 );
-
-// --- MAIN COMPONENT ---
 
 const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const router = useRouter();
@@ -295,7 +294,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             <FormItem>
               <Label className="text-xs text-slate-700">Pet Name <span className="text-red-500">*</span></Label>
                 <FormControl>
-                <Input {...register("name", { required: true })} className="h-8 bg-slate-50 border-slate-200 focus:bg-white transition-all" placeholder="e.g. Buddy" />
+                <Input {...register("name", { required: true })} className="w-full bg-slate-50 border-slate-200 h-7 px-2 py-0.5 text-xs rounded-sm focus:bg-white transition-all" placeholder="e.g. Buddy" />
               </FormControl>
             </FormItem>
           </div>
@@ -304,9 +303,9 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             <FormItem>
               <Label className="text-xs text-slate-700">About</Label>
               <FormControl>
-                <textarea
+                <Textarea
                   {...register("about")}
-                  className="flex w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/20 focus-visible:border-green-500 disabled:cursor-not-allowed disabled:opacity-50 min-h-[68px] focus:bg-white transition-all"
+                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm placeholder:text-muted-foreground"
                   placeholder="Describe personality, history, or quirks..."
                 />
               </FormControl>
@@ -336,7 +335,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
 
             <FormItem>
               <Label className="text-xs uppercase text-slate-500 font-semibold">Breed</Label>
-              <FormControl><Input {...register("breed")} className="w-full bg-slate-50 border-slate-200 h-6 text-xs" placeholder="Mixed" /></FormControl>
+              <FormControl><Input {...register("breed")} className="w-full bg-slate-50 border-slate-200 h-9 px-2 py-0.5 text-xs rounded-sm" placeholder="Mixed" /></FormControl>
             </FormItem>
 
             <FormItem>
@@ -386,7 +385,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
 
             <FormItem>
               <Label className="text-xs uppercase text-slate-500 font-semibold">Birth Date</Label>
-              <FormControl><Input type="date" {...register("date_of_birth")} className="w-full bg-slate-50 border-slate-200 h-6 text-xs" /></FormControl>
+              <FormControl><Input type="date" {...register("date_of_birth")} className="w-full bg-slate-50 border-slate-200 h-9 px-2 py-0.5 text-xs rounded-sm" /></FormControl>
             </FormItem>
           </div>
 

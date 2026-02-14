@@ -178,7 +178,7 @@ export default function DetailPetPage() {
       <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-12 md:px-10 lg:max-w-screen-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
           <div className="space-y-4 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
-            <div className="relative w-full h-64 sm:h-80 md:aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
+            <div className="relative w-full h-96 md:h-auto md:aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
                   <Image

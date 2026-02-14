@@ -134,18 +134,6 @@ export default function DetailPetPage() {
     return null; // Or use a generic icon like <Circle />
   };
 
-  const nextImage = () => {
-    if (pet && pet.profile_pictures.length > 0) {
-      setSelectedImageIndex((prev) => (prev + 1) % pet.profile_pictures.length);
-    }
-  };
-
-  const prevImage = () => {
-    if (pet && pet.profile_pictures.length > 0) {
-      setSelectedImageIndex((prev) => (prev - 1 + pet.profile_pictures.length) % pet.profile_pictures.length);
-    }
-  };
-
   if (loading) {
     return (
       <div className="container mx-auto px-6 py-8 max-w-screen-2xl">
@@ -249,9 +237,9 @@ export default function DetailPetPage() {
           </div>
 
           <Card className="rounded-2xl shadow-xl border-0 bg-white/95">
-            <CardContent className="p-6 space-y-6">
+            <CardContent className="p-6 space-y-6 text-base">
               <div>
-                <h1 className="text-4xl font-bold text-slate-900">
+                <h1 className="text-[48px] font-bold text-slate-900">
                   {pet.name}
                 </h1>
                 {pet.about && (
@@ -262,7 +250,7 @@ export default function DetailPetPage() {
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-base font-semibold text-slate-900">
                   About {pet.name}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -308,7 +296,7 @@ export default function DetailPetPage() {
                     {pet.physique_tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-base"
                       >
                         {tag.name}
                       </span>
@@ -326,7 +314,7 @@ export default function DetailPetPage() {
                     {pet.personality_tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-base"
                       >
                         {tag.name}
                       </span>
@@ -357,7 +345,7 @@ export default function DetailPetPage() {
                             <span className="text-slate-400 flex-none">
                               <FileText className="h-5 w-5 text-green-600" />
                             </span>
-                            <span className="text-sm text-slate-700 truncate">
+                            <span className="text-base text-slate-700 truncate">
                               {record.filename}
                             </span>
                           </a>

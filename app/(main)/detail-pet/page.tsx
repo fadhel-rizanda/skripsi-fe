@@ -138,7 +138,7 @@ export default function DetailPetPage() {
     return (
       <div className="container mx-auto px-6 py-8 max-w-screen-2xl">
         <Skeleton className="h-8 w-32 mb-6" />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-10 lg:grid-cols-2">
           <Skeleton className="h-96 rounded-lg" />
           <div className="space-y-4">
             <Skeleton className="h-12 w-3/4" />

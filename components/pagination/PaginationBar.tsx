@@ -67,19 +67,18 @@ export function PaginationBar({
     const end = Math.min(current_page * per_page, total);
 
     return (
-        <div className="w-full flex items-center justify-center">
+        <div className="w-full flex items-center justify-center px-3 sm:px-0">
             <div className="w-fit border-t border-gray-200 bg-white rounded-lg">
-                <div
-                    className="max-w-1/2 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
+                <div className="flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3">
                     {/* Data per page selector */}
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-700 whitespace-nowrap">Data per page:</span>
+                        <span className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">Data per page:</span>
                         <Select
                             value={per_page.toString()}
                             onValueChange={v => onDataPerPageChange && onDataPerPageChange(Number(v))}
                         >
-                            <SelectTrigger className="w-20 h-9 text-sm">
-                                <SelectValue/>
+                            <SelectTrigger className="w-16 h-8 sm:w-20 sm:h-9 text-xs sm:text-sm">
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent align="start">
                                 <SelectGroup>
@@ -93,68 +92,70 @@ export function PaginationBar({
                         </Select>
                     </div>
 
-                    {/* Page navigation */}
-                    <Pagination className="w-auto">
-                        <PaginationContent className="gap-1">
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={e => {
-                                        e.preventDefault();
-                                        if (onPageChange && current_page > 1) onPageChange(current_page - 1);
-                                    }}
-                                    aria-disabled={current_page === 1}
-                                    className={cn(
-                                        'h-9 px-3 text-sm',
-                                        current_page === 1 && 'pointer-events-none opacity-50'
-                                    )}
-                                />
-                            </PaginationItem>
+                    {/* Page navigation (center) */}
+                    <div className="flex-1 flex items-center justify-center overflow-x-auto scrollbar-hide">
+                        <Pagination className="inline-flex">
+                            <PaginationContent className="flex items-center gap-1">
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            if (onPageChange && current_page > 1) onPageChange(current_page - 1);
+                                        }}
+                                        aria-disabled={current_page === 1}
+                                        className={cn(
+                                            'h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm',
+                                            current_page === 1 && 'pointer-events-none opacity-50'
+                                        )}
+                                    />
+                                </PaginationItem>
 
-                            {pageNumbers.map((item) =>
-                                typeof item === 'object' ? (
-                                    <PaginationItem key={item.key}>
-                                        <PaginationEllipsis className="h-9 w-9"/>
-                                    </PaginationItem>
-                                ) : (
-                                    <PaginationItem key={item}>
-                                        <PaginationLink
-                                            href="#"
-                                            isActive={item === current_page}
-                                            className={cn(
-                                                'h-9 w-9 text-sm',
-                                                item === current_page && 'bg-black text-white hover:bg-black hover:text-white'
-                                            )}
-                                            onClick={e => {
-                                                e.preventDefault();
-                                                if (onPageChange && item !== current_page) onPageChange(item);
-                                            }}
-                                        >
-                                            {item}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                )
-                            )}
+                                {pageNumbers.map(item =>
+                                    typeof item === 'object' ? (
+                                        <PaginationItem key={item.key}>
+                                            <PaginationEllipsis className="h-8 w-8 sm:h-9 sm:w-9" />
+                                        </PaginationItem>
+                                    ) : (
+                                        <PaginationItem key={item}>
+                                            <PaginationLink
+                                                href="#"
+                                                isActive={item === current_page}
+                                                className={cn(
+                                                    'h-8 w-8 sm:h-9 sm:w-9 text-xs sm:text-sm',
+                                                    item === current_page && 'bg-black text-white hover:bg-black hover:text-white'
+                                                )}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    if (onPageChange && item !== current_page) onPageChange(item);
+                                                }}
+                                            >
+                                                {item}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    )
+                                )}
 
-                            <PaginationItem>
-                                <PaginationNext
-                                    href="#"
-                                    onClick={e => {
-                                        e.preventDefault();
-                                        if (onPageChange && current_page < totalPages) onPageChange(current_page + 1);
-                                    }}
-                                    aria-disabled={current_page === totalPages}
-                                    className={cn(
-                                        'h-9 px-3 text-sm',
-                                        current_page === totalPages && 'pointer-events-none opacity-50'
-                                    )}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            if (onPageChange && current_page < totalPages) onPageChange(current_page + 1);
+                                        }}
+                                        aria-disabled={current_page === totalPages}
+                                        className={cn(
+                                            'h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm',
+                                            current_page === totalPages && 'pointer-events-none opacity-50'
+                                        )}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </div>
 
                     {/* Showing info */}
-                    <div className="text-sm text-gray-700 whitespace-nowrap">
+                    <div className="ml-3 text-xs sm:text-sm text-gray-700 whitespace-nowrap">
                         Showing <span className="font-semibold">{start}</span> to{' '}
                         <span className="font-semibold">{end}</span> of{' '}
                         <span className="font-semibold">{total}</span>

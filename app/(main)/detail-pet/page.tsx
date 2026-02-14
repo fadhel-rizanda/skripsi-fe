@@ -2,27 +2,33 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+
 import { petService } from "@/services/petServices";
 import { PetDetail } from "@/types/pet";
-import { ANIMAL_TYPES } from "@/lib/constants/pet";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   Heart,
-  Calendar,
   Ruler,
   PawPrint,
   MessageCircle,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Edit,
+  Mars,
+  Venus,
+  Tag,
+  Cake,
+  FileText,
+  Download,
 } from "lucide-react";
-import Image from "next/image";
+import EditPetForm from "./EditPetForm";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 
 export default function DetailPetPage() {
   const searchParams = useSearchParams();
@@ -33,6 +39,13 @@ export default function DetailPetPage() {
   const [loading, setLoading] = useState(true);
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { data: session } = useSession();
+  // Support both shapes: `session.user.role` can be a string or an object { name }
+  const _role = session?.user?.role;
+  const roleName = typeof _role === "string" ? _role : _role?.name;
+  const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
 
   const fetchPetDetail = useCallback(async () => {
     try {
@@ -53,11 +66,24 @@ export default function DetailPetPage() {
     } else {
       router.push("/find-pet");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId, router, fetchPetDetail]);
+
+  useEffect(() => {
+    if (!pet) {
+      setSelectedImageIndex(0);
+      return;
+    }
+    const picsLen = pet.profile_pictures.length;
+    if (picsLen === 0) {
+      setSelectedImageIndex(0);
+    } else if (selectedImageIndex >= picsLen) {
+      setSelectedImageIndex(0);
+    }
+  }, [pet, selectedImageIndex]);
 
   const handleAdoption = async () => {
     if (!pet) return;
-
     try {
       setAdoptionLoading(true);
       await petService.adoptPet(petId!);
@@ -67,14 +93,12 @@ export default function DetailPetPage() {
       type ErrorWithResponse = {
         response?: { data?: { message?: string } };
       };
-
       const errorMessage =
         (typeof error === "object" &&
           error &&
           "response" in error &&
           (error as ErrorWithResponse).response?.data?.message) ||
         "Failed to send adoption request";
-
       toast.error(errorMessage);
       console.error(error);
     } finally {
@@ -82,26 +106,25 @@ export default function DetailPetPage() {
     }
   };
 
-  const getAnimalTypeName = (typeId: string) => {
-    const animalType = ANIMAL_TYPES.find((type) => type.value === typeId);
-    return animalType?.label || typeId;
+  const getAnimalTypeName = (typeId: string | number) => String(typeId);
+
+  const renderGenderIcon = (gender?: string) => {
+    if (!gender) return <Heart className="h-4 w-4 text-green-600" />;
+    const g = gender.toLowerCase();
+    if (g.startsWith("m")) return <Mars className="h-4 w-4 text-green-600" />;
+    if (g.startsWith("f")) return <Venus className="h-4 w-4 text-green-600" />;
+    return <Heart className="h-4 w-4 text-green-600" />;
   };
 
   const nextImage = () => {
     if (pet && pet.profile_pictures.length > 0) {
-      setSelectedImageIndex(
-        (prev) => (prev + 1) % pet.profile_pictures.length
-      );
+      setSelectedImageIndex((prev) => (prev + 1) % pet.profile_pictures.length);
     }
   };
 
   const prevImage = () => {
     if (pet && pet.profile_pictures.length > 0) {
-      setSelectedImageIndex(
-        (prev) =>
-          (prev - 1 + pet.profile_pictures.length) %
-          pet.profile_pictures.length
-      );
+      setSelectedImageIndex((prev) => (prev - 1 + pet.profile_pictures.length) % pet.profile_pictures.length);
     }
   };
 
@@ -138,10 +161,11 @@ export default function DetailPetPage() {
     );
   }
 
-  const currentImage =
+  const currentImageRaw =
     pet.profile_pictures.length > 0
       ? pet.profile_pictures[selectedImageIndex]?.public_url
       : null;
+  const currentImage = typeof currentImageRaw === "string" && currentImageRaw ? currentImageRaw : null;
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
@@ -162,6 +186,7 @@ export default function DetailPetPage() {
                   {pet.profile_pictures.length > 1 && (
                     <>
                       <button
+                        type="button"
                         onClick={prevImage}
                         className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
                         aria-label="Previous image"
@@ -169,6 +194,7 @@ export default function DetailPetPage() {
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
+                        type="button"
                         onClick={nextImage}
                         className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
                         aria-label="Next image"
@@ -185,29 +211,40 @@ export default function DetailPetPage() {
               )}
             </div>
 
-            {pet.profile_pictures.length > 1 && (
+              {pet.profile_pictures.length > 1 && (
               <div className="flex gap-3 overflow-x-auto">
-                {pet.profile_pictures.map((image, index) => (
+                {pet.profile_pictures.map((image, index) => {
+                  const thumbSrc = typeof image.public_url === "string" && image.public_url ? image.public_url : null;
+                  return (
                   <button
                     key={image.id}
+                    type="button"
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`h-16 w-16 flex-none rounded-xl overflow-hidden border-2 transition-all ${
+                    className={`h-24 w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
                       selectedImageIndex === index
                         ? "border-green-500 ring-2 ring-green-200"
                         : "border-transparent hover:border-green-300"
                     }`}
                   >
                     <div className="relative w-full h-full">
-                      <Image
-                        src={image.public_url}
-                        alt={`${pet.name} ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
+                      {thumbSrc ? (
+                        <Image
+                          src={thumbSrc}
+                          alt={`${pet.name} ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                          <PawPrint className="h-8 w-8" />
+                        </div>
+                      )}
                     </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -238,19 +275,19 @@ export default function DetailPetPage() {
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">
-                      <Calendar className="h-4 w-4 text-green-600" />
+                      <Cake className="h-4 w-4 text-green-600" />
                     </span>
                     <span>Age: {pet.age} {pet.age_unit}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">
-                      <Heart className="h-4 w-4 text-green-600" />
+                      {renderGenderIcon(pet.gender)}
                     </span>
                     <span>Gender: {pet.gender}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">
-                      <PawPrint className="h-4 w-4 text-green-600" />
+                      <Tag className="h-4 w-4 text-green-600" />
                     </span>
                     <span>Breed: {pet.breed}</span>
                   </div>
@@ -306,18 +343,32 @@ export default function DetailPetPage() {
                   </h3>
                   <div className="space-y-2">
                     {pet.additional_records.map((record) => (
-                      <a
-                        key={record.id}
-                        href={record.public_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
-                      >
-                        <span className="text-sm text-slate-700 truncate">
-                          {record.filename}
-                        </span>
-                        <span className="text-slate-400">↗</span>
-                      </a>
+                      <div
+                          key={record.id}
+                          className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                        >
+                          <a
+                            href={record.public_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 flex-1 min-w-0"
+                          >
+                            <span className="text-slate-400 flex-none">
+                              <FileText className="h-5 w-5 text-green-600" />
+                            </span>
+                            <span className="text-sm text-slate-700 truncate">
+                              {record.filename}
+                            </span>
+                          </a>
+                          <a
+                            href={record.public_url}
+                            download
+                            className="text-slate-400 flex-none ml-2"
+                            aria-label="Download file"
+                          >
+                            <Download className="h-5 w-5 hover:text-green-700" />
+                          </a>
+                        </div>
                     ))}
                   </div>
                 </div>
@@ -333,18 +384,36 @@ export default function DetailPetPage() {
                   <Heart className="mr-2 h-5 w-5" />
                   {adoptionLoading ? "Sending..." : "Adopt Me"}
                 </Button>
-                <Button
-                  size="lg"
-                  className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Chat with Provider
-                </Button>
+                {isProvider ? (
+                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="lg"
+                        className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                      >
+                        <Edit className="mr-2 h-5 w-5" />
+                        Edit Information
+                      </Button>
+                    </DialogTrigger>
+                      <DialogContent>
+                        <EditPetForm pet={{ ...pet, id: pet.id ?? petId ?? "" }} onClose={() => setDialogOpen(false)} />
+                      </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                  >
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Chat with Provider
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+      
     </div>
   );
 }

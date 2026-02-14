@@ -16,6 +16,7 @@ export interface Pet {
 }
 
 export interface PetDetail {
+  id: string;
   type_of_animal_id: string;
   size: string;
   name: string;

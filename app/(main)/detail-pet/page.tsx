@@ -129,11 +129,11 @@ export default function DetailPetPage() {
   };
 
   const renderGenderIcon = (gender?: string) => {
-    if (!gender) return <Heart className="h-4 w-4 text-green-600" />;
+    if (!gender) return null; // Or use a generic icon like <Circle />
     const g = gender.toLowerCase();
     if (g.startsWith("m")) return <Mars className="h-4 w-4 text-green-600" />;
     if (g.startsWith("f")) return <Venus className="h-4 w-4 text-green-600" />;
-    return <Heart className="h-4 w-4 text-green-600" />;
+    return null; // Or use a generic icon like <Circle />
   };
 
   const nextImage = () => {

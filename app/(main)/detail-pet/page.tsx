@@ -8,6 +8,7 @@ import Image from "next/image";
 import { petService } from "@/services/petServices";
 import { PetDetail } from "@/types/pet";
 import { generalService, Tag as AnimalTag } from "@/services/generalServices";
+import { isValidUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -361,13 +362,15 @@ export default function DetailPetPage() {
                     Additional Records
                   </h3>
                   <div className="space-y-2">
-                    {pet.additional_records.map((record) => (
-                      <div
+                    {pet.additional_records.map((record) => {
+                      const safeUrl = isValidUrl(record.public_url) ? record.public_url : undefined;
+                      return (
+                        <div
                           key={record.id}
                           className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
                         >
                           <a
-href={record.public_url && (/^https?:\/\//.test(record.public_url) ? record.public_url : '#')}
+                            href={safeUrl || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-3 flex-1 min-w-0"
@@ -380,15 +383,19 @@ href={record.public_url && (/^https?:\/\//.test(record.public_url) ? record.publ
                             </span>
                           </a>
                           <a
-                            href={record.public_url}
+                            href={safeUrl}
                             download
                             className="text-slate-400 flex-none ml-2"
                             aria-label="Download file"
+                            tabIndex={safeUrl ? 0 : -1}
+                            aria-disabled={!safeUrl}
+                            onClick={e => { if (!safeUrl) e.preventDefault(); }}
                           >
                             <Download className="h-5 w-5 hover:text-green-700" />
                           </a>
                         </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

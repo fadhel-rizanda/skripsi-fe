@@ -136,9 +136,9 @@ export default function DetailPetPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-6 py-8 max-w-screen-2xl">
+      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:px-10 lg:max-w-screen-xl">
         <Skeleton className="h-8 w-32 mb-6" />
-        <div className="grid gap-10 lg:grid-cols-2">
+        <div className="grid gap-y-10 gap-x-6 md:gap-x-8 md:grid-cols-2 justify-center">
           <Skeleton className="h-96 rounded-lg" />
           <div className="space-y-4">
             <Skeleton className="h-12 w-3/4" />
@@ -175,9 +175,9 @@ export default function DetailPetPage() {
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
-      <div className="container mx-auto px-6 py-10 max-w-screen-2xl">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
+      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-12 md:px-10 lg:max-w-screen-xl">
+        <div className="grid gap-y-6 gap-x-6 md:gap-x-8 md:grid-cols-2 justify-center">
+          <div className="space-y-4 w-full md:max-w-[552px] md:flex-none mx-auto md:mx-0">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
@@ -199,7 +199,7 @@ export default function DetailPetPage() {
             </div>
 
               {pet.profile_pictures.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto">
+              <div className="flex gap-3 overflow-x-auto justify-center md:justify-start">
                 {pet.profile_pictures.map((image, index) => {
                   const thumbSrc = typeof image.public_url === "string" && image.public_url ? image.public_url : null;
                   return (
@@ -236,7 +236,7 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="rounded-2xl shadow-xl border-0 bg-white/95">
+          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:max-w-[552px] md:flex-none mx-auto md:mx-0">
             <CardContent className="p-6 space-y-6 text-base">
               <div>
                 <h1 className="text-[48px] font-bold text-slate-900">

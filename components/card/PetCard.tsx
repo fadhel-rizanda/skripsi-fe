@@ -70,7 +70,6 @@ export function PetCard({ id, name, type, age, imageUrl, extraImages, priority =
             +{extraImages.length}
           </div>
         )}
-        )}
       </div>
       <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">
         <CardTitle className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-900 line-clamp-1">{name}</CardTitle>

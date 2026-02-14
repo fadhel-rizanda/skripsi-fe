@@ -91,7 +91,7 @@ export default function AdoptionsPage() {
                 </div>
 
                 {/* Content */}
-                <div className="w-full max-w-4xl mx-auto flex flex-col gap-4">
+                <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-4">
 
                     {loading && (
                         <div className="text-lg font-medium text-gray-600 text-center font-sans">

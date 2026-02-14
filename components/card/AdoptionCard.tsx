@@ -18,9 +18,9 @@ interface AdoptionCardProps {
 export function AdoptionCard({adoption}: AdoptionCardProps) {
     return (
         <Card
-            className="group w-full hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0">
+            className="group w-3xl hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0">
             {/* Header */}
-            <div className="bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 border-b border-gray-100">
+            <div className="bg-linear-to-br p-6 border-b border-gray-100">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-white rounded-xl shadow-sm">
@@ -129,20 +129,16 @@ export function AdoptionCard({adoption}: AdoptionCardProps) {
                                 <p className="font-medium text-gray-900 truncate">
                                     {adoption.adopter.name}
                                 </p>
-                                <a
-                                    href={`mailto:${adoption.adopter.email}`}
-                                    className="inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 hover:underline transition-colors"
-                                >
-                                    <Icon icon="lucide:mail" className="w-3 h-3"/>
+                                <p className="text-xs text-gray-500 truncate">
                                     {adoption.adopter.email}
-                                </a>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 pb-6 pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
                     <Icon icon="lucide:calendar" className="w-3.5 h-3.5"/>
                     <span>Created {new Date(adoption.created_at).toLocaleDateString('en-US', {
                         month: 'short',

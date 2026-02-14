@@ -18,6 +18,21 @@ interface PetListParams extends PetFilterState {
   per_page?: number;
 }
 
+export type CreatePetPayload = {
+  name: string
+  breed: string
+  size: "small" | "medium" | "large" | "extra large"
+  date_of_birth: string
+  gender: "male" | "female"
+  about: string
+  special_needs: boolean
+  type_of_animal_id: string
+  profile_picture_ids: string[]
+  physique_ids: string[]
+  personality_ids: string[]
+  additional_record_ids?: string[]
+}
+
 export const petService = {
   // Get list of pets via Next.js API route (no auth, public access)
   getPetsPublic: async (params?: PetListParams, signal?: AbortSignal): Promise<PetListResponse> => {
@@ -55,7 +70,7 @@ export const petService = {
   },
 
   // Create new pet
-  createPet: async (data: Partial<Pet>) => {
+  createPet: async (data: CreatePetPayload) => {
     const response = await api.post("/v1/pets", data);
     return response.data;
   },

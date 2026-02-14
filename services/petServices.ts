@@ -62,8 +62,23 @@ export const petService = {
 
   // Update existing pet
   updatePet: async (id: string | number, data: Partial<Pet>) => {
-    const response = await api.put(`/v1/pets/${id}`, data);
-    return response.data;
+    // Log the outgoing update for debugging (will appear in Node/Browser console depending on where api is used)
+    try {
+      console.log("petService.updatePet: calling PUT /v1/pets/" + id, data);
+    } catch (err) {
+      console.warn("petService.updatePet: unable to log request data", err);
+    }
+
+    try {
+      const response = await api.put(`/v1/pets/${id}`, data);
+      try {
+        console.log("petService.updatePet: response received", response?.status);
+      } catch {}
+      return response.data;
+    } catch (err) {
+      console.error("petService.updatePet: request failed", err);
+      throw err;
+    }
   },
 
   // Delete pet

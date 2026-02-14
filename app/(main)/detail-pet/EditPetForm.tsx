@@ -20,6 +20,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { FileText, Download, Upload, Loader2, Info, PawPrint, Heart, Image as ImageIcon, FileDigit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // --- TYPES ---
 type PetDetail = OriginalPetDetail & { id: string | number; date_of_birth?: string };
@@ -87,6 +88,8 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const [selectedAdditionalRecordIds, setSelectedAdditionalRecordIds] = useState<string[]>([]);
   
   const [isUploading, setIsUploading] = useState(false);
+  const [stagedProfileFiles, setStagedProfileFiles] = useState<Array<{ file: File; preview: string }>>([]);
+  const [stagedRecordFiles, setStagedRecordFiles] = useState<Array<{ file: File; filename: string }>>([]);
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -150,51 +153,88 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
     setter(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
-  const handleFileUpload = async (file: File, target: "profile" | "record") => {
-    setIsUploading(true);
-    try {
-      const presigned = await attachmentService.getPresignedUrl({ 
-        filename: file.name, 
-        mime_type: file.type, 
-        file_size: file.size, 
-        is_public: true 
-      });
-      const { id, upload_url } = presigned.data || presigned;
-
-      await attachmentService.uploadToS3(upload_url, file, () => {
-        // Progress callback intentionally left blank
-      });
-      await attachmentService.confirmUpload(id);
-
-      if (target === "profile") {
-        setSelectedProfilePictureIds(prev => [...prev, id]);
-      } else {
-        setSelectedAdditionalRecordIds(prev => [...prev, id]);
-      }
-
-      toast.success("Upload successful");
-    } catch {
-      toast.error("File upload failed");
-    } finally {
-      setIsUploading(false);
+  // Stage files locally; upload will happen when user clicks Save
+  const handleFileSelect = (file: File, target: "profile" | "record") => {
+    if (!file) return;
+    if (target === "profile") {
+      const preview = URL.createObjectURL(file);
+      setStagedProfileFiles((s) => [...s, { file, preview }]);
+    } else {
+      setStagedRecordFiles((s) => [...s, { file, filename: file.name }]);
     }
   };
 
+  const removeStagedProfile = (index: number) => {
+    setStagedProfileFiles((prev) => {
+      const item = prev[index];
+      if (item?.preview) URL.revokeObjectURL(item.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const removeStagedRecord = (index: number) => setStagedRecordFiles((prev) => prev.filter((_, i) => i !== index));
+
   const onSubmit = async (values: FormValues) => {
     try {
+      // Upload staged files first (if any)
+      const uploadedProfileIds: string[] = [];
+      const uploadedRecordIds: string[] = [];
+      if (stagedProfileFiles.length > 0 || stagedRecordFiles.length > 0) setIsUploading(true);
+
+      for (const staged of stagedProfileFiles) {
+        try {
+          const presigned = await attachmentService.getPresignedUrl({ filename: staged.file.name, mime_type: staged.file.type, file_size: staged.file.size, is_public: true });
+          const { id, upload_url } = presigned.data || presigned;
+          await attachmentService.uploadToS3(upload_url, staged.file);
+          await attachmentService.confirmUpload(id);
+          uploadedProfileIds.push(id);
+        } catch (err) {
+          console.error("Profile upload failed", err);
+          toast.error(`Failed to upload ${staged.file.name}`);
+        }
+      }
+
+      for (const staged of stagedRecordFiles) {
+        try {
+          const presigned = await attachmentService.getPresignedUrl({ filename: staged.file.name, mime_type: staged.file.type, file_size: staged.file.size, is_public: true });
+          const { id, upload_url } = presigned.data || presigned;
+          await attachmentService.uploadToS3(upload_url, staged.file);
+          await attachmentService.confirmUpload(id);
+          uploadedRecordIds.push(id);
+        } catch (err) {
+          console.error("Record upload failed", err);
+          toast.error(`Failed to upload ${staged.file.name}`);
+        }
+      }
+
+      const finalProfileIds = [...selectedProfilePictureIds, ...uploadedProfileIds];
+      const finalRecordIds = [...selectedAdditionalRecordIds, ...uploadedRecordIds];
+
       const payload = {
         ...values,
-        physique_ids: selectedPhysiqueIds,
-        personality_ids: selectedPersonalityIds,
-        profile_picture_ids: selectedProfilePictureIds,
-        additional_record_ids: selectedAdditionalRecordIds,
+        type_of_animal_id: values.type_of_animal_id ? Number(values.type_of_animal_id) : null,
+        date_of_birth: !values.date_of_birth ? undefined : values.date_of_birth,
+        physique_ids: selectedPhysiqueIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
+        personality_ids: selectedPersonalityIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
+        profile_picture_ids: finalProfileIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
+        additional_record_ids: finalRecordIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
       };
+
+      try { console.log("Payload yang dikirim:", payload); } catch {}
+
       await petService.updatePet(pet.id, payload);
       toast.success("Pet data updated successfully");
+      // cleanup staged previews
+      stagedProfileFiles.forEach((s) => s.preview && URL.revokeObjectURL(s.preview));
+      setStagedProfileFiles([]);
+      setStagedRecordFiles([]);
       onClose();
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Failed to update data", err);
       toast.error("Failed to update data");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -232,6 +272,17 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             </div>
           ))}
 
+          {stagedProfileFiles.map((s, idx) => (
+            <div key={`staged-${idx}`} className="relative rounded-md overflow-hidden border-2 border-dashed w-16 flex-shrink-0">
+              <div className="w-full h-full">
+                <Image src={s.preview} alt={s.file.name} className="object-cover w-full h-full" fill style={{ objectFit: "cover" }} />
+              </div>
+              <button type="button" onClick={() => removeStagedProfile(idx)} className="absolute top-1 right-1 p-1 rounded-full bg-white text-slate-600 hover:text-red-600">
+                ✕
+              </button>
+            </div>
+          ))}
+
           <label className={cn(
             "flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer bg-white hover:bg-green-50 hover:border-green-400 transition group w-16 flex-shrink-0",
             isUploading && "pointer-events-none opacity-50"
@@ -239,7 +290,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "profile")}
+              onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], "profile")}
               className="hidden"
               disabled={isUploading}
             />
@@ -271,11 +322,27 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             </div>
           ))}
 
+          {stagedRecordFiles.map((r, idx) => (
+            <div key={`staged-record-${idx}`} className="flex items-start gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 p-1.5 rounded-md border border-slate-200 bg-white">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-1.5 bg-slate-100 rounded text-slate-500"><FileText className="h-3.5 w-3.5"/></div>
+                    <span className="text-xs text-slate-700 truncate font-medium">{r.filename}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => removeStagedRecord(idx)} className="text-slate-400 hover:text-red-600 p-1 rounded-full">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
           <label className="flex items-center justify-center w-full p-1.5 mt-2 text-xs font-medium text-slate-600 bg-white border border-dashed border-slate-300 rounded-md cursor-pointer hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition">
             <input
               type="file"
               accept="application/pdf,image/*"
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], "record")}
+              onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], "record")}
               className="hidden"
             />
             <Upload className="w-3.5 h-3.5 mr-2" /> Upload New Record

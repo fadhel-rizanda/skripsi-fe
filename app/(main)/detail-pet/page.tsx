@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 import { petService } from "@/services/petServices";
-import { PetDetail } from "@/types/pet";
+import { Pet } from "@/types/pet";
 import { generalService, Tag as AnimalTag } from "@/services/generalServices";
 import { isValidUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function DetailPetPage() {
   const router = useRouter();
   const petId = searchParams.get("id");
 
-  const [pet, setPet] = useState<PetDetail | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -73,7 +73,7 @@ export default function DetailPetPage() {
       setSelectedImageIndex(0);
       return;
     }
-    const picsLen = pet.profile_pictures.length;
+    const picsLen = (pet.profile_pictures ?? []).length;
     if (picsLen === 0) {
       setSelectedImageIndex(0);
     } else if (selectedImageIndex >= picsLen) {
@@ -168,8 +168,8 @@ export default function DetailPetPage() {
   }
 
   const currentImageRaw =
-    pet.profile_pictures.length > 0
-      ? pet.profile_pictures[selectedImageIndex]?.public_url
+    (pet.profile_pictures ?? []).length > 0
+      ? (pet.profile_pictures ?? [])[selectedImageIndex]?.public_url
       : null;
   const currentImage = typeof currentImageRaw === "string" && currentImageRaw ? currentImageRaw : null;
 
@@ -198,9 +198,9 @@ export default function DetailPetPage() {
               )}
             </div>
 
-              {pet.profile_pictures.length > 1 && (
+              {(pet.profile_pictures ?? []).length > 1 && (
               <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
-                {pet.profile_pictures.map((image, index) => {
+                {pet.profile_pictures?.map((image, index) => {
                   const thumbSrc = typeof image.public_url === "string" && image.public_url ? image.public_url : null;
                   return (
                   <button
@@ -258,7 +258,7 @@ export default function DetailPetPage() {
                     <span className="p-2 rounded-lg bg-green-100">
                       <PawPrint className="h-4 w-4 text-green-600" />
                     </span>
-                    <span>Species: {getAnimalTypeName(pet.type_of_animal_id)}</span>
+                    <span>Species: {pet.type_of_animal_id ? getAnimalTypeName(pet.type_of_animal_id) : "Unknown"}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">

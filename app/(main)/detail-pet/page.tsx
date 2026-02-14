@@ -138,7 +138,7 @@ export default function DetailPetPage() {
     return (
       <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:px-10 lg:max-w-screen-xl">
         <Skeleton className="h-8 w-32 mb-6" />
-        <div className="grid gap-y-10 gap-x-6 md:gap-x-8 md:grid-cols-2 justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
           <Skeleton className="h-96 rounded-lg" />
           <div className="space-y-4">
             <Skeleton className="h-12 w-3/4" />
@@ -176,9 +176,9 @@ export default function DetailPetPage() {
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
       <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-12 md:px-10 lg:max-w-screen-xl">
-        <div className="grid gap-y-6 gap-x-6 md:gap-x-8 md:grid-cols-2 justify-center">
-          <div className="space-y-4 w-full md:max-w-[552px] md:flex-none mx-auto md:mx-0">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
+          <div className="space-y-4 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
+            <div className="relative w-full h-64 sm:h-80 md:aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
                   <Image
@@ -199,7 +199,7 @@ export default function DetailPetPage() {
             </div>
 
               {pet.profile_pictures.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto justify-center md:justify-start">
+              <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
                 {pet.profile_pictures.map((image, index) => {
                   const thumbSrc = typeof image.public_url === "string" && image.public_url ? image.public_url : null;
                   return (
@@ -207,7 +207,7 @@ export default function DetailPetPage() {
                     key={image.id}
                     type="button"
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`h-24 w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
+                    className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
                       selectedImageIndex === index
                         ? "border-green-500 ring-2 ring-green-200"
                         : "border-transparent hover:border-green-300"
@@ -236,10 +236,10 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:max-w-[552px] md:flex-none mx-auto md:mx-0">
-            <CardContent className="p-6 space-y-6 text-base">
+          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
+            <CardContent className="p-4 sm:p-6 md:p-8 space-y-6 text-base">
               <div>
-                <h1 className="text-[48px] font-bold text-slate-900">
+                <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}
                 </h1>
                 {pet.about && (

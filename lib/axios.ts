@@ -25,7 +25,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
           if (typeof window !== "undefined") {
             await signOut({ redirect: false });
-            window.location.href = "/login?error=unauthorized";
+            window.location.href = "/login";
           }
         }
       }

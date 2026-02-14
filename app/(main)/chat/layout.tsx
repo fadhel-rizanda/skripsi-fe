@@ -11,7 +11,7 @@ export default function ChatLayout({children}: { children: React.ReactNode; }) {
     const { chats } = useChatStore();
     const activeChat = chats.find((c) => c.id === chatId);
     return (
-        <div className="flex h-screen">
+        <div className="flex h-[calc(100vh-64px)]">
             {/* Sidebar */}
             <ChatSidebar/>
 

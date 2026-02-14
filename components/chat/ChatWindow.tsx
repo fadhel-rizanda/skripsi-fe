@@ -8,16 +8,15 @@ import {chatService} from "@/services/chatServices";
 import {Chat, Message} from "@/types/chat";
 import {Skeleton} from "@/components/ui/skeleton";
 import {Input} from "@/components/ui/input";
-import {attachmentService} from "@/services/attachmentServices";
 import {toast} from "sonner";
 import {SendMessageSchema} from "@/schemas/chat.schema";
-import {PresignedUrlSchema} from "@/schemas/attachment.schema";
 import {useSession} from "next-auth/react";
 import {clsx} from "clsx";
 import Image from "next/image";
 import {isValidUrl} from "@/lib/utils";
 import {Attachment} from "@/types/attachment";
 import {getEcho} from "@/lib/echo";
+import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 
 export default function ChatWindow({chat}: { chat: Chat }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -81,42 +80,30 @@ export default function ChatWindow({chat}: { chat: Chat }) {
         if (!content.trim() && !file) return;
 
         setIsSending(true);
-        let attachmentId: string | null = null;
 
         try {
+            let attachmentId: string | null = null;
+
             if (file) {
-                const attachmentPayload = {
-                    filename: file.name,
-                    mime_type: file.type,
-                    file_size: file.size,
-                    is_public: false,
-                };
-                const attachmentValidation = PresignedUrlSchema.safeParse(attachmentPayload);
-                if (!attachmentValidation.success) {
-                    console.error(attachmentValidation.error.issues);
-                    toast.error(attachmentValidation.error.message);
-                    return;
-                }
-                const presignedResponse = await attachmentService.getPresignedUrl(attachmentValidation.data);
-                const {id, upload_url} = presignedResponse.data;
-
-                await attachmentService.uploadToS3(upload_url, file);
-                await attachmentService.confirmUpload(id);
-
-                attachmentId = id;
+                attachmentId = await uploadAttachment(file);
             }
 
             const messagePayload = {
-                content: content,
+                content,
                 attachment_id: attachmentId,
             };
+
             const messageValidation = SendMessageSchema.safeParse(messagePayload);
+
             if (!messageValidation.success) {
-                console.error(messageValidation.error.issues);
-                toast.error(messageValidation.error.message);
+                toast.error(messageValidation.error.issues[0]?.message);
                 return;
             }
-            const response = await chatService.sendMessage(chat?.id, messageValidation.data);
+
+            const response = await chatService.sendMessage(
+                chat?.id,
+                messageValidation.data
+            );
 
             setMessages((prev) => [...prev, response.data]);
             shouldAutoScrollRef.current = true;
@@ -125,31 +112,22 @@ export default function ChatWindow({chat}: { chat: Chat }) {
             setFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to send message", error);
-            toast.error("Failed to send message. Please try again.");
+            toast.error(error?.message ?? "Failed to send message.");
         } finally {
             setIsSending(false);
         }
     };
 
+
     const handleDownload = async (attachment: Attachment) => {
         try {
             toast.info("Preparing download...");
 
-            const { download_url } = await attachmentService.generateDownloadUrl(attachment.id);
-            const blob = await attachmentService.downloadFromS3(download_url, attachment.mime_type, (pct) => {
+            await downloadAttachment(attachment, (pct) => {
                 console.log(`Downloading: ${pct}%`);
             });
-
-            const blobUrl = window.URL.createObjectURL(new Blob([blob]));
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.setAttribute('download', attachment.filename);
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode?.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
 
             toast.success("Download started!");
         } catch (error) {

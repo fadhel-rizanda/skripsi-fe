@@ -9,14 +9,14 @@ export interface Tag {
 
 export const generalService = {
   // Get all tags with optional type filter
-  getTags: async (type?: string, signal?: AbortSignal): Promise<Tag[]> => {
-    const params = type ? { type } : {};
+  getTags: async (type?: string, signal?: AbortSignal, page: number=1, search?: string): Promise<Tag[]> => {
+    const params = type ? { type, search, page } : {};
     const response = await api.get("/v1/tags", { params, signal });
     return response.data.data;
   },
 
-  getStatuses: async (type?: string, signal?: AbortSignal): Promise<Status[]> => {
-    const params = type ? { type } : {};
+  getStatuses: async (type?: string, signal?: AbortSignal,  page: number=1, search?: string): Promise<Status[]> => {
+    const params = type ? { type, search, page } : {};
     const response = await api.get("/v1/statuses", { params, signal });
     return response.data.data;
   },

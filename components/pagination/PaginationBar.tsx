@@ -70,7 +70,7 @@ export function PaginationBar({
         <div className="w-full flex items-center justify-center">
             <div className="w-fit border-t border-gray-200 bg-white rounded-lg">
                 <div
-                    className="max-w-1/2 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
+                    className="max-w-4xl lg:w-4xl flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
                     {/* Data per page selector */}
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-700 whitespace-nowrap">Data per page:</span>

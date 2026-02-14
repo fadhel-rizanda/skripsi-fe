@@ -253,7 +253,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const LeftSidebar = () => (
     <div className="lg:col-span-4 space-y-3">
       <div className="bg-slate-50 p-3 rounded-md border border-slate-200/60">
-        <SectionHeader icon={ImageIcon} title="Pet Profile" description={`Select photos to keep (max ${MAX_PROFILE_PHOTOS})`} />
+        <SectionHeader icon={ImageIcon} title="Profile" description={`Select photos to keep (max ${MAX_PROFILE_PHOTOS})`} />
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs text-slate-600">Selected {selectedProfilePictureIds.length}/{MAX_PROFILE_PHOTOS}</div>
           <div className="text-xs text-slate-500">Photos</div>

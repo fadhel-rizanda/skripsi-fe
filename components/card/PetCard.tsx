@@ -15,6 +15,7 @@ interface PetCardProps {
   type: string;
   age: string;
   imageUrl: string;
+  extraImages?: string[];
   priority?: boolean;
 }
 
@@ -27,8 +28,9 @@ const isValidUrl = (url: string) => {
   }
 };
 
-export function PetCard({ id, name, type, age, imageUrl, priority = false }: PetCardProps) {
+export function PetCard({ id, name, type, age, imageUrl, extraImages, priority = false }: PetCardProps) {
   const hasValidImage = imageUrl && isValidUrl(imageUrl);
+  const extraCount = (extraImages?.filter(Boolean) || []).length;
   const router = useRouter();
 
   const handleOpenDetail = () => {
@@ -61,6 +63,11 @@ export function PetCard({ id, name, type, age, imageUrl, priority = false }: Pet
         ) : (
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
             <span className="text-gray-500 text-sm">No Image</span>
+          </div>
+        )}
+        {extraCount > 1 && (
+          <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+            +{extraCount - 1}
           </div>
         )}
       </div>

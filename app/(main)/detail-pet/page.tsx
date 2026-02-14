@@ -68,7 +68,6 @@ export default function DetailPetPage() {
     } else {
       router.push("/find-pet");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId, router, fetchPetDetail]);
 
   useEffect(() => {

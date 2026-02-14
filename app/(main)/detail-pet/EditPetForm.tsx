@@ -104,7 +104,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
     },
   });
 
-  const { register, handleSubmit, reset, control } = form;
+  const { register, handleSubmit, reset, control, formState: { errors } } = form;
 
   // Load Data
   useEffect(() => {
@@ -176,6 +176,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      try { console.log("Raw form values:", values); } catch {}
       // Upload staged files first (if any)
       const uploadedProfileIds: string[] = [];
       const uploadedRecordIds: string[] = [];
@@ -212,7 +213,8 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
 
       const payload = {
         ...values,
-        type_of_animal_id: values.type_of_animal_id ? Number(values.type_of_animal_id) : null,
+        // keep type_of_animal_id as the string id (backend uses tag id strings)
+        type_of_animal_id: values.type_of_animal_id || null,
         date_of_birth: !values.date_of_birth ? undefined : values.date_of_birth,
         physique_ids: selectedPhysiqueIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
         personality_ids: selectedPersonalityIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
@@ -386,11 +388,12 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
                 <Controller
                   control={control}
                   name="type_of_animal_id"
+                  rules={{ required: "Species is required" }}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value || ""}>
                       <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-7 px-2 py-0.5 text-xs rounded-sm">
-                          <SelectValue placeholder="Select..." />
-                        </SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
                       <SelectContent>
                         {animalTypes.map(t => <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>)}
                       </SelectContent>
@@ -398,6 +401,9 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
                   )}
                 />
               </FormControl>
+              {errors.type_of_animal_id && (
+                <p className="text-xs text-red-600 mt-1">{String(errors.type_of_animal_id.message)}</p>
+              )}
             </FormItem>
 
             <FormItem>

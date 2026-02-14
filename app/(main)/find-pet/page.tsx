@@ -101,6 +101,7 @@ export default function FindPetPage() {
               type={pet.type_of_animal_name}
               age={`${pet.age} ${pet.age_unit}`}
               imageUrl={pet.profile_picture}
+              extraImages={pet.profile_picture ? [pet.profile_picture] : []}
               priority={index < 4}
             />
           ))}

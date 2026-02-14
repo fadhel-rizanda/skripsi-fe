@@ -1,57 +1,81 @@
-import { useState, useEffect } from "react";
-import { generalService, Tag } from "@/services/generalServices";
-import { Status } from "@/types/general";
+import {useState, useEffect} from "react";
+import {generalService, Tag} from "@/services/generalServices";
+import {Status} from "@/types/general";
 import axios from "axios";
 
 interface UseFilterOptionsResult<T> {
-  options: T[];
-  isLoading: boolean;
-  error: Error | null;
+    options: T[];
+    isLoading: boolean;
+    error: Error | null;
+    setSearch: (search: string) => void;
+    setPage: (page: number) => void;
+    loadMore: () => void;
+    hasMore: boolean;
 }
 
 function useFilterOptions<T>(
-    fetcher: (type: string, signal: AbortSignal) => Promise<T[]>,
+    fetcher: (type: string, signal: AbortSignal, page: number, search?: string) => Promise<T[]>,
     type?: string,
     fetchOnMount: boolean = true
 ): UseFilterOptionsResult<T> {
-  const [options, setOptions] = useState<T[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+    const [options, setOptions] = useState<T[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    const [search, setSearch] = useState<string>("");
+    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (!fetchOnMount || !type) return;
+    useEffect(() => {
+        if (!fetchOnMount || !type) return;
 
-    const abortController = new AbortController();
+        const abortController = new AbortController();
 
-    const fetchOptions = async () => {
-      setIsLoading(true);
-      setError(null);
+        const fetchOptions = async () => {
+            setIsLoading(true);
+            setError(null);
 
-      try {
-        const data = await fetcher(type, abortController.signal);
-        setOptions(data);
-      } catch (err) {
-        if (
-            (err instanceof Error && err.name === "AbortError") ||
-            axios.isCancel(err)
-        ) {
-          return;
+            try {
+                const data = await fetcher(type, abortController.signal, page, search);
+
+                if (page === 1) {
+                    setOptions(data);
+                } else {
+                    setOptions(prev => [...prev, ...data]);
+                }
+
+                setHasMore(data.length > 0);
+            } catch (err) {
+                if (
+                    (err instanceof Error && err.name === "AbortError") ||
+                    axios.isCancel(err)
+                ) {
+                    return;
+                }
+                setError(err as Error);
+                console.error(`Failed to fetch options for type ${type}:`, err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchOptions();
+
+        return () => {
+            abortController.abort();
+        };
+    }, [type, fetchOnMount, fetcher, search, page]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [search]);
+
+    const loadMore = () => {
+        if (!isLoading && hasMore) {
+            setPage(prev => prev + 1);
         }
-        setError(err as Error);
-        console.error(`Failed to fetch options for type ${type}:`, err);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-    fetchOptions();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [type, fetchOnMount, fetcher]);
-
-  return { options, isLoading, error };
+    return {options, isLoading, error, setSearch, setPage, loadMore, hasMore};
 }
 
 export const useTagsOptions = (type?: string, fetchOnMount: boolean = true) =>

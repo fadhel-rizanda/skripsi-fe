@@ -90,6 +90,8 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [stagedProfileFiles, setStagedProfileFiles] = useState<Array<{ file: File; preview: string }>>([]);
   const [stagedRecordFiles, setStagedRecordFiles] = useState<Array<{ file: File; filename: string }>>([]);
+  const MAX_PROFILE_PHOTOS = 5;
+  const MAX_RECORDS = 5;
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -157,9 +159,19 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const handleFileSelect = (file: File, target: "profile" | "record") => {
     if (!file) return;
     if (target === "profile") {
+      const currentCount = selectedProfilePictureIds.length + stagedProfileFiles.length;
+      if (currentCount >= MAX_PROFILE_PHOTOS) {
+        toast.error(`You can upload up to ${MAX_PROFILE_PHOTOS} photos.`);
+        return;
+      }
       const preview = URL.createObjectURL(file);
       setStagedProfileFiles((s) => [...s, { file, preview }]);
     } else {
+      const currentRecordCount = selectedAdditionalRecordIds.length + stagedRecordFiles.length;
+      if (currentRecordCount >= MAX_RECORDS) {
+        toast.error(`You can upload up to ${MAX_RECORDS} documents.`);
+        return;
+      }
       setStagedRecordFiles((s) => [...s, { file, filename: file.name }]);
     }
   };
@@ -244,7 +256,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
   const LeftSidebar = () => (
     <div className="lg:col-span-4 space-y-3">
       <div className="bg-slate-50 p-3 rounded-md border border-slate-200/60">
-        <SectionHeader icon={ImageIcon} title="Gallery" description="Select photos to keep" />
+        <SectionHeader icon={ImageIcon} title="Pet Profile" description={`Select photos to keep (max ${MAX_PROFILE_PHOTOS})`} />
         <div className="flex gap-2 overflow-x-auto py-1">
           {pet.profile_pictures?.map((p) => (
             <div
@@ -294,7 +306,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
               accept="image/*"
               onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], "profile")}
               className="hidden"
-              disabled={isUploading}
+              disabled={isUploading || (selectedProfilePictureIds.length + stagedProfileFiles.length) >= MAX_PROFILE_PHOTOS}
             />
             {isUploading ? (
               <Loader2 className="h-5 w-5 text-green-500 animate-spin" />
@@ -302,6 +314,9 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
               <>
                 <Upload className="h-5 w-5 text-slate-400 group-hover:text-green-500 mb-2 transition" />
                 <span className="text-[11px] font-semibold text-slate-500 group-hover:text-green-600">Add Photo</span>
+                {(selectedProfilePictureIds.length + stagedProfileFiles.length) >= MAX_PROFILE_PHOTOS && (
+                  <span className="text-[10px] text-red-600 mt-1">Max {MAX_PROFILE_PHOTOS} photos</span>
+                )}
               </>
             )}
           </label>
@@ -346,8 +361,12 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
               accept="application/pdf,image/*"
               onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0], "record")}
               className="hidden"
+              disabled={(selectedAdditionalRecordIds.length + stagedRecordFiles.length) >= MAX_RECORDS}
             />
             <Upload className="w-3.5 h-3.5 mr-2" /> Upload New Record
+            {(selectedAdditionalRecordIds.length + stagedRecordFiles.length) >= MAX_RECORDS && (
+              <span className="text-[10px] text-red-600 ml-2">Max {MAX_RECORDS} documents</span>
+            )}
           </label>
         </div>
       </div>
@@ -363,7 +382,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             <FormItem>
               <Label className="text-xs text-slate-700">Pet Name <span className="text-red-500">*</span></Label>
                 <FormControl>
-                <Input {...register("name", { required: true })} className="w-full bg-slate-50 border-slate-200 h-7 px-2 py-0.5 text-xs rounded-sm focus:bg-white transition-all" placeholder="e.g. Buddy" />
+                <Input {...register("name", { required: true })} className="w-full bg-slate-50 border-slate-200 h-9 px-2 py-0.5 text-xs rounded-sm focus:bg-white transition-all" placeholder="e.g. Buddy" />
               </FormControl>
             </FormItem>
           </div>

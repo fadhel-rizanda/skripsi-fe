@@ -188,7 +188,6 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      try { console.log("Raw form values:", values); } catch {}
       // Upload staged files first (if any)
       const uploadedProfileIds: string[] = [];
       const uploadedRecordIds: string[] = [];
@@ -233,8 +232,6 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
         profile_picture_ids: finalProfileIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
         additional_record_ids: finalRecordIds.map((x) => (typeof x === "string" && /^\d+$/.test(x) ? Number(x) : x)),
       };
-
-      try { console.log("Payload yang dikirim:", payload); } catch {}
 
       await petService.updatePet(pet.id, payload);
       toast.success("Pet data updated successfully");

@@ -257,15 +257,20 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
     <div className="lg:col-span-4 space-y-3">
       <div className="bg-slate-50 p-3 rounded-md border border-slate-200/60">
         <SectionHeader icon={ImageIcon} title="Pet Profile" description={`Select photos to keep (max ${MAX_PROFILE_PHOTOS})`} />
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-slate-600">Selected {selectedProfilePictureIds.length}/{MAX_PROFILE_PHOTOS}</div>
+          <div className="text-xs text-slate-500">Photos</div>
+        </div>
+
         <div className="flex gap-2 overflow-x-auto py-1">
           {pet.profile_pictures?.map((p) => (
             <div
               key={String(p.id)}
               className={cn(
-                "relative rounded-md overflow-hidden border-2 transition-all cursor-pointer w-16 flex-shrink-0",
+                "relative rounded-md overflow-hidden border-2 transition-all cursor-pointer w-20 h-20 flex-shrink-0",
                 selectedProfilePictureIds.includes(String(p.id))
                   ? "border-green-500 ring-2 ring-green-500/20"
-                  : "border-transparent opacity-70 hover:opacity-100"
+                  : "border-transparent opacity-80 hover:opacity-100"
               )}
               onClick={() => handleToggleId(String(p.id), setSelectedProfilePictureIds)}
             >
@@ -287,10 +292,11 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
           ))}
 
           {stagedProfileFiles.map((s, idx) => (
-            <div key={`staged-${idx}`} className="relative rounded-md overflow-hidden border-2 border-dashed w-16 flex-shrink-0">
+            <div key={`staged-${idx}`} className="relative rounded-md overflow-hidden border-2 border-dashed w-20 h-20 flex-shrink-0">
               <div className="w-full h-full">
                 <Image src={s.preview} alt={s.file.name} className="object-cover w-full h-full" fill style={{ objectFit: "cover" }} />
               </div>
+              <div className="absolute left-0 right-0 bottom-0 bg-black/40 text-white text-[10px] truncate px-1 py-0.5">{s.file.name}</div>
               <button type="button" onClick={() => removeStagedProfile(idx)} className="absolute top-1 right-1 p-1 rounded-full bg-white text-slate-600 hover:text-red-600">
                 ✕
               </button>
@@ -298,7 +304,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
           ))}
 
           <label className={cn(
-            "flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer bg-white hover:bg-green-50 hover:border-green-400 transition group w-16 flex-shrink-0",
+            "flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer bg-white hover:bg-green-50 hover:border-green-400 transition group w-20 h-20 flex-shrink-0",
             isUploading && "pointer-events-none opacity-50"
           )}>
             <input
@@ -312,8 +318,10 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
               <Loader2 className="h-5 w-5 text-green-500 animate-spin" />
             ) : (
               <>
-                <Upload className="h-5 w-5 text-slate-400 group-hover:text-green-500 mb-2 transition" />
-                <span className="text-[11px] font-semibold text-slate-500 group-hover:text-green-600">Add Photo</span>
+                <div className="p-1.5 rounded-full bg-slate-100 mb-1">
+                  <Upload className="h-5 w-5 text-slate-400 group-hover:text-green-500 transition" />
+                </div>
+                <span className="text-[11px] font-semibold text-slate-500 group-hover:text-green-600">Add</span>
                 {(selectedProfilePictureIds.length + stagedProfileFiles.length) >= MAX_PROFILE_PHOTOS && (
                   <span className="text-[10px] text-red-600 mt-1">Max {MAX_PROFILE_PHOTOS} photos</span>
                 )}
@@ -324,7 +332,12 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
       </div>
 
       <div className="bg-slate-50 p-3 rounded-md border border-slate-200/60">
-        <SectionHeader icon={FileDigit} title="Documents" description="Medical records & certs" />
+        <SectionHeader icon={FileDigit} title="Documents" description={`Medical records & certs (max ${MAX_RECORDS})`} />
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-slate-600">Selected {selectedAdditionalRecordIds.length}/{MAX_RECORDS}</div>
+          <div className="text-xs text-slate-500">Documents</div>
+        </div>
+
         <div className="space-y-3">
           {pet.additional_records?.map((record) => (
             <div key={record.id} className="flex items-start gap-2">
@@ -342,10 +355,13 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
           {stagedRecordFiles.map((r, idx) => (
             <div key={`staged-record-${idx}`} className="flex items-start gap-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 p-1.5 rounded-md border border-slate-200 bg-white">
+                <div className="flex items-center justify-between gap-2 p-2 rounded-md border border-slate-200 bg-white">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="p-1.5 bg-slate-100 rounded text-slate-500"><FileText className="h-3.5 w-3.5"/></div>
-                    <span className="text-xs text-slate-700 truncate font-medium">{r.filename}</span>
+                    <div className="p-2 bg-slate-100 rounded text-slate-500"><FileText className="h-4 w-4"/></div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-700 truncate">{r.filename}</div>
+                      <div className="text-xs text-slate-400">{r.file ? Math.round(r.file.size / 1024) + ' KB' : ''}</div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => removeStagedRecord(idx)} className="text-slate-400 hover:text-red-600 p-1 rounded-full">✕</button>
@@ -355,7 +371,7 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
             </div>
           ))}
 
-          <label className="flex items-center justify-center w-full p-1.5 mt-2 text-xs font-medium text-slate-600 bg-white border border-dashed border-slate-300 rounded-md cursor-pointer hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition">
+          <label className="flex items-center justify-center w-full p-2 mt-2 text-xs font-medium text-slate-600 bg-white border border-dashed border-slate-300 rounded-md cursor-pointer hover:bg-green-50 hover:border-green-400 hover:text-green-700 transition">
             <input
               type="file"
               accept="application/pdf,image/*"
@@ -363,7 +379,8 @@ const EditPetForm: React.FC<Props> = ({ pet, onClose }) => {
               className="hidden"
               disabled={(selectedAdditionalRecordIds.length + stagedRecordFiles.length) >= MAX_RECORDS}
             />
-            <Upload className="w-3.5 h-3.5 mr-2" /> Upload New Record
+            <div className="p-1.5 rounded-full bg-slate-100 mr-2"><Upload className="w-3.5 h-3.5" /></div>
+            <span>Upload</span>
             {(selectedAdditionalRecordIds.length + stagedRecordFiles.length) >= MAX_RECORDS && (
               <span className="text-[10px] text-red-600 ml-2">Max {MAX_RECORDS} documents</span>
             )}

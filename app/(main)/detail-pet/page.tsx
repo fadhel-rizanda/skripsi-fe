@@ -19,8 +19,6 @@ import {
   PawPrint,
   MessageCircle,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
   Edit,
   Mars,
   Venus,
@@ -150,7 +148,7 @@ export default function DetailPetPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-6 py-8 max-w-screen-2xl">
         <Skeleton className="h-8 w-32 mb-6" />
         <div className="grid gap-6 lg:grid-cols-2">
           <Skeleton className="h-96 rounded-lg" />
@@ -189,7 +187,7 @@ export default function DetailPetPage() {
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
-      <div className="container mx-auto px-4 py-10 max-w-5xl">
+      <div className="container mx-auto px-6 py-10 max-w-screen-2xl">
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
@@ -203,26 +201,7 @@ export default function DetailPetPage() {
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority
                   />
-                  {pet.profile_pictures.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={prevImage}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
-                        aria-label="Previous image"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={nextImage}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
-                        aria-label="Next image"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </>
-                  )}
+                  {/* Image navigation arrows removed */}
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

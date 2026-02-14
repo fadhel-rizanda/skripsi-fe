@@ -28,7 +28,7 @@ const isValidUrl = (url: string) => {
   }
 };
 
-export function PetCard({ id, name, type, age, imageUrl, extraImages, priority = false }: PetCardProps) {
+export function PetCard({ id, name, type, age, imageUrl, priority = false }: PetCardProps) {
   const hasValidImage = imageUrl && isValidUrl(imageUrl);
   const router = useRouter();
 
@@ -64,11 +64,7 @@ export function PetCard({ id, name, type, age, imageUrl, extraImages, priority =
             <span className="text-gray-500 text-sm">No Image</span>
           </div>
         )}
-        {extraImages && extraImages.length > 0 && (
-          <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
-            +{extraImages.length}
-          </div>
-        )}
+        {/* Extra images badge removed as requested */}
       </div>
       <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">
         <CardTitle className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-900 line-clamp-1">{name}</CardTitle>

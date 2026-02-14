@@ -30,7 +30,6 @@ const isValidUrl = (url: string) => {
 
 export function PetCard({ id, name, type, age, imageUrl, extraImages, priority = false }: PetCardProps) {
   const hasValidImage = imageUrl && isValidUrl(imageUrl);
-  const extraCount = (extraImages?.filter(Boolean) || []).length;
   const router = useRouter();
 
   const handleOpenDetail = () => {

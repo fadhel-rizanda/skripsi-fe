@@ -28,8 +28,7 @@ import {
   FileText,
   Download,
 } from "lucide-react";
-import EditPetForm from "./EditPetForm";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
+// Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
   const searchParams = useSearchParams();
@@ -40,7 +39,7 @@ export default function DetailPetPage() {
   const [loading, setLoading] = useState(true);
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // dialog state removed; navigation to edit page is used instead
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
   const { data: session } = useSession();
@@ -405,21 +404,14 @@ export default function DetailPetPage() {
                   {adoptionLoading ? "Sending..." : "Adopt Me"}
                 </Button>
                 {isProvider ? (
-                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="lg"
-                        className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                      >
-                        <Edit className="mr-2 h-5 w-5" />
-                        Edit Information
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogTitle>Edit Pet</DialogTitle>
-                      <EditPetForm pet={{ ...pet, id: pet.id ?? petId ?? "" }} onClose={() => setDialogOpen(false)} />
-                    </DialogContent>
-                  </Dialog>
+                  <Button
+                    size="lg"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                    onClick={() => router.push(`/edit-pet?id=${pet.id}`)}
+                  >
+                    <Edit className="mr-2 h-5 w-5" />
+                    Edit Information
+                  </Button>
                 ) : (
                   <Button
                     size="lg"

@@ -369,12 +369,12 @@ export default function DetailPetPage() {
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
-                  className="bg-green-500 hover:bg-green-600 text-white shadow-md"
+                  className="bg-green-500 hover:bg-green-600 text-black shadow-md"
                   size="lg"
                   onClick={handleAdoption}
                   disabled={adoptionLoading}
                 >
-                  <Heart className="mr-2 h-5 w-5" />
+                  <Heart className="mr-2 h-5 w-5 text-black" />
                   {adoptionLoading ? "Sending..." : "Adopt Me"}
                 </Button>
                 {isProvider ? (

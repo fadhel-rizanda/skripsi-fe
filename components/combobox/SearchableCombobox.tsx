@@ -34,6 +34,7 @@ interface SearchableComboboxProps {
     placeholder?: string
     emptyMessage?: string
     mode?: "single" | "multiple"
+    className?: string
 }
 
 export function SearchableCombobox({
@@ -47,6 +48,7 @@ export function SearchableCombobox({
                                        placeholder = "Select...",
                                        emptyMessage = "No options found.",
                                        mode = "multiple",
+                                       className = "",
                                    }: SearchableComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [searchValue, setSearchValue] = React.useState("")
@@ -106,7 +108,8 @@ export function SearchableCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between font-normal"
+                    className={`justify-between font-normal ${className}`}
+                    size="sm"
                 >
                     {displayValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>

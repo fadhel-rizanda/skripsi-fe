@@ -8,10 +8,32 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 60000,
 });
 
+let cachedSession: any = null;
+let sessionPromise: Promise<any> | null = null;
+
+async function getCachedSession() {
+  if (sessionPromise) {
+    return sessionPromise;
+  }
+
+  if (cachedSession && cachedSession._fetchedAt > Date.now() - 5000) {
+    return cachedSession;
+  }
+
+  sessionPromise = getSession().then(session => {
+    cachedSession = session ? { ...session, _fetchedAt: Date.now() } : null;
+    sessionPromise = null;
+    return cachedSession;
+  });
+
+  return sessionPromise;
+}
+
 api.interceptors.request.use(async (config) => {
-  const session = await getSession()
+  const session = await getCachedSession();
     if (session?.accessToken) {
       config.headers.Authorization = `Bearer ${session.accessToken}`;
     }
@@ -23,6 +45,8 @@ api.interceptors.response.use(
     async (error) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
+          cachedSession = null;
+          sessionPromise = null;
           if (typeof window !== "undefined") {
             await signOut({ redirect: false });
             window.location.href = "/login";

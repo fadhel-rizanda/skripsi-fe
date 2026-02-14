@@ -1,6 +1,6 @@
 "use client"
 
-import {ChangeEvent, useState} from "react"
+import {ChangeEvent, useMemo, useState} from "react"
 import {useForm} from "react-hook-form"
 import {format} from "date-fns"
 import {Card, CardContent} from "@/components/ui/card"
@@ -28,23 +28,19 @@ import {Calendar} from "@/components/ui/calendar";
 import {Icon} from "@iconify/react";
 import {TagBadge} from "@/components/badge/TagBadge";
 import {uploadAttachment} from "@/lib/attachment-helpers";
-import {CreatePetInput, CreatePetSchema} from "@/schemas/pet.schema";
+import {CreatePetSchema} from "@/schemas/pet.schema";
 import {CreatePetPayload, petService} from "@/services/petServices";
 import {useTagsOptions} from "@/hooks/useFilterOptions";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {useRouter} from "next/navigation";
-import {toast} from "sonner";
-import {ConfirmationDialog} from "@/components/dialog/ConfirmationDialog";
 import {zodResolver} from "@hookform/resolvers/zod";
+import {ActionDialog} from "@/components/dialog/ActionDialog";
 
 export default function PetForm() {
     const router = useRouter()
     const [profileFiles, setProfileFiles] = useState<File[]>([])
     const [additionalFiles, setAdditionalFiles] = useState<File[]>([])
-    const [selectedPhysiqueTags, setSelectedPhysiqueTags] = useState<string[]>([])
-    const [selectedPersonalityTags, setSelectedPersonalityTags] = useState<string[]>([])
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-    const [pendingFormData, setPendingFormData] = useState<CreatePetInput | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const {
         options: physiqueTags,
@@ -88,49 +84,31 @@ export default function PetForm() {
         },
     })
 
-    async function submitForm(values: CreatePetInput) {
-        try {
-            toast.info("Submitting pet...")
-            const profilePictureIds = await Promise.all(
-                profileFiles.map(uploadAttachment)
-            )
+    async function handleFinalSubmit() {
+        const values = form.getValues()
 
-            const additionalRecordIds = additionalFiles.length
-                ? await Promise.all(additionalFiles.map(uploadAttachment))
-                : []
+        const [profilePictureIds, additionalRecordIds] = await Promise.all([
+            Promise.all(profileFiles.map(file => uploadAttachment(file, true))),
+            additionalFiles.length > 0
+                ? Promise.all(additionalFiles.map(file => uploadAttachment(file)))
+                : Promise.resolve([])
+        ])
 
-            const payload: CreatePetPayload = {
-                ...values,
-                date_of_birth: values.date_of_birth.toISOString(),
-                profile_picture_ids: profilePictureIds,
-                additional_record_ids: additionalRecordIds,
-                physique_ids: selectedPhysiqueTags,
-                personality_ids: selectedPersonalityTags,
-            }
-
-            const {data} = await petService.createPet(payload)
-            toast.success("Pet created successfully.")
-            router.push(`/find-pet/${data.id}`)
-        } catch (error) {
-            console.error("Failed to submit pet:", error)
-            toast.error("Failed to submit pet. Please try again.")
+        const payload: CreatePetPayload = {
+            ...values,
+            date_of_birth: values.date_of_birth.toISOString(),
+            profile_picture_ids: profilePictureIds,
+            special_needs: values.special_needs ?? false,
+            additional_record_ids: additionalRecordIds,
         }
+
+        return await petService.createPet(payload)
     }
 
-    function onSubmit(values: CreatePetInput) {
+    function onSubmit() {
         setIsSubmitted(true)
-        if (profileFiles.length === 0) {
-            return
-        }
-        setPendingFormData(values)
-        setShowConfirmDialog(true)
-    }
-
-    function handleConfirmSubmit() {
-        if (pendingFormData) {
-            submitForm(pendingFormData)
-            setPendingFormData(null)
-        }
+        if (profileFiles.length === 0) return
+        setDialogOpen(true)
     }
 
     const handleProfileUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -154,35 +132,15 @@ export default function PetForm() {
         setAdditionalFiles(additionalFiles.filter((_, i) => i !== index))
     }
 
-    const handlePhysiqueTagSelect = (tagId: string) => {
-        if (!selectedPhysiqueTags.includes(tagId)) {
-            setSelectedPhysiqueTags([...selectedPhysiqueTags, tagId])
-            form.setValue('physique_ids', [...selectedPhysiqueTags, tagId])
-        }
-    }
+    const physiqueTagsMap = useMemo(
+        () => new Map(physiqueTags.map(tag => [tag.id, tag.name])),
+        [physiqueTags]
+    )
 
-    const handlePersonalityTagSelect = (tagId: string) => {
-        if (!selectedPersonalityTags.includes(tagId)) {
-            setSelectedPersonalityTags([...selectedPersonalityTags, tagId])
-            form.setValue('personality_ids', [...selectedPersonalityTags, tagId])
-        }
-    }
-
-    const removePhysiqueTag = (tagId: string) => {
-        const updated = selectedPhysiqueTags.filter(id => id !== tagId)
-        setSelectedPhysiqueTags(updated)
-        form.setValue('physique_ids', updated)
-    }
-
-    const removePersonalityTag = (tagId: string) => {
-        const updated = selectedPersonalityTags.filter(id => id !== tagId)
-        setSelectedPersonalityTags(updated)
-        form.setValue('personality_ids', updated)
-    }
-
-    const getTagNameById = (tagId: string, tags: Array<{ id: string, name: string }>) => {
-        return tags.find(tag => tag.id === tagId)?.name || tagId
-    }
+    const personalityTagsMap = useMemo(
+        () => new Map(personalityTags.map(tag => [tag.id, tag.name])),
+        [personalityTags]
+    )
 
     return (
         <>
@@ -379,8 +337,12 @@ export default function PetForm() {
                                                             <FormControl>
                                                                 <SearchableCombobox
                                                                     options={physiqueTags}
-                                                                    selectedValues={selectedPhysiqueTags}
-                                                                    onSelect={handlePhysiqueTagSelect}
+                                                                    selectedValues={field.value}
+                                                                    onSelect={(tagId) => {
+                                                                        if (!field.value.includes(tagId)) {
+                                                                            field.onChange([...field.value, tagId]);
+                                                                        }
+                                                                    }}
                                                                     onSearch={setPhysiqueSearch}
                                                                     onLoadMore={loadMorePhysique}
                                                                     isLoading={isLoadingPhysiqueTags}
@@ -391,18 +353,21 @@ export default function PetForm() {
                                                                 />
                                                             </FormControl>
                                                             <FormMessage/>
+                                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                                {field.value.map(tagId => (
+                                                                    <TagBadge
+                                                                        key={tagId}
+                                                                        label={physiqueTagsMap.get(tagId) || tagId}
+                                                                        onRemove={() => {
+                                                                            const updated = field.value.filter(id => id !== tagId);
+                                                                            field.onChange(updated);
+                                                                        }}
+                                                                    />
+                                                                ))}
+                                                            </div>
                                                         </FormItem>
                                                     )}
                                                 />
-                                                <div className="flex flex-wrap gap-2">
-                                                    {selectedPhysiqueTags.map(tagId => (
-                                                        <TagBadge
-                                                            key={tagId}
-                                                            label={getTagNameById(tagId, physiqueTags)}
-                                                            onRemove={() => removePhysiqueTag(tagId)}
-                                                        />
-                                                    ))}
-                                                </div>
                                             </div>
 
                                             <div className="flex flex-col gap-4">
@@ -415,8 +380,12 @@ export default function PetForm() {
                                                             <FormControl>
                                                                 <SearchableCombobox
                                                                     options={personalityTags}
-                                                                    selectedValues={selectedPersonalityTags}
-                                                                    onSelect={handlePersonalityTagSelect}
+                                                                    selectedValues={field.value}
+                                                                    onSelect={(tagId) => {
+                                                                        if (!field.value.includes(tagId)) {
+                                                                            field.onChange([...field.value, tagId]);
+                                                                        }
+                                                                    }}
                                                                     onSearch={setPersonalitySearch}
                                                                     onLoadMore={loadMorePersonality}
                                                                     isLoading={isLoadingPersonalityTags}
@@ -427,18 +396,21 @@ export default function PetForm() {
                                                                 />
                                                             </FormControl>
                                                             <FormMessage/>
+                                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                                {field.value.map(tagId => (
+                                                                    <TagBadge
+                                                                        key={tagId}
+                                                                        label={personalityTagsMap.get(tagId) || tagId}
+                                                                        onRemove={() => {
+                                                                            const updated = field.value.filter(id => id !== tagId);
+                                                                            field.onChange(updated);
+                                                                        }}
+                                                                    />
+                                                                ))}
+                                                            </div>
                                                         </FormItem>
                                                     )}
                                                 />
-                                                <div className="flex flex-wrap gap-2">
-                                                    {selectedPersonalityTags.map(tagId => (
-                                                        <TagBadge
-                                                            key={tagId}
-                                                            label={getTagNameById(tagId, personalityTags)}
-                                                            onRemove={() => removePersonalityTag(tagId)}
-                                                        />
-                                                    ))}
-                                                </div>
                                             </div>
                                         </div>
 
@@ -586,14 +558,17 @@ export default function PetForm() {
                     </Card>
                 </div>
             </div>
-            <ConfirmationDialog
-                open={showConfirmDialog}
-                onOpenChange={setShowConfirmDialog}
-                onConfirm={handleConfirmSubmit}
-                title="Are you sure want to continue this process?"
-                description="This action can't be undone. Please make sure you really want to proceed."
-                confirmText="Confirm"
-                cancelText="Cancel"
+            <ActionDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                onConfirm={handleFinalSubmit}
+                onContinue={() => router.push("/find-pet")}
+                title="Create Pet Profile?"
+                description="Please review the pet's information, health records, and photos before continuing."
+                successTitle="Pet Profile Created Successfully"
+                successDescription="Your pet profile is now live and ready to find a loving forever home."
+                confirmText="Create Profile"
+                cancelText="Review Again"
             />
         </>
     )

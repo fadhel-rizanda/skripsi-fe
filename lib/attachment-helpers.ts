@@ -2,12 +2,12 @@ import { PresignedUrlSchema } from "@/schemas/attachment.schema";
 import {attachmentService} from "@/services/attachmentServices";
 import { Attachment } from "@/types/attachment";
 
-export async function uploadAttachment(file: File): Promise<string> {
+export async function uploadAttachment(file: File, isPublic:boolean=false): Promise<string> {
     const payload = {
         filename: file.name,
         mime_type: file.type,
         file_size: file.size,
-        is_public: false,
+        is_public: isPublic,
     };
 
     const validation = PresignedUrlSchema.safeParse(payload);

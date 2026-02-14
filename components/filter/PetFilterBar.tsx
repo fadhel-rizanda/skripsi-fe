@@ -4,6 +4,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import {useTagsOptions} from "@/hooks/useFilterOptions";
 import { SearchInput, FilterSelect, type FilterOption } from ".";
 import {Button} from "@/components/ui/button";
+import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {
@@ -24,19 +25,20 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   const [tagPersonalityId, setTagPersonalityId] = useState("");
 
   // Fetch options from API
-  const { options: animalTypes, isLoading: isLoadingTypes } = useTagsOptions("type_of_animal");
-  const { options: tagPersonalities, isLoading: isLoadingTags } = useTagsOptions("personality");
-
-  // Convert to FilterOption format
-  const animalTypeOptions: FilterOption[] = animalTypes.map((type) => ({
-    value: type.id,
-    label: type.name,
-  }));
-
-  const tagPersonalityOptions: FilterOption[] = tagPersonalities.map((tag) => ({
-    value: tag.id,
-    label: tag.name,
-  }));
+  const {
+    options: animalTypes,
+    isLoading: isLoadingTypes,
+      setSearch: setSearchType,
+    loadMore: loadMoreTypes,
+    hasMore: hasMoreTypes
+  } = useTagsOptions("type_of_animal");
+  const {
+    options: tagPersonalities,
+    isLoading: isLoadingTags,
+    setSearch: setSearchTagPersonality,
+    loadMore: loadMoreTags,
+    hasMore: hasMoreTags
+  } = useTagsOptions("personality");
 
   const ageOptions: FilterOption[] = AGE_RANGES.map((range) => ({
     value: range.value,
@@ -76,13 +78,24 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
         className="w-full md:w-auto"
       />
       <div className="flex flex-row flex-nowrap gap-2 md:gap-2.5 lg:gap-3 overflow-x-auto scrollbar-hide md:overflow-visible md:flex-1 md:justify-start">
-        <FilterSelect
-          name="type_of_animal_id"
-          value={typeOfAnimalId}
-          onChange={setTypeOfAnimalId}
-          options={animalTypeOptions}
-          placeholder="Type of Animal"
-          isLoading={isLoadingTypes}
+        <SearchableCombobox
+            options={animalTypes}
+            selectedValues={[typeOfAnimalId].filter(Boolean)}
+            onSelect={(value) => {
+              if (value === typeOfAnimalId) {
+                setTypeOfAnimalId("");
+              } else {
+                setTypeOfAnimalId(value);
+              }
+            }}
+            onSearch={setSearchType}
+            onLoadMore={loadMoreTypes}
+            isLoading={isLoadingTypes}
+            hasMore={hasMoreTypes}
+            placeholder="Type of Animal"
+            emptyMessage="No types found."
+            mode="single"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
         <FilterSelect
           name="age"
@@ -91,13 +104,24 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
           options={ageOptions}
           placeholder="Any Age"
         />
-        <FilterSelect
-          name="tag_personality_id"
-          value={tagPersonalityId}
-          onChange={setTagPersonalityId}
-          options={tagPersonalityOptions}
-          placeholder="Tags"
-          isLoading={isLoadingTags}
+        <SearchableCombobox
+            options={tagPersonalities}
+            selectedValues={[tagPersonalityId].filter(Boolean)}
+            onSelect={(value) => {
+              if (value === tagPersonalityId) {
+                setTagPersonalityId("");
+              } else {
+                setTagPersonalityId(value);
+              }
+            }}
+            onSearch={setSearchTagPersonality}
+            onLoadMore={loadMoreTags}
+            isLoading={isLoadingTags}
+            hasMore={hasMoreTags}
+            placeholder="Tags"
+            emptyMessage="No tags found."
+            mode="single"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
         {(search || age || typeOfAnimalId || tagPersonalityId) && (
             <Button type="button" onClick={handleReset} className="h-8 w-8">x</Button>

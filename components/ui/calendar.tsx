@@ -9,6 +9,7 @@ import {
 import {
   DayPicker,
   getDefaultClassNames,
+  type DayButton,
 } from "react-day-picker"
 
 import { cn } from "@/lib/utils"

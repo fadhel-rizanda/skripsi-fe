@@ -409,7 +409,7 @@ export default function DetailPetPage() {
                   <Button
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    onClick={() => router.push(`/edit-pet?id=${pet.id}`)}
+                    onClick={() => router.push(`/create-update-pet?id=${pet.id}`)}
                   >
                     <Edit className="mr-2 h-5 w-5" />
                     Edit Information

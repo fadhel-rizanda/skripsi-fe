@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { CreatePetPayload } from '@/services/petServices';
 import { Camera, CloudUpload, Trash2, X, FileText } from 'lucide-react';
 import { attachmentService } from '@/services/attachmentServices';
@@ -24,6 +25,13 @@ export default function RehomePetForm() {
   type AnimalType = { id: string; name?: string; label?: string };
   type TagOption = { id: string; name?: string; label?: string };
   type FileItem = { name: string; size: string };
+  type StagedItem = File | { existingId: string };
+
+  // API response shapes used locally to avoid `any`
+  type Tag = { id: string | number; name?: string; label?: string };
+  type Attachment = { id: string | number; filename?: string; public_url?: string; file_size?: number };
+  type ErrorLike = { response?: { data?: { message?: string } }; message?: string };
+  type UpdatePetPayload = Partial<CreatePetPayload> & { profile_picture_ids?: string[]; additional_record_ids?: string[] };
 
   // --- State ---
   const [form, setForm] = useState<{
@@ -61,18 +69,89 @@ export default function RehomePetForm() {
   const [profileFiles, setProfileFiles] = useState<FileItem[]>([]);
   const [additionalFiles, setAdditionalFiles] = useState<FileItem[]>([]);
   // Raw File objects staged by user (will be uploaded on form submit)
-  const [profileFilesRaw, setProfileFilesRaw] = useState<File[]>([]);
-  const [additionalFilesRaw, setAdditionalFilesRaw] = useState<File[]>([]);
+  const [profileFilesRaw, setProfileFilesRaw] = useState<StagedItem[]>([]);
+  const [additionalFilesRaw, setAdditionalFilesRaw] = useState<StagedItem[]>([]);
   // Drag state for dropzones
   const [profileDragActive, setProfileDragActive] = useState<boolean>(false);
   const [additionalDragActive, setAdditionalDragActive] = useState<boolean>(false);
   
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [petIdState, setPetIdState] = useState<string | null>(null);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const isValidUuid = (id?: string | null) => !!id && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
 
   // --- Effects ---
   useEffect(() => {
     // Submit placeholder removed from right column; bottom row added after columns
     // (If you had async logic here, restore it. Otherwise, remove this effect if not needed.)
+  }, []);
+
+  // Load pet data when ?id= is present (edit mode)
+  // Extracted loader so we can call it from multiple places
+  const loadPetById = async (currentId: string) => {
+    if (!currentId) return;
+    setIsEdit(true);
+    setPetIdState(currentId);
+    setLoading(true);
+    console.debug('[create-update-pet] loadPet id=', currentId);
+    if (!isValidUuid(currentId)) console.warn('[create-update-pet] id does not match UUID pattern:', currentId);
+    try {
+      const p = await petService.getPetById(currentId);
+      if (!p) return;
+
+      setForm(prev => ({
+        ...prev,
+        name: p.name || "",
+        breed: p.breed || "",
+        typeOfAnimalId: p.type_of_animal_id || "",
+        size: (p.size as PetSize) || "",
+        dob: p.date_of_birth ? new Date(p.date_of_birth).toISOString().slice(0,10) : "",
+        gender: (p.gender as PetGender) || "",
+        about: p.about || "",
+        physiqueIds: (p.physique_tags || []).map((t: Tag) => String(t.id)),
+        personalityIds: (p.personality_tags || []).map((t: Tag) => String(t.id)),
+        hasSpecialNeeds: !!p.special_needs,
+        profilePictureIds: [],
+        additionalRecordIds: [],
+      }));
+
+      setProfileFiles((p.profile_pictures || []).map((a: Attachment) => ({ name: a.filename || a.public_url || 'file', size: a.file_size ? `${(a.file_size/1024/1024).toFixed(2)} MB` : '—' })));
+      setAdditionalFiles((p.additional_records || []).map((a: Attachment) => ({ name: a.filename || a.public_url || 'file', size: a.file_size ? `${(a.file_size/1024/1024).toFixed(2)} MB` : '—' })));
+      setProfileFilesRaw((p.profile_pictures || []).map((a: Attachment) => ({ existingId: String(a.id) })) as StagedItem[]);
+      setAdditionalFilesRaw((p.additional_records || []).map((a: Attachment) => ({ existingId: String(a.id) })) as StagedItem[]);
+    } catch (err) {
+      console.error('Failed to load pet for edit', err);
+      try {
+        const e = err as ErrorLike;
+        const serverMsg = e.response?.data?.message || e.response?.data || e.message;
+        toast.error(String(serverMsg) || 'Failed to load pet for editing');
+      } catch {
+        toast.error('Failed to load pet for editing');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Prefer Next's searchParams but fall back to window.location for some client navigations
+    const raw = (searchParams?.get?.('id')) ?? (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('id') : null);
+    const currentId = raw && raw !== 'undefined' ? raw : null;
+    if (!currentId) return;
+    loadPetById(currentId);
+  }, [searchParams]);
+
+  // Ensure mount-time detection (some client navigations may not update `useSearchParams` immediately)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = new URLSearchParams(window.location.search).get('id');
+    const currentId = raw && raw !== 'undefined' ? raw : null;
+    if (currentId && !petIdState) {
+      loadPetById(currentId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- Handlers ---
@@ -170,34 +249,42 @@ export default function RehomePetForm() {
 
     setLoading(true);
     try {
-      // Upload staged profile files and additional files, collect IDs
-      const uploadedProfileIds: string[] = [];
-      for (const file of profileFilesRaw) {
-        const presigned = await attachmentService.getPresignedUrl({
-          filename: file.name,
-          mime_type: file.type,
-          file_size: file.size,
-          is_public: true,
-        });
-        await attachmentService.uploadToS3(presigned.url, file);
-        await attachmentService.confirmUpload(presigned.id);
-        uploadedProfileIds.push(presigned.id);
+      // Process staged items: upload new Files, keep existing placeholders
+      const finalProfileIds: string[] = [];
+      for (const item of profileFilesRaw) {
+        if (item instanceof File) {
+          const presigned = await attachmentService.getPresignedUrl({
+            filename: item.name,
+            mime_type: item.type,
+            file_size: item.size,
+            is_public: true,
+          });
+          await attachmentService.uploadToS3(presigned.url, item);
+          await attachmentService.confirmUpload(presigned.id);
+          finalProfileIds.push(presigned.id);
+        } else if ('existingId' in item) {
+          finalProfileIds.push(item.existingId);
+        }
       }
 
-      const uploadedAdditionalIds: string[] = [];
-      for (const file of additionalFilesRaw) {
-        const presigned = await attachmentService.getPresignedUrl({
-          filename: file.name,
-          mime_type: file.type,
-          file_size: file.size,
-          is_public: true,
-        });
-        await attachmentService.uploadToS3(presigned.url, file);
-        await attachmentService.confirmUpload(presigned.id);
-        uploadedAdditionalIds.push(presigned.id);
+      const finalAdditionalIds: string[] = [];
+      for (const item of additionalFilesRaw) {
+        if (item instanceof File) {
+          const presigned = await attachmentService.getPresignedUrl({
+            filename: item.name,
+            mime_type: item.type,
+            file_size: item.size,
+            is_public: true,
+          });
+          await attachmentService.uploadToS3(presigned.url, item);
+          await attachmentService.confirmUpload(presigned.id);
+          finalAdditionalIds.push(presigned.id);
+        } else if ('existingId' in item) {
+          finalAdditionalIds.push(item.existingId);
+        }
       }
 
-      if (uploadedProfileIds.length === 0 && form.profilePictureIds.length === 0) {
+      if (finalProfileIds.length === 0) {
         return toast.error('Please upload at least one profile picture');
       }
 
@@ -211,15 +298,34 @@ export default function RehomePetForm() {
         about: form.about.trim(),
         breed: form.breed.trim(),
         special_needs: form.hasSpecialNeeds,
-        profile_picture_ids: [...form.profilePictureIds, ...uploadedProfileIds],
+        profile_picture_ids: [...form.profilePictureIds, ...finalProfileIds],
         physique_ids: form.physiqueIds,
         personality_ids: form.personalityIds,
-        additional_record_ids: [...form.additionalRecordIds, ...uploadedAdditionalIds].length ? [...form.additionalRecordIds, ...uploadedAdditionalIds] : undefined,
+        additional_record_ids: [...form.additionalRecordIds, ...finalAdditionalIds].length ? [...form.additionalRecordIds, ...finalAdditionalIds] : undefined,
       };
 
-      await petService.createPet(payload);
-      toast.success('Pet created successfully!');
-      // Reset form logic could go here
+      if (isEdit && petIdState) {
+        // For edit, send merged ids from staged arrays
+        const updatePayload: UpdatePetPayload = {
+          ...payload,
+          profile_picture_ids: finalProfileIds,
+          additional_record_ids: finalAdditionalIds.length ? finalAdditionalIds : undefined,
+        };
+        await petService.updatePet(petIdState, updatePayload);
+        toast.success('Pet updated successfully!');
+        router.push(`/detail-pet?id=${petIdState}`);
+      } else {
+        // For create, use final ids computed above
+        const createPayload: CreatePetPayload = {
+          ...payload,
+          profile_picture_ids: finalProfileIds,
+          additional_record_ids: finalAdditionalIds.length ? finalAdditionalIds : undefined,
+        };
+        const created = await petService.createPet(createPayload);
+        const newId = (created && (created.id || created.data?.id)) || null;
+        toast.success('Pet created successfully!');
+        if (newId) router.push(`/detail-pet?id=${newId}`);
+      }
     } catch (err: unknown) {
       console.error(err);
       toast.error(getErrorMessage(err, 'Failed to create pet'));
@@ -233,8 +339,8 @@ export default function RehomePetForm() {
     if (typeof err === 'string') return err;
     if (err instanceof Error) return err.message || fallback;
     try {
-      const e = err as any;
-      return e?.response?.data?.message || e?.message || fallback;
+      const e = err as ErrorLike;
+      return (e.response?.data as { message?: string } | undefined)?.message || e.message || fallback;
     } catch {
       return fallback;
     }
@@ -497,8 +603,7 @@ export default function RehomePetForm() {
               </div>
             </div>
           </div>
-        </form>
-        
+
         {/* Bottom row: spans both columns */}
         <div className="col-span-full mt-6 pt-6 border-t border-gray-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-0 flex flex-col sm:flex-row items-center sm:justify-between gap-4">
@@ -512,16 +617,27 @@ export default function RehomePetForm() {
             </label>
 
             <div className="flex-shrink-0 mt-2 sm:mt-0 sm:ml-4">
-              <Button
-                type="submit"
-                className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm mr-4 w-[188px] h-[48px] text-base"
-                disabled={loading}
-              >
-                {loading ? 'Submitting...' : 'Submit for Review'}
-              </Button>
+              {isEdit ? (
+                <Button
+                  type="submit"
+                  className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm mr-4 w-[188px] h-[48px] text-base"
+                  disabled={loading}
+                >
+                  {loading ? 'Updating...' : 'Update'}
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm mr-4 w-[188px] h-[48px] text-base"
+                  disabled={loading}
+                >
+                  {loading ? 'Submitting...' : 'Submit for Review'}
+                </Button>
+              )}
             </div>
           </div>
         </div>
+        </form>
       </div>
     </div>
   );

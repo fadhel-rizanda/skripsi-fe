@@ -58,9 +58,19 @@ export default function DetailPetPage() {
         console.log(`Downloading: ${pct}%`);
       });
       toast.success("Download started!");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Download failed:", error);
-      toast.error("Failed to download file.");
+      type ErrorWithResponse = { response?: { status?: number } };
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as ErrorWithResponse).response?.status === 403
+      ) {
+        toast.error("Akses file ditolak. Anda tidak memiliki izin untuk mengunduh file ini.");
+      } else {
+        toast.error("Failed to download file.");
+      }
     }
   };
 
@@ -254,7 +264,7 @@ export default function DetailPetPage() {
           </div>
 
           <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
-            <CardContent className="py-8 px-6 sm:py-8 sm:px-6 md:py-10 md:px-8 space-y-6 text-base">
+            <CardContent className="py-8 px-6 space-y-6 text-base">
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}

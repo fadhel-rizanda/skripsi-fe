@@ -3,21 +3,30 @@ import type { Tag } from './general';
 export interface Pet {
   id: string | number;
   name: string;
-  type_of_animal_name?: string;
+  // optional relationship fields
   type_of_animal_id?: string;
-  age: number | string;
-  age_unit: string;
+  type_of_animal_name?: string;
+
+  // legacy/derived fields (may be present in UI)
+  age?: number | string;
+  age_unit?: string;
+
+  // media
   profile_picture?: string;
-  size: string;
-  date_of_birth?: string;
-  gender?: string;
+  
+  // canonical fields (align with CreatePetPayload / CreatePetSchema)
+  size: 'small' | 'medium' | 'large' | 'extra large';
+  date_of_birth?: string; // ISO date string
+  gender?: 'male' | 'female';
   about?: string;
   breed?: string;
   special_needs?: boolean;
+
+  // timestamps
   created_at?: string;
   updated_at?: string;
 
-  /* Detail-specific fields (merged from PetDetail) */
+  // detail fields
   profile_pictures?: PetProfilePicture[];
   physique_tags?: Tag[];
   personality_tags?: Tag[];
@@ -31,14 +40,12 @@ export interface PetProfilePicture {
   public_url: string;
 }
 
-// `PetTag` removed — use shared `Tag` from `types/general.ts` instead
-
 export interface PetAdditionalRecord {
   id: string | number;
   public_url: string;
-  filename: string;
-  mime_type: string;
-  path: string;
+  filename?: string;
+  mime_type?: string;
+  path?: string;
 }
 
 export interface PetFilterState {

@@ -6,6 +6,7 @@ import type { CreatePetPayload } from '@/services/petServices';
 import { Camera, CloudUpload, Trash2, X, FileText } from 'lucide-react';
 import { attachmentService } from '@/services/attachmentServices';
 import { petService } from '@/services/petServices';
+import { useTagsOptions } from '@/hooks/useFilterOptions';
 import { PET_SIZES, PET_GENDERS, PetSize, PetGender } from '@/lib/constants/pet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +23,6 @@ export default function RehomePetForm() {
   const additionalInputRef = useRef<HTMLInputElement>(null);
 
   // --- Types ---
-  type AnimalType = { id: string; name?: string; label?: string };
-  type TagOption = { id: string; name?: string; label?: string };
   type FileItem = { name: string; size: string };
   type StagedItem = File | { existingId: string };
 
@@ -45,8 +44,7 @@ export default function RehomePetForm() {
     physiqueIds: string[];
     personalityIds: string[];
     hasSpecialNeeds: boolean;
-    profilePictureIds: string[];
-    additionalRecordIds: string[];
+    // profile/additional ids are represented by staged arrays instead of form fields
   }>({
     name: "",
     breed: "",
@@ -58,13 +56,12 @@ export default function RehomePetForm() {
     physiqueIds: [],
     personalityIds: [],
     hasSpecialNeeds: false,
-    profilePictureIds: [],
-    additionalRecordIds: [],
+    
   });
 
-  const [animalTypes] = useState<AnimalType[]>([]);
-  const [physiqueOptions] = useState<TagOption[]>([]);
-  const [personalityOptions] = useState<TagOption[]>([]);
+  const { options: animalTypes } = useTagsOptions('type_of_animal');
+  const { options: physiqueOptions } = useTagsOptions('physique');
+  const { options: personalityOptions } = useTagsOptions('personality');
   
   const [profileFiles, setProfileFiles] = useState<FileItem[]>([]);
   const [additionalFiles, setAdditionalFiles] = useState<FileItem[]>([]);
@@ -83,10 +80,7 @@ export default function RehomePetForm() {
   const isValidUuid = (id?: string | null) => !!id && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
 
   // --- Effects ---
-  useEffect(() => {
-    // Submit placeholder removed from right column; bottom row added after columns
-    // (If you had async logic here, restore it. Otherwise, remove this effect if not needed.)
-  }, []);
+  // (removed empty effect)
 
   // Load pet data when ?id= is present (edit mode)
   // Extracted loader so we can call it from multiple places
@@ -107,14 +101,18 @@ export default function RehomePetForm() {
         breed: p.breed || "",
         typeOfAnimalId: p.type_of_animal_id || "",
         size: (p.size as PetSize) || "",
-        dob: p.date_of_birth ? new Date(p.date_of_birth).toISOString().slice(0,10) : "",
+        dob: p.date_of_birth ? (() => {
+          const d = new Date(p.date_of_birth);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${dd}`;
+        })() : "",
         gender: (p.gender as PetGender) || "",
         about: p.about || "",
         physiqueIds: (p.physique_tags || []).map((t: Tag) => String(t.id)),
         personalityIds: (p.personality_tags || []).map((t: Tag) => String(t.id)),
         hasSpecialNeeds: !!p.special_needs,
-        profilePictureIds: [],
-        additionalRecordIds: [],
       }));
 
       setProfileFiles((p.profile_pictures || []).map((a: Attachment) => ({ name: a.filename || a.public_url || 'file', size: a.file_size ? `${(a.file_size/1024/1024).toFixed(2)} MB` : '—' })));
@@ -136,23 +134,18 @@ export default function RehomePetForm() {
   };
 
   useEffect(() => {
-    // Prefer Next's searchParams but fall back to window.location for some client navigations
-    const raw = (searchParams?.get?.('id')) ?? (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('id') : null);
+    // Rely on Next's `useSearchParams` only. Avoid reading `window.location` here.
+    const raw = searchParams?.get('id') ?? null;
     const currentId = raw && raw !== 'undefined' ? raw : null;
     if (!currentId) return;
+    if (currentId === petIdState) return;
     loadPetById(currentId);
-  }, [searchParams]);
+  }, [searchParams, petIdState]);
 
-  // Ensure mount-time detection (some client navigations may not update `useSearchParams` immediately)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const raw = new URLSearchParams(window.location.search).get('id');
-    const currentId = raw && raw !== 'undefined' ? raw : null;
-    if (currentId && !petIdState) {
-      loadPetById(currentId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // NOTE: Do NOT read `window.location` here; rely on `useSearchParams`.
+  // Important: when using `useSearchParams` inside client components under App Router,
+  // ensure the parent route/component wraps this component with React.Suspense to avoid
+  // production build/runtime issues when rendering search params.
 
   // --- Handlers ---
 
@@ -180,11 +173,9 @@ export default function RehomePetForm() {
     if (type === 'profile') {
       setProfileFiles(prev => prev.filter((_, i) => i !== index));
       setProfileFilesRaw(prev => prev.filter((_, i) => i !== index));
-      setForm(prev => ({ ...prev, profilePictureIds: prev.profilePictureIds.filter((_, i) => i !== index) }));
     } else {
       setAdditionalFiles(prev => prev.filter((_, i) => i !== index));
       setAdditionalFilesRaw(prev => prev.filter((_, i) => i !== index));
-      setForm(prev => ({ ...prev, additionalRecordIds: prev.additionalRecordIds.filter((_, i) => i !== index) }));
     }
   };
 
@@ -288,26 +279,23 @@ export default function RehomePetForm() {
         return toast.error('Please upload at least one profile picture');
       }
 
-      const dateIso = new Date(form.dob).toISOString();
-      const payload: CreatePetPayload = {
+      // Backend expects a YYYY-MM-DD string; send the raw date string to avoid TZ shifts
+      const commonPayload: Partial<CreatePetPayload> = {
         type_of_animal_id: form.typeOfAnimalId,
         size: form.size as PetSize,
         name: form.name.trim(),
-        date_of_birth: dateIso,
+        date_of_birth: form.dob,
         gender: form.gender,
         about: form.about.trim(),
         breed: form.breed.trim(),
         special_needs: form.hasSpecialNeeds,
-        profile_picture_ids: [...form.profilePictureIds, ...finalProfileIds],
         physique_ids: form.physiqueIds,
         personality_ids: form.personalityIds,
-        additional_record_ids: [...form.additionalRecordIds, ...finalAdditionalIds].length ? [...form.additionalRecordIds, ...finalAdditionalIds] : undefined,
       };
 
       if (isEdit && petIdState) {
-        // For edit, send merged ids from staged arrays
         const updatePayload: UpdatePetPayload = {
-          ...payload,
+          ...commonPayload,
           profile_picture_ids: finalProfileIds,
           additional_record_ids: finalAdditionalIds.length ? finalAdditionalIds : undefined,
         };
@@ -315,9 +303,8 @@ export default function RehomePetForm() {
         toast.success('Pet updated successfully!');
         router.push(`/detail-pet?id=${petIdState}`);
       } else {
-        // For create, use final ids computed above
         const createPayload: CreatePetPayload = {
-          ...payload,
+          ...(commonPayload as CreatePetPayload),
           profile_picture_ids: finalProfileIds,
           additional_record_ids: finalAdditionalIds.length ? finalAdditionalIds : undefined,
         };
@@ -399,7 +386,7 @@ export default function RehomePetForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {animalTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>{type.name || type.label}</SelectItem>
+                      <SelectItem key={type.id} value={type.id}>{type.name || String(type.id)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -466,7 +453,7 @@ export default function RehomePetForm() {
                 </SelectTrigger>
                 <SelectContent>
                   {availablePhysiques.map(opt => (
-                    <SelectItem key={opt.id} value={opt.id}>{opt.name || opt.label}</SelectItem>
+                    <SelectItem key={opt.id} value={opt.id}>{opt.name || String(opt.id)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -492,7 +479,7 @@ export default function RehomePetForm() {
                 </SelectTrigger>
                 <SelectContent>
                   {availablePersonalities.map(opt => (
-                    <SelectItem key={opt.id} value={opt.id}>{opt.name || opt.label}</SelectItem>
+                    <SelectItem key={opt.id} value={opt.id}>{opt.name || String(opt.id)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

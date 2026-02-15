@@ -67,7 +67,7 @@ export default function DetailPetPage() {
         "response" in error &&
         (error as ErrorWithResponse).response?.status === 403
       ) {
-        toast.error("Akses file ditolak. Anda tidak memiliki izin untuk mengunduh file ini.");
+        toast.error("Access denied. You do not have permission to download this file.");
       } else {
         toast.error("Failed to download file.");
       }

@@ -9,6 +9,9 @@ import { petService } from "@/services/petServices";
 import { Pet } from "@/types/pet";
 import { generalService, Tag as AnimalTag } from "@/services/generalServices";
 import { isValidUrl } from "@/lib/utils";
+import { downloadAttachment } from "@/lib/attachment-helpers";
+import { Attachment } from "@/types/attachment";
+  
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,6 +49,20 @@ export default function DetailPetPage() {
   const _role = session?.user?.role;
   const roleName = typeof _role === "string" ? _role : _role?.name;
   const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
+
+  // Handler download khusus untuk additional record
+  const handleDownload = async (attachment: Attachment) => {
+    try {
+      toast.info("Preparing download...");
+      await downloadAttachment(attachment, (pct) => {
+        console.log(`Downloading: ${pct}%`);
+      });
+      toast.success("Download started!");
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download file.");
+    }
+  };
 
   const fetchPetDetail = useCallback(async () => {
     try {
@@ -171,7 +188,7 @@ export default function DetailPetPage() {
     (pet.profile_pictures ?? []).length > 0
       ? (pet.profile_pictures ?? [])[selectedImageIndex]?.public_url
       : null;
-  const currentImage = typeof currentImageRaw === "string" && currentImageRaw ? currentImageRaw : null;
+  const currentImage = isValidUrl(currentImageRaw ?? "") ? currentImageRaw : null;
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
@@ -201,35 +218,35 @@ export default function DetailPetPage() {
               {(pet.profile_pictures ?? []).length > 1 && (
               <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
                 {pet.profile_pictures?.map((image, index) => {
-                  const thumbSrc = typeof image.public_url === "string" && image.public_url ? image.public_url : null;
+                  const thumbSrc = isValidUrl(image.public_url) ? image.public_url : null;
                   return (
-                  <button
-                    key={image.id}
-                    type="button"
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
-                      selectedImageIndex === index
-                        ? "border-green-500 ring-2 ring-green-200"
-                        : "border-transparent hover:border-green-300"
-                    }`}
-                  >
-                    <div className="relative w-full h-full">
-                      {thumbSrc ? (
-                        <Image
-                          src={thumbSrc}
-                          alt={`${pet.name} ${index + 1}`}
-                          fill
-                          className="object-cover"
-                          sizes="96px"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
-                          <PawPrint className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                    <button
+                      key={image.id}
+                      type="button"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
+                        selectedImageIndex === index
+                          ? "border-green-500 ring-2 ring-green-200"
+                          : "border-transparent hover:border-green-300"
+                      }`}
+                    >
+                      <div className="relative w-full h-full">
+                        {thumbSrc ? (
+                          <Image
+                            src={thumbSrc}
+                            alt={`${pet.name} ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="96px"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                            <PawPrint className="h-8 w-8" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
                   );
                 })}
               </div>
@@ -237,7 +254,7 @@ export default function DetailPetPage() {
           </div>
 
           <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
-            <CardContent className="p-4 sm:p-6 md:p-8 space-y-6 text-base">
+            <CardContent className="py-8 px-6 sm:py-8 sm:px-6 md:py-10 md:px-8 space-y-6 text-base">
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}
@@ -349,17 +366,18 @@ export default function DetailPetPage() {
                               {record.filename}
                             </span>
                           </a>
-                          <a
-                            href={safeUrl}
-                            download
-                            className="text-slate-400 flex-none ml-2"
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.preventDefault();
+                              if (record?.id) handleDownload(record as Attachment);
+                            }}
+                            className={`text-slate-400 flex-none ml-2 ${!record?.id ? "opacity-50 cursor-not-allowed" : ""}`}
                             aria-label="Download file"
-                            tabIndex={safeUrl ? 0 : -1}
-                            aria-disabled={!safeUrl}
-                            onClick={e => { if (!safeUrl) e.preventDefault(); }}
+                            disabled={!record?.id}
                           >
                             <Download className="h-5 w-5 hover:text-green-700" />
-                          </a>
+                          </button>
                         </div>
                       );
                     })}

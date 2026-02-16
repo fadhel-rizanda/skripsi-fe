@@ -612,7 +612,7 @@ export default function RehomePetForm() {
                 <span className="text-sm font-medium">Does this animal have any special needs?</span>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end mr-3">
                 <Button
                   type="submit"
                   className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm w-[188px] h-[48px] text-base"

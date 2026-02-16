@@ -6,6 +6,7 @@ import type { CreatePetPayload } from '@/services/petServices';
 import { Camera, CloudUpload, Trash2, X, FileText } from 'lucide-react';
 import { attachmentService } from '@/services/attachmentServices';
 import { petService } from '@/services/petServices';
+import { generalService } from '@/services/generalServices'; // Added import
 import { PET_SIZES, PET_GENDERS, PetSize, PetGender } from '@/lib/constants/pet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,9 +64,9 @@ export default function RehomePetForm() {
     additionalRecordIds: [],
   });
 
-  const [animalTypes] = useState<AnimalType[]>([]);
-  const [physiqueOptions] = useState<TagOption[]>([]);
-  const [personalityOptions] = useState<TagOption[]>([]);
+  const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
+  const [physiqueOptions, setPhysiqueOptions] = useState<TagOption[]>([]);
+  const [personalityOptions, setPersonalityOptions] = useState<TagOption[]>([]);
 
   const [profileFiles, setProfileFiles] = useState<FileItem[]>([]);
   const [additionalFiles, setAdditionalFiles] = useState<FileItem[]>([]);
@@ -93,29 +94,48 @@ export default function RehomePetForm() {
       setForm({
         name: pet.name || "",
         breed: pet.breed || "",
-        typeOfAnimalId: pet.type_of_animal_id || "",
+        typeOfAnimalId: pet.type_of_animal_id ? String(pet.type_of_animal_id) : "",
         size: pet.size || "",
         dob: pet.date_of_birth ? pet.date_of_birth.split("T")[0] : "",
         gender: pet.gender || "",
         about: pet.about || "",
-        physiqueIds: pet.physique_ids || [],
-        personalityIds: pet.personality_ids || [],
+        physiqueIds: (pet.physique_tags || []).map(t => String(t.id)),
+        personalityIds: (pet.personality_tags || []).map(t => String(t.id)),
         hasSpecialNeeds: !!pet.special_needs,
-        profilePictureIds: pet.profile_picture_ids || [],
-        additionalRecordIds: pet.additional_record_ids || [],
+        profilePictureIds: (pet.profile_pictures || []).map(p => String(p.id)),
+        additionalRecordIds: (pet.additional_records || []).map(r => String(r.id)),
       });
       setProfileFiles(
-        (pet.profile_picture_ids || []).map((_: string, idx: number) => ({
-          name: `Existing file ${idx + 1}`,
+        (pet.profile_pictures || []).map((p: any) => ({
+          name: p.public_url || "Existing Image",
           size: "-",
         }))
       );
       setAdditionalFiles(
-        (pet.additional_record_ids || []).map((_: string, idx: number) => ({
-          name: `Existing file ${idx + 1}`,
+        (pet.additional_records || []).map((r: any) => ({
+          name: r.filename || "Existing File",
           size: "-",
         }))
       );
+
+      // Update options with existing tags so names show up
+      if (pet.physique_tags?.length) {
+        setPhysiqueOptions(prev => {
+          // Combine existing with pet tags, removing duplicates by ID
+          const newTags = pet.physique_tags!.map((t: any) => ({ id: String(t.id), name: t.name, label: t.name }));
+          const existingIds = new Set(prev.map(p => p.id));
+          return [...prev, ...newTags.filter(t => !existingIds.has(t.id))];
+        });
+      }
+      if (pet.personality_tags?.length) {
+        setPersonalityOptions(prev => {
+          const newTags = pet.personality_tags!.map((t: any) => ({ id: String(t.id), name: t.name, label: t.name }));
+          const existingIds = new Set(prev.map(p => p.id));
+          return [...prev, ...newTags.filter(t => !existingIds.has(t.id))];
+        });
+      }
+
+
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to load pet data"));
     } finally {
@@ -129,6 +149,34 @@ export default function RehomePetForm() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
+
+  // Fetch Options (Animal Types, Physique, Personality)
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchOptions = async () => {
+      try {
+        const [typesData, identitiesData, personalitiesData] = await Promise.all([
+          generalService.getAnimalTypes(),
+          generalService.getTags('physique'), // assuming 'physique' is the type key for physique tags
+          generalService.getTagPersonalities()
+        ]);
+
+        if (mounted) {
+          setAnimalTypes(typesData.map(t => ({ id: String(t.id), name: t.name, label: t.name })));
+          setPhysiqueOptions(identitiesData.map(t => ({ id: t.id, name: t.name, label: t.name })));
+          setPersonalityOptions(personalitiesData.map(t => ({ id: t.id, name: t.name, label: t.name })));
+        }
+      } catch (error) {
+        console.error("Failed to fetch options", error);
+        toast.error("Failed to load form options");
+      }
+    };
+
+    fetchOptions();
+
+    return () => { mounted = false; };
+  }, []);
 
   // --- Handlers ---
   const addTag = (id: string, type: 'physique' | 'personality') => {
@@ -472,7 +520,7 @@ export default function RehomePetForm() {
 
               <div className="space-y-4">
                 {profileFiles.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm">
+                  <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm w-[387px] h-[24px] mx-auto">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <FileText size={16} className="text-gray-400 shrink-0" />
                       <span className="text-gray-600 truncate">{file.name}</span>
@@ -515,7 +563,7 @@ export default function RehomePetForm() {
 
               <div className="space-y-4">
                 {additionalFiles.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm">
+                  <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm w-[387px] h-[24px] mx-auto">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <FileText size={16} className="text-gray-400 shrink-0" />
                       <span className="text-gray-600 truncate">{file.name}</span>

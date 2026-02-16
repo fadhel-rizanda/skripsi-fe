@@ -13,7 +13,7 @@ export interface Pet {
 
   // media
   profile_picture?: string;
-  
+
   // canonical fields (align with CreatePetPayload / CreatePetSchema)
   size: 'small' | 'medium' | 'large' | 'extra large';
   date_of_birth?: string; // ISO date string

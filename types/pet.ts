@@ -38,6 +38,7 @@ export type PetDetail = Pet;
 export interface PetProfilePicture {
   id: string | number;
   public_url: string;
+  filename?: string;
 }
 
 export interface PetAdditionalRecord {

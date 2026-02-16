@@ -111,7 +111,7 @@ export default function RehomePetForm() {
       });
       setProfileFiles(
         (pet.profile_pictures || []).map((p: any) => ({
-          name: p.public_url || "Existing Image",
+          name: p.filename || p.public_url || "Existing Image",
           size: "-",
         }))
       );

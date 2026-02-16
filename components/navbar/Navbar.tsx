@@ -52,7 +52,7 @@ export function Navbar() {
           { href: "/find-pet", label: "Find a Pet" },
           { href: "/adoption-process", label: "Adoption Process" },
           { href: "/community", label: "Community" },
-          { href: "/submit-animal", label: "Submit Animal" },
+          { href: "/pets/create", label: "Submit Animal" },
           { href: "/chat", label: "Chat" },
         ]
 

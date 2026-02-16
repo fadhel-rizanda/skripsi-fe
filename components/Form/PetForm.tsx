@@ -121,8 +121,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
             ],
         }
 
-        console.log("payloadna: ", payload)
-
         if (isEditMode) {
             return await petService.updatePet(petId!, payload)
         }
@@ -250,8 +248,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
                         res.additional_records?.map(p => String(p.id)) ?? [],
                 })
 
-                console.log("responena: ", res)
-
                 setExistingProfilePictures(
                     res.profile_pictures?.map(p => ({
                         id: String(p.id),
@@ -275,7 +271,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
     }, [form, isEditMode, petId])
 
     if (isEditMode && isLoadingDetail) {
-        return <div className="p-10 text-center">Loading pet data...</div>
+        return <div className="p-10 text-center bg-green-50 min-h-screen py-12 px-4">Loading pet data...</div>
     }
 
     return (

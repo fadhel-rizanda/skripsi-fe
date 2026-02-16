@@ -96,10 +96,12 @@ export default function FindPetPage() {
           {!loading && !error && pets.map((pet, index) => (
             <PetCard
               key={pet.id}
+              id={pet.id}
               name={pet.name}
-              type={pet.type_of_animal_name}
+              type={pet.type_of_animal_name ?? ""}
               age={`${pet.age} ${pet.age_unit}`}
-              imageUrl={pet.profile_picture}
+              imageUrl={pet.profile_picture ?? ""}
+              extraImages={pet.profile_picture ? [pet.profile_picture] : []}
               priority={index < 4}
             />
           ))}

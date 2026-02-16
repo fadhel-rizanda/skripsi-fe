@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CreatePetPayload } from '@/services/petServices';
 import { Camera, CloudUpload, Trash2, X, FileText } from 'lucide-react';
 import { attachmentService } from '@/services/attachmentServices';
@@ -16,6 +16,18 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
+
+function getErrorMessage(err: unknown, fallback = 'An error occurred') {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  if (err instanceof Error) return err.message || fallback;
+  try {
+    const e = err as any;
+    return e?.response?.data?.message || e?.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export default function RehomePetForm() {
   const router = useRouter();
@@ -82,20 +94,10 @@ export default function RehomePetForm() {
   const [petOwnerId, setPetOwnerId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  function getErrorMessage(err: unknown, fallback = 'An error occurred') {
-    if (!err) return fallback;
-    if (typeof err === 'string') return err;
-    if (err instanceof Error) return err.message || fallback;
-    try {
-      const e = err as any;
-      return e?.response?.data?.message || e?.message || fallback;
-    } catch {
-      return fallback;
-    }
-  }
+
 
   // --- Fetch Pet Detail ---
-  const fetchPetDetail = async (id: string) => {
+  const fetchPetDetail = useCallback(async (id: string) => {
     if (!id || id === "undefined") return;
     setFetchingPet(true);
     try {
@@ -157,7 +159,7 @@ export default function RehomePetForm() {
     } finally {
       setFetchingPet(false);
     }
-  };
+  }, []);
 
 
   // Fetch current user session
@@ -180,8 +182,7 @@ export default function RehomePetForm() {
     if (petId) {
       fetchPetDetail(petId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [petId]);
+  }, [petId, fetchPetDetail]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
   // Fetch Options (Animal Types, Physique, Personality)
   useEffect(() => {

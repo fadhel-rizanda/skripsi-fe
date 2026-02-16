@@ -2,6 +2,7 @@ import type { Tag } from './general';
 
 export interface Pet {
   id: string | number;
+  user_id?: string;
   name: string;
   // optional relationship fields
   type_of_animal_id?: string;

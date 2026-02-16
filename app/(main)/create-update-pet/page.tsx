@@ -76,6 +76,8 @@ export default function RehomePetForm() {
   const [pendingAdditionalFiles, setPendingAdditionalFiles] = useState<File[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [petOwnerId, setPetOwnerId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   function getErrorMessage(err: unknown, fallback = 'An error occurred') {
     if (!err) return fallback;
@@ -95,6 +97,10 @@ export default function RehomePetForm() {
     setFetchingPet(true);
     try {
       const pet = await petService.getPetById(id);
+
+      // Store pet owner ID for ownership check
+      setPetOwnerId(pet.user_id || null);
+
       setForm({
         name: pet.name || "",
         breed: pet.breed || "",
@@ -146,6 +152,23 @@ export default function RehomePetForm() {
       setFetchingPet(false);
     }
   };
+
+
+  // Fetch current user session
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+        if (session?.user?.id) {
+          setCurrentUserId(session.user.id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch session:', error);
+      }
+    };
+    fetchSession();
+  }, []);
 
   useEffect(() => {
     if (petId) {
@@ -622,15 +645,18 @@ export default function RehomePetForm() {
                 <span className="text-sm font-medium">Does this animal have any special needs?</span>
               </div>
 
-              <div className="flex justify-end mr-3">
-                <Button
-                  type="submit"
-                  className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm w-[188px] h-[48px] text-base"
-                  disabled={loading || fetchingPet}
-                >
-                  {loading ? 'Submitting...' : isEditMode ? "Update Pet" : "Submit for Review"}
-                </Button>
-              </div>
+              {/* Only show submit button if: 1) Create mode OR 2) Edit mode AND user is owner */}
+              {(!isEditMode || (isEditMode && petOwnerId && currentUserId && petOwnerId === currentUserId)) && (
+                <div className="flex justify-end mr-3">
+                  <Button
+                    type="submit"
+                    className="bg-[#22c55e] hover:bg-green-600 text-black font-bold rounded-lg shadow-sm w-[188px] h-[48px] text-base"
+                    disabled={loading || fetchingPet}
+                  >
+                    {loading ? 'Submitting...' : isEditMode ? "Update Pet" : "Submit for Review"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </form>

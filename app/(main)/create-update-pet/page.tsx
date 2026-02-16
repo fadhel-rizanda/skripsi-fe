@@ -275,9 +275,9 @@ export default function RehomePetForm() {
           file_size: file.size,
           is_public: true
         });
-        await attachmentService.uploadToS3(presigned.url, file);
-        await attachmentService.confirmUpload(presigned.id);
-        uploadedProfileIds.push(presigned.id);
+        await attachmentService.uploadToS3(presigned.data.upload_url, file);
+        await attachmentService.confirmUpload(presigned.data.id);
+        uploadedProfileIds.push(presigned.data.id);
       }
 
       // Upload new additional records
@@ -288,9 +288,9 @@ export default function RehomePetForm() {
           file_size: file.size,
           is_public: true
         });
-        await attachmentService.uploadToS3(presigned.url, file);
-        await attachmentService.confirmUpload(presigned.id);
-        uploadedAdditionalIds.push(presigned.id);
+        await attachmentService.uploadToS3(presigned.data.upload_url, file);
+        await attachmentService.confirmUpload(presigned.data.id);
+        uploadedAdditionalIds.push(presigned.data.id);
       }
 
       const dateIso = new Date(form.dob).toISOString();
@@ -330,6 +330,12 @@ export default function RehomePetForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper untuk mendapatkan nama animal type dari ID
+  const getAnimalTypeName = (typeId: string) => {
+    const found = animalTypes.find((t) => String(t.id) === String(typeId));
+    return found ? found.name || found.label : "";
   };
 
   // Helper untuk memfilter opsi yang sudah dipilih
@@ -391,13 +397,17 @@ export default function RehomePetForm() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="mb-1 text-sm">Type of Animal *</Label>
-                <Select value={form.typeOfAnimalId} onValueChange={val => setForm(prev => ({ ...prev, typeOfAnimalId: val }))}>
+                <Select
+                  key={`animal-type-${animalTypes.length}-${form.typeOfAnimalId}`}
+                  value={form.typeOfAnimalId}
+                  onValueChange={val => setForm(prev => ({ ...prev, typeOfAnimalId: val }))}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {animalTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>{type.name || type.label}</SelectItem>
+                      <SelectItem key={type.id} value={String(type.id)}>{type.name || type.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

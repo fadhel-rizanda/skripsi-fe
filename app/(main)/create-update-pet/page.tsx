@@ -3,6 +3,8 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CreatePetPayload } from '@/services/petServices';
+import type { PetProfilePicture, PetAdditionalRecord } from '@/types/pet';
+import type { Tag } from '@/types/general';
 import { Camera, CloudUpload, Trash2, X, FileText } from 'lucide-react';
 import { attachmentService } from '@/services/attachmentServices';
 import { petService } from '@/services/petServices';
@@ -120,7 +122,7 @@ export default function RehomePetForm() {
       });
       // Pre-fill files
       setProfileAttachments(
-        (pet.profile_pictures || []).map((p: any) => ({
+        (pet.profile_pictures || []).map((p: PetProfilePicture) => ({
           id: String(p.id),
           name: p.filename || p.public_url || "Existing Image",
           size: "-",
@@ -129,7 +131,7 @@ export default function RehomePetForm() {
       );
 
       setAdditionalAttachments(
-        (pet.additional_records || []).map((r: any) => ({
+        (pet.additional_records || []).map((r: PetAdditionalRecord) => ({
           id: String(r.id),
           name: r.filename || r.public_url || "Existing Record",
           size: "-",
@@ -140,14 +142,14 @@ export default function RehomePetForm() {
       if (pet.physique_tags?.length) {
         setPhysiqueOptions(prev => {
           // Combine existing with pet tags, removing duplicates by ID
-          const newTags = pet.physique_tags!.map((t: any) => ({ id: String(t.id), name: t.name, label: t.name }));
+          const newTags = pet.physique_tags!.map((t: Tag) => ({ id: String(t.id), name: t.name, label: t.name }));
           const existingIds = new Set(prev.map(p => p.id));
           return [...prev, ...newTags.filter(t => !existingIds.has(t.id))];
         });
       }
       if (pet.personality_tags?.length) {
         setPersonalityOptions(prev => {
-          const newTags = pet.personality_tags!.map((t: any) => ({ id: String(t.id), name: t.name, label: t.name }));
+          const newTags = pet.personality_tags!.map((t: Tag) => ({ id: String(t.id), name: t.name, label: t.name }));
           const existingIds = new Set(prev.map(p => p.id));
           return [...prev, ...newTags.filter(t => !existingIds.has(t.id))];
         });

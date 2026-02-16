@@ -228,7 +228,7 @@ export default function DetailPetPage() {
               {(pet.profile_pictures ?? []).length > 1 && (
               <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
                 {pet.profile_pictures?.map((image, index) => {
-                  const thumbSrc = isValidUrl(image.public_url) ? image.public_url : null;
+                  const thumbSrc = isValidUrl(image.public_url ?? "") ? image.public_url : null;
                   return (
                     <button
                       key={image.id}
@@ -405,7 +405,7 @@ export default function DetailPetPage() {
                   <Button
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    onClick={() => router.push(`/edit-pet?id=${pet.id}`)}
+                    onClick={() => router.push(`/pets/${pet.id}/edit`)}
                   >
                     <Edit className="mr-2 h-5 w-5" />
                     Edit Information

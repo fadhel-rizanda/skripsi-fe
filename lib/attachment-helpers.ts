@@ -48,3 +48,26 @@ export async function downloadAttachment(
 
     window.URL.revokeObjectURL(blobUrl);
 }
+
+export async function openAttachment(
+    attachment: Attachment,
+    onProgress?: (percent: number) => void
+) {
+    const isPreviewable =
+        attachment.mime_type?.startsWith("image/") ||
+        attachment.mime_type === "application/pdf"
+
+    const { download_url } =
+        await attachmentService.generateDownloadUrl(
+            attachment.id,
+            isPreviewable ? "preview" : "download"
+        )
+
+    if (isPreviewable) {
+        window.open(download_url, "_blank")
+        return
+    }
+
+    await downloadAttachment(attachment, onProgress)
+}
+

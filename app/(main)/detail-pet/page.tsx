@@ -11,7 +11,7 @@ import { generalService, Tag as AnimalTag } from "@/services/generalServices";
 import { isValidUrl } from "@/lib/utils";
 import { downloadAttachment } from "@/lib/attachment-helpers";
 import { Attachment } from "@/types/attachment";
-  
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,7 +48,9 @@ export default function DetailPetPage() {
   // Support both shapes: `session.user.role` can be a string or an object { name }
   const _role = session?.user?.role;
   const roleName = _role?.name;
+  const currentUserId = session?.user?.id || null;
   const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
+  const isAdopter = !!roleName && String(roleName).toLowerCase() === "adopter";
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -225,7 +227,7 @@ export default function DetailPetPage() {
               )}
             </div>
 
-              {(pet.profile_pictures ?? []).length > 1 && (
+            {(pet.profile_pictures ?? []).length > 1 && (
               <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
                 {pet.profile_pictures?.map((image, index) => {
                   const thumbSrc = isValidUrl(image.public_url) ? image.public_url : null;
@@ -234,11 +236,10 @@ export default function DetailPetPage() {
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === index
-                          ? "border-green-500 ring-2 ring-green-200"
-                          : "border-transparent hover:border-green-300"
-                      }`}
+                      className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index
+                        ? "border-green-500 ring-2 ring-green-200"
+                        : "border-transparent hover:border-green-300"
+                        }`}
                     >
                       <div className="relative w-full h-full">
                         {thumbSrc ? (
@@ -391,41 +392,46 @@ export default function DetailPetPage() {
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button
-                  className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
-                  size="lg"
-                  onClick={handleAdoption}
-                  disabled={adoptionLoading}
-                >
-                  <Heart className="mr-2 h-5 w-5 text-black" />
-                  {adoptionLoading ? "Sending..." : "Adopt Me"}
-                </Button>
-                {isProvider ? (
+              {/* Show action buttons based on user role and ownership */}
+              {((pet.user_id && currentUserId && pet.user_id === currentUserId) || isAdopter) && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Adopt Me and Chat buttons for adopters or owners */}
                   <Button
+                    className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
                     size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    onClick={
-                      () => router.push(`/create-update-pet?id=${pet.id}`)}
+                    onClick={handleAdoption}
+                    disabled={adoptionLoading}
                   >
-                    <Edit className="mr-2 h-5 w-5" />
-                    Edit Information
+                    <Heart className="mr-2 h-5 w-5 text-black" />
+                    {adoptionLoading ? "Sending..." : "Adopt Me"}
                   </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                  >
-                    <MessageCircle className="mr-2 h-5 w-5" />
-                    Chat with Provider
-                  </Button>
-                )}
-              </div>
+
+                  {/* Edit button only for owner who is provider */}
+                  {pet.user_id && currentUserId && pet.user_id === currentUserId && isProvider ? (
+                    <Button
+                      size="lg"
+                      className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                      onClick={() => router.push(`/create-update-pet?id=${pet.id}`)}
+                    >
+                      <Edit className="mr-2 h-5 w-5" />
+                      Edit Information
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                    >
+                      <MessageCircle className="mr-2 h-5 w-5" />
+                      Chat with Provider
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
-      
+
     </div>
   );
 }

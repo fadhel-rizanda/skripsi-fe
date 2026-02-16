@@ -332,7 +332,7 @@ export default function RehomePetForm() {
           filename: file.name,
           mime_type: file.type,
           file_size: file.size,
-          is_public: true
+          is_public: false
         });
         await attachmentService.uploadToS3(presigned.data.upload_url, file);
         await attachmentService.confirmUpload(presigned.data.id);

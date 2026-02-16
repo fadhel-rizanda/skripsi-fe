@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { AGE_RANGES } from "@/lib/constants/pet";
 import { useDebounce } from "@/hooks/useDebounce";
-import {useTagsOptions} from "@/hooks/useFilterOptions";
+import { useTagsOptions } from "@/hooks/useFilterOptions";
 import { SearchInput, FilterSelect, type FilterOption } from ".";
-import {Button} from "@/components/ui/button";
-import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
+import { Button } from "@/components/ui/button";
+import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {
@@ -28,7 +28,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   const {
     options: animalTypes,
     isLoading: isLoadingTypes,
-      setSearch: setSearchType,
+    setSearch: setSearchType,
     loadMore: loadMoreTypes,
     hasMore: hasMoreTypes
   } = useTagsOptions("type_of_animal");
@@ -48,7 +48,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   // Debounce search input to avoid excessive API calls
   const debouncedSearch = useDebounce(search, 500);
 
-  const handleReset = ()=>{
+  const handleReset = () => {
     setSearch("");
     setAge("");
     setTypeOfAnimalId("");
@@ -58,7 +58,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   // Trigger onFilterChange when debounced search or other filters change
   useEffect(() => {
     const filters: FilterState = {};
-    
+
     if (debouncedSearch) filters.search = debouncedSearch;
     if (age) filters.age = age;
     if (typeOfAnimalId) filters.type_of_animal_id = typeOfAnimalId;
@@ -79,23 +79,23 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       />
       <div className="flex flex-row flex-nowrap gap-2 md:gap-2.5 lg:gap-3 overflow-x-auto scrollbar-hide md:overflow-visible md:flex-1 md:justify-start">
         <SearchableCombobox
-            options={animalTypes}
-            selectedValues={[typeOfAnimalId].filter(Boolean)}
-            onSelect={(value) => {
-              if (value === typeOfAnimalId) {
-                setTypeOfAnimalId("");
-              } else {
-                setTypeOfAnimalId(value);
-              }
-            }}
-            onSearch={setSearchType}
-            onLoadMore={loadMoreTypes}
-            isLoading={isLoadingTypes}
-            hasMore={hasMoreTypes}
-            placeholder="Type of Animal"
-            emptyMessage="No types found."
-            mode="single"
-            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
+          options={animalTypes}
+          selectedValues={[typeOfAnimalId].filter(Boolean)}
+          onSelect={(value) => {
+            if (value === typeOfAnimalId) {
+              setTypeOfAnimalId("");
+            } else {
+              setTypeOfAnimalId(value);
+            }
+          }}
+          onSearch={setSearchType}
+          onLoadMore={loadMoreTypes}
+          isLoading={isLoadingTypes}
+          hasMore={hasMoreTypes}
+          placeholder="Type of Animal"
+          emptyMessage="No types found."
+          mode="single"
+          className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
         <FilterSelect
           name="age"
@@ -103,28 +103,29 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
           onChange={setAge}
           options={ageOptions}
           placeholder="Any Age"
+          className="text-black"
         />
         <SearchableCombobox
-            options={tagPersonalities}
-            selectedValues={[tagPersonalityId].filter(Boolean)}
-            onSelect={(value) => {
-              if (value === tagPersonalityId) {
-                setTagPersonalityId("");
-              } else {
-                setTagPersonalityId(value);
-              }
-            }}
-            onSearch={setSearchTagPersonality}
-            onLoadMore={loadMoreTags}
-            isLoading={isLoadingTags}
-            hasMore={hasMoreTags}
-            placeholder="Tags"
-            emptyMessage="No tags found."
-            mode="single"
-            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
+          options={tagPersonalities}
+          selectedValues={[tagPersonalityId].filter(Boolean)}
+          onSelect={(value) => {
+            if (value === tagPersonalityId) {
+              setTagPersonalityId("");
+            } else {
+              setTagPersonalityId(value);
+            }
+          }}
+          onSearch={setSearchTagPersonality}
+          onLoadMore={loadMoreTags}
+          isLoading={isLoadingTags}
+          hasMore={hasMoreTags}
+          placeholder="Tags"
+          emptyMessage="No tags found."
+          mode="single"
+          className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
         {(search || age || typeOfAnimalId || tagPersonalityId) && (
-            <Button type="button" onClick={handleReset} className="h-8 w-8">x</Button>
+          <Button type="button" onClick={handleReset} className="h-8 w-8">x</Button>
         )}
       </div>
     </div>

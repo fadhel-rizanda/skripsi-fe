@@ -29,7 +29,7 @@ export function Navbar() {
   const getMenuItems = (): MenuItem[] => {
     if (!session?.user) {
       return [
-        { href: "/find-pet", label: "Find a Pet" },
+        { href: "/pets", label: "Find a Pet" },
         { href: "/adoption-process", label: "Adoption Process" },
         { href: "/community", label: "Community" },
         { href: "/chat", label: "Chat" },
@@ -41,7 +41,7 @@ export function Navbar() {
     switch (roleName) {
       case "adopter":
         return [
-          { href: "/find-pet", label: "Find a Pet" },
+          { href: "/pets", label: "Find a Pet" },
           { href: "/adoption-process", label: "Adoption Process" },
           { href: "/community", label: "Community" },
           { href: "/chat", label: "Chat" },
@@ -49,7 +49,7 @@ export function Navbar() {
 
       case "provider":
         return [
-          { href: "/find-pet", label: "Find a Pet" },
+          { href: "/pets", label: "Find a Pet" },
           { href: "/adoption-process", label: "Adoption Process" },
           { href: "/community", label: "Community" },
           { href: "/pets/create", label: "Submit Animal" },
@@ -69,7 +69,7 @@ export function Navbar() {
       default:
         return [
           { href: "/dashboard", label: "Dashboard" },
-          { href: "/find-pet", label: "Find a Pet" },
+          { href: "/pets", label: "Find a Pet" },
           { href: "/community", label: "Community" },
         ]
     }
@@ -163,7 +163,7 @@ export function Navbar() {
               <ProfileDropdown user={session.user} />
             </>
           )}
-          
+
           {/* Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

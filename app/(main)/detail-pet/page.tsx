@@ -51,6 +51,7 @@ export default function DetailPetPage() {
   const currentUserId = session?.user?.id || null;
   const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
   const isAdopter = !!roleName && String(roleName).toLowerCase() === "adopter";
+  const isOwner = !!(pet && currentUserId && pet.user_id === currentUserId);
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -393,9 +394,24 @@ export default function DetailPetPage() {
               )}
 
               {/* Show action buttons based on user role and ownership */}
-              {((pet.user_id && currentUserId && pet.user_id === currentUserId) || isAdopter) && (
+
+              {/* 1. Owner Actions (Edit) - Visible ONLY to Owner who is Provider */}
+              {isOwner && isProvider && (
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Adopt Me and Chat buttons for adopters or owners */}
+                  <Button
+                    size="lg"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                    onClick={() => router.push(`/create-update-pet?id=${pet.id}`)}
+                  >
+                    <Edit className="mr-2 h-5 w-5" />
+                    Edit Information
+                  </Button>
+                </div>
+              )}
+
+              {/* 2. Adopter Actions (Adopt/Chat) - Visible ONLY to Adopter who is NOT Owner */}
+              {isAdopter && !isOwner && (
+                <div className="flex flex-col sm:flex-row gap-4">
                   <Button
                     className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
                     size="lg"
@@ -406,25 +422,13 @@ export default function DetailPetPage() {
                     {adoptionLoading ? "Sending..." : "Adopt Me"}
                   </Button>
 
-                  {/* Edit button only for owner who is provider */}
-                  {pet.user_id && currentUserId && pet.user_id === currentUserId && isProvider ? (
-                    <Button
-                      size="lg"
-                      className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                      onClick={() => router.push(`/create-update-pet?id=${pet.id}`)}
-                    >
-                      <Edit className="mr-2 h-5 w-5" />
-                      Edit Information
-                    </Button>
-                  ) : (
-                    <Button
-                      size="lg"
-                      className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    >
-                      <MessageCircle className="mr-2 h-5 w-5" />
-                      Chat with Provider
-                    </Button>
-                  )}
+                  <Button
+                    size="lg"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                  >
+                    <MessageCircle className="mr-2 h-5 w-5" />
+                    Chat with Provider
+                  </Button>
                 </div>
               )}
             </CardContent>

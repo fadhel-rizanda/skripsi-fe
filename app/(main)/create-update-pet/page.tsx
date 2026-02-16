@@ -33,7 +33,13 @@ export default function RehomePetForm() {
   // --- Types ---
   type AnimalType = { id: string; name?: string; label?: string };
   type TagOption = { id: string; name?: string; label?: string };
-  type FileItem = { name: string; size: string };
+  type FileAttachment = {
+    id?: string;
+    file?: File;
+    name: string;
+    size: string;
+    type: 'existing' | 'new';
+  };
 
   // --- State ---
   const [form, setForm] = useState<{
@@ -47,8 +53,8 @@ export default function RehomePetForm() {
     physiqueIds: string[];
     personalityIds: string[];
     hasSpecialNeeds: boolean;
-    profilePictureIds: string[];
-    additionalRecordIds: string[];
+    // profilePictureIds and additionalRecordIds removed from form state
+    // maintained in profileAttachments/additionalAttachments
   }>({
     name: "",
     breed: "",
@@ -60,20 +66,17 @@ export default function RehomePetForm() {
     physiqueIds: [],
     personalityIds: [],
     hasSpecialNeeds: false,
-    profilePictureIds: [],
-    additionalRecordIds: [],
   });
 
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
   const [physiqueOptions, setPhysiqueOptions] = useState<TagOption[]>([]);
   const [personalityOptions, setPersonalityOptions] = useState<TagOption[]>([]);
 
-  const [profileFiles, setProfileFiles] = useState<FileItem[]>([]);
-  const [additionalFiles, setAdditionalFiles] = useState<FileItem[]>([]);
+  // Unified File State
+  const [profileAttachments, setProfileAttachments] = useState<FileAttachment[]>([]);
+  const [additionalAttachments, setAdditionalAttachments] = useState<FileAttachment[]>([]);
 
-  // Store actual File objects for new uploads (not yet uploaded to S3)
-  const [pendingProfileFiles, setPendingProfileFiles] = useState<File[]>([]);
-  const [pendingAdditionalFiles, setPendingAdditionalFiles] = useState<File[]>([]);
+
 
   const [loading, setLoading] = useState<boolean>(false);
   const [petOwnerId, setPetOwnerId] = useState<string | null>(null);
@@ -112,22 +115,25 @@ export default function RehomePetForm() {
         physiqueIds: (pet.physique_tags || []).map(t => String(t.id)),
         personalityIds: (pet.personality_tags || []).map(t => String(t.id)),
         hasSpecialNeeds: !!pet.special_needs,
-        profilePictureIds: (pet.profile_pictures || []).map(p => String(p.id)),
-        additionalRecordIds: (pet.additional_records || []).map(r => String(r.id)),
       });
-      setProfileFiles(
+      // Pre-fill files
+      setProfileAttachments(
         (pet.profile_pictures || []).map((p: any) => ({
-          name: p.filename || "Existing Image",
+          id: String(p.id),
+          name: p.filename || p.public_url || "Existing Image",
           size: "-",
-        }))
-      );
-      setAdditionalFiles(
-        (pet.additional_records || []).map((r: any) => ({
-          name: r.filename || "Existing File",
-          size: "-",
+          type: 'existing'
         }))
       );
 
+      setAdditionalAttachments(
+        (pet.additional_records || []).map((r: any) => ({
+          id: String(r.id),
+          name: r.filename || r.public_url || "Existing Record",
+          size: "-",
+          type: 'existing'
+        }))
+      );
       // Update options with existing tags so names show up
       if (pet.physique_tags?.length) {
         setPhysiqueOptions(prev => {
@@ -228,19 +234,9 @@ export default function RehomePetForm() {
 
   const removeFile = (index: number, type: 'profile' | 'additional') => {
     if (type === 'profile') {
-      setProfileFiles(prev => prev.filter((_, i) => i !== index));
-      setPendingProfileFiles(prev => prev.filter((_, i) => i !== index));
-      setForm(prev => ({
-        ...prev,
-        profilePictureIds: prev.profilePictureIds.filter((_, i) => i !== index)
-      }));
+      setProfileAttachments(prev => prev.filter((_, i) => i !== index));
     } else {
-      setAdditionalFiles(prev => prev.filter((_, i) => i !== index));
-      setPendingAdditionalFiles(prev => prev.filter((_, i) => i !== index));
-      setForm(prev => ({
-        ...prev,
-        additionalRecordIds: prev.additionalRecordIds.filter((_, i) => i !== index)
-      }));
+      setAdditionalAttachments(prev => prev.filter((_, i) => i !== index));
     }
   };
 
@@ -248,24 +244,27 @@ export default function RehomePetForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset value input agar user bisa upload file yang sama jika sebelumnya dihapus
+    // Reset input
     e.target.value = '';
 
-    // Validasi Ukuran Client-side (contoh max 5MB)
+    // Validasi Ukuran (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('File too large (max 5MB)');
       return;
     }
 
-    const fileItem = { name: file.name, size: `${(file.size / 1024 / 1024).toFixed(2)} MB` };
+    const newItem: FileAttachment = {
+      file,
+      name: file.name,
+      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      type: 'new'
+    };
 
     if (type === 'profile') {
-      setPendingProfileFiles(prev => [...prev, file]);
-      setProfileFiles(prev => [...prev, fileItem]);
+      setProfileAttachments(prev => [...prev, newItem]);
       toast.success('Profile picture added (will upload on submit)');
     } else {
-      setPendingAdditionalFiles(prev => [...prev, file]);
-      setAdditionalFiles(prev => [...prev, fileItem]);
+      setAdditionalAttachments(prev => [...prev, newItem]);
       toast.success('Additional record added (will upload on submit)');
     }
   };
@@ -290,16 +289,31 @@ export default function RehomePetForm() {
     if (!form.about || form.about.trim().length < 10) return toast.error('Description must be at least 10 characters');
     if (!form.physiqueIds.length) return toast.error('Select at least one physique tag');
     if (!form.personalityIds.length) return toast.error('Select at least one personality tag');
-    if (!form.profilePictureIds.length && !pendingProfileFiles.length) return toast.error('Please upload at least one profile picture');
+
+    if (!profileAttachments.length) return toast.error('Please upload at least one profile picture');
 
     setLoading(true);
     try {
-      // Upload pending files first
-      const uploadedProfileIds: string[] = [];
-      const uploadedAdditionalIds: string[] = [];
+      // 1. Separate existing IDs and new files
+      const existingProfileIds = profileAttachments
+        .filter(p => p.type === 'existing' && p.id)
+        .map(p => p.id!);
 
-      // Upload new profile pictures
-      for (const file of pendingProfileFiles) {
+      const newProfileFiles = profileAttachments
+        .filter(p => p.type === 'new' && p.file)
+        .map(p => p.file!);
+
+      const existingAdditionalIds = additionalAttachments
+        .filter(p => p.type === 'existing' && p.id)
+        .map(p => p.id!);
+
+      const newAdditionalFiles = additionalAttachments
+        .filter(p => p.type === 'new' && p.file)
+        .map(p => p.file!);
+
+      // 2. Upload new profile pictures
+      const uploadedProfileIds: string[] = [];
+      for (const file of newProfileFiles) {
         const presigned = await attachmentService.getPresignedUrl({
           filename: file.name,
           mime_type: file.type,
@@ -311,8 +325,9 @@ export default function RehomePetForm() {
         uploadedProfileIds.push(presigned.data.id);
       }
 
-      // Upload new additional records
-      for (const file of pendingAdditionalFiles) {
+      // 3. Upload new additional records
+      const uploadedAdditionalIds: string[] = [];
+      for (const file of newAdditionalFiles) {
         const presigned = await attachmentService.getPresignedUrl({
           filename: file.name,
           mime_type: file.type,
@@ -327,8 +342,8 @@ export default function RehomePetForm() {
       const dateIso = new Date(form.dob).toISOString();
 
       // Combine existing IDs with newly uploaded IDs
-      const allProfileIds = [...form.profilePictureIds, ...uploadedProfileIds];
-      const allAdditionalIds = [...form.additionalRecordIds, ...uploadedAdditionalIds];
+      const allProfileIds = [...existingProfileIds, ...uploadedProfileIds];
+      const allAdditionalIds = [...existingAdditionalIds, ...uploadedAdditionalIds];
 
       const payload: CreatePetPayload = {
         type_of_animal_id: form.typeOfAnimalId,
@@ -582,7 +597,7 @@ export default function RehomePetForm() {
               <p className="text-xs text-gray-500 mt-2 mb-3 max-w-[387px] mx-auto">A great profile picture is key to finding a new home.</p>
 
               <div className="space-y-4">
-                {profileFiles.map((file, idx) => (
+                {profileAttachments.map((file, idx) => (
                   <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm w-[387px] h-[24px] mx-auto">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <FileText size={16} className="text-gray-400 shrink-0" />
@@ -625,7 +640,7 @@ export default function RehomePetForm() {
               <p className="text-xs text-gray-500 mt-2 mb-3 max-w-[387px] mx-auto">Please upload multiple high-quality photos and any relevant documents.</p>
 
               <div className="space-y-4">
-                {additionalFiles.map((file, idx) => (
+                {additionalAttachments.map((file, idx) => (
                   <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-3 bg-white text-sm shadow-sm w-[387px] h-[24px] mx-auto">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <FileText size={16} className="text-gray-400 shrink-0" />

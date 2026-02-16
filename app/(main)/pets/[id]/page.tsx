@@ -235,8 +235,8 @@ export default function DetailPetPage() {
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
                       className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                          ? "border-green-500 ring-2 ring-green-200"
-                          : "border-transparent hover:border-green-300"
+                        ? "border-green-500 ring-2 ring-green-200"
+                        : "border-transparent hover:border-green-300"
                         }`}
                     >
                       <div className="relative w-full h-full">

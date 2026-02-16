@@ -275,6 +275,14 @@ export default function RehomePetForm() {
 
     if (fetchingPet) return;
 
+    // Security check: Ensure user is owner before allowing update
+    if (isEditMode) {
+      if (!currentUserId || !petOwnerId || currentUserId !== petOwnerId) {
+        toast.error("You are not authorized to update this pet.");
+        return;
+      }
+    }
+
     if (!form.typeOfAnimalId) return toast.error('Please select a type of animal');
     if (!form.size) return toast.error('Please select a valid size');
     if (!form.gender) return toast.error('Please select a gender');

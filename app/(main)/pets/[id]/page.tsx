@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -11,7 +11,7 @@ import { generalService, Tag as AnimalTag } from "@/services/generalServices";
 import { isValidUrl } from "@/lib/utils";
 import { downloadAttachment } from "@/lib/attachment-helpers";
 import { Attachment } from "@/types/attachment";
-  
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,9 +33,9 @@ import {
 // Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
-  const searchParams = useSearchParams();
+  const params = useParams();
   const router = useRouter();
-  const petId = searchParams.get("id");
+  const petId = params.id as string;
 
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +91,7 @@ export default function DetailPetPage() {
     if (petId) {
       fetchPetDetail();
     } else {
-      router.push("/find-pet");
+      router.push("/pets");
     }
   }, [petId, router, fetchPetDetail]);
 
@@ -187,7 +187,7 @@ export default function DetailPetPage() {
           The pet you&apos;re looking for doesn&apos;t exist or has been
           removed.
         </p>
-        <Button onClick={() => router.push("/find-pet")}>
+        <Button onClick={() => router.push("/pets")}>
           Back to Find Pet
         </Button>
       </div>
@@ -225,7 +225,7 @@ export default function DetailPetPage() {
               )}
             </div>
 
-              {(pet.profile_pictures ?? []).length > 1 && (
+            {(pet.profile_pictures ?? []).length > 1 && (
               <div className="flex gap-3 sm:gap-4 overflow-x-auto justify-center md:justify-start px-2 md:px-0">
                 {pet.profile_pictures?.map((image, index) => {
                   const thumbSrc = isValidUrl(image.public_url ?? "") ? image.public_url : null;
@@ -234,11 +234,10 @@ export default function DetailPetPage() {
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === index
+                      className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-none rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index
                           ? "border-green-500 ring-2 ring-green-200"
                           : "border-transparent hover:border-green-300"
-                      }`}
+                        }`}
                     >
                       <div className="relative w-full h-full">
                         {thumbSrc ? (
@@ -424,7 +423,7 @@ export default function DetailPetPage() {
           </Card>
         </div>
       </div>
-      
+
     </div>
   );
 }

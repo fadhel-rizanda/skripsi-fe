@@ -41,7 +41,7 @@ export function Footer() {
             <h3 className="font-bold text-white text-lg mb-4">Quick Links</h3>
             <div className="flex flex-col gap-2">
               <Button variant="link" className="h-auto p-0 text-gray-300 hover:text-green-500 font-normal justify-start" asChild>
-                <Link href="/find-pet">Find a Pet</Link>
+                <Link href="/pets">Find a Pet</Link>
               </Button>
               <Button variant="link" className="h-auto p-0 text-gray-300 hover:text-green-500 font-normal justify-start" asChild>
                 <Link href="/#why-pawsitive">Why Pawsitive</Link>

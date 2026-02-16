@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
 } from "@/components/ui/card";
 
 interface PetCardProps {
@@ -33,7 +33,7 @@ export function PetCard({ id, name, type, age, imageUrl, priority = false }: Pet
   const router = useRouter();
 
   const handleOpenDetail = () => {
-    router.push(`/detail-pet?id=${encodeURIComponent(String(id))}`);
+    router.push(`/pets/${id}`);
   };
 
   return (

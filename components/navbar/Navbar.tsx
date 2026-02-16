@@ -52,7 +52,7 @@ export function Navbar() {
           { href: "/find-pet", label: "Find a Pet" },
           { href: "/adoption-process", label: "Adoption Process" },
           { href: "/community", label: "Community" },
-          { href: "/submit-animal", label: "Submit Animal" },
+          { href: "/create-update-pet", label: "Submit Animal" },
           { href: "/chat", label: "Chat" },
         ]
 
@@ -163,7 +163,7 @@ export function Navbar() {
               <ProfileDropdown user={session.user} />
             </>
           )}
-          
+
           {/* Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

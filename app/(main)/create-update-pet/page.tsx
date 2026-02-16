@@ -444,7 +444,6 @@ export default function RehomePetForm() {
               <div>
                 <Label className="mb-1 text-sm">Type of Animal *</Label>
                 <Select
-                  key={`animal-type-${animalTypes.length}-${form.typeOfAnimalId}`}
                   value={form.typeOfAnimalId}
                   onValueChange={val => setForm(prev => ({ ...prev, typeOfAnimalId: val }))}
                 >

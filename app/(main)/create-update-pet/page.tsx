@@ -378,12 +378,6 @@ export default function RehomePetForm() {
     }
   };
 
-  // Helper untuk mendapatkan nama animal type dari ID
-  const getAnimalTypeName = (typeId: string) => {
-    const found = animalTypes.find((t) => String(t.id) === String(typeId));
-    return found ? found.name || found.label : "";
-  };
-
   // Helper untuk memfilter opsi yang sudah dipilih
   const availablePhysiques = physiqueOptions.filter(opt => !form.physiqueIds.includes(opt.id));
   const availablePersonalities = personalityOptions.filter(opt => !form.personalityIds.includes(opt.id));

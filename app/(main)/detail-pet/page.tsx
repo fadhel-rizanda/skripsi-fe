@@ -47,7 +47,7 @@ export default function DetailPetPage() {
   const { data: session } = useSession();
   // Support both shapes: `session.user.role` can be a string or an object { name }
   const _role = session?.user?.role;
-  const roleName = typeof _role === "string" ? _role : _role?.name;
+  const roleName = _role?.name;
   const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
 
   // Handler download khusus untuk additional record
@@ -127,9 +127,9 @@ export default function DetailPetPage() {
     if (!pet) return;
     try {
       setAdoptionLoading(true);
-      await petService.adoptPet(petId!);
+      const response = await petService.adoptPet(petId!);
       toast.success("Adoption request sent successfully!");
-      fetchPetDetail();
+      router.push(`/adoption/${response.id}`);
     } catch (error: unknown) {
       type ErrorWithResponse = {
         response?: { data?: { message?: string } };
@@ -163,7 +163,7 @@ export default function DetailPetPage() {
 
   if (loading) {
     return (
-      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:px-10 lg:max-w-screen-xl">
+      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 lg:max-w-7xl">
         <Skeleton className="h-8 w-32 mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
           <Skeleton className="h-96 rounded-lg" />
@@ -202,10 +202,10 @@ export default function DetailPetPage() {
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
-      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-12 md:px-10 lg:max-w-screen-xl">
+      <div className="w-full mx-auto px-4 lg:px-12 py-12 lg:max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
-          <div className="space-y-4 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
-            <div className="relative w-full h-96 md:h-auto md:aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
+          <div className="space-y-4 w-full md:w-138 md:flex-none mx-auto md:mx-0">
+            <div className="relative w-full h-96 md:h-auto md:aspect-4/3 rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
                   <Image
@@ -263,8 +263,8 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-[552px] md:flex-none mx-auto md:mx-0">
-            <CardContent className="py-8 px-6 space-y-6 text-base">
+          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
+            <CardContent className="space-y-6 text-base p-0!">
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}
@@ -357,16 +357,12 @@ export default function DetailPetPage() {
                   </h3>
                   <div className="space-y-2">
                     {pet.additional_records.map((record) => {
-                      const safeUrl = isValidUrl(record.public_url) ? record.public_url : undefined;
                       return (
                         <div
                           key={record.id}
-                          className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition"
+                          className="flex items-center justify-between gap-3 p-3 rounded-lg bg-slate-100 hover:bg-slate-200 transition"
                         >
-                          <a
-                            href={safeUrl || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <div
                             className="flex items-center gap-3 flex-1 min-w-0"
                           >
                             <span className="text-slate-400 flex-none">
@@ -375,7 +371,7 @@ export default function DetailPetPage() {
                             <span className="text-base text-slate-700 truncate">
                               {record.filename}
                             </span>
-                          </a>
+                          </div>
                           <button
                             type="button"
                             onClick={e => {
@@ -397,7 +393,7 @@ export default function DetailPetPage() {
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
-                  className="bg-green-500 hover:bg-green-600 text-black shadow-md"
+                  className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
                   size="lg"
                   onClick={handleAdoption}
                   disabled={adoptionLoading}

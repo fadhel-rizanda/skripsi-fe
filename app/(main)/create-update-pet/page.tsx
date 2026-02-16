@@ -21,7 +21,7 @@ export default function RehomePetForm() {
   const searchParams = useSearchParams();
 
   const petId = searchParams.get("id");
-  const isEditMode = !!petId;
+  const isEditMode = typeof petId === "string" && petId.length > 0;
 
   const [fetchingPet, setFetchingPet] = useState(false);
 
@@ -86,10 +86,10 @@ export default function RehomePetForm() {
 
   // --- Fetch Pet Detail ---
   const fetchPetDetail = async (id: string) => {
+    if (!id || id === "undefined") return;
     setFetchingPet(true);
     try {
       const pet = await petService.getPetById(id);
-
       setForm({
         name: pet.name || "",
         breed: pet.breed || "",
@@ -104,15 +104,12 @@ export default function RehomePetForm() {
         profilePictureIds: pet.profile_picture_ids || [],
         additionalRecordIds: pet.additional_record_ids || [],
       });
-
-      // Dummy file list untuk existing attachment ids
       setProfileFiles(
         (pet.profile_picture_ids || []).map((_: string, idx: number) => ({
           name: `Existing file ${idx + 1}`,
           size: "-",
         }))
       );
-
       setAdditionalFiles(
         (pet.additional_record_ids || []).map((_: string, idx: number) => ({
           name: `Existing file ${idx + 1}`,

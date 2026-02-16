@@ -130,7 +130,12 @@ export default function PetForm({mode, petId}: PetFormProps) {
 
     function onSubmit() {
         setIsSubmitted(true)
-        if (profileFiles.length === 0) return
+
+        const totalProfilePictures =
+            profileFiles.length + existingProfilePictures.length
+
+        if (totalProfilePictures === 0) return
+
         setDialogOpen(true)
     }
 
@@ -215,9 +220,8 @@ export default function PetForm({mode, petId}: PetFormProps) {
         if (!isEditMode || !petId) return
 
         const fetchDetail = async () => {
+            setIsLoadingDetail(true)
             try {
-                setIsLoadingDetail(true)
-
                 const res = await petService.getPetById(petId)
 
                 const safeSize: PetSize =
@@ -576,11 +580,13 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                         onChange={handleProfileUpload}
                                                     />
                                                 </div>
-                                                {isSubmitted && profileFiles.length === 0 && (
-                                                    <p className="text-sm font-medium text-destructive mt-2">
-                                                        At least one profile picture is required
-                                                    </p>
-                                                )}
+                                                {isSubmitted &&
+                                                    profileFiles.length + existingProfilePictures.length === 0 && (
+                                                        <p className="text-sm font-medium text-destructive mt-2">
+                                                            At least one profile picture is required
+                                                        </p>
+                                                    )}
+
                                                 <p className="text-xs text-[#757575] mt-3">A great profile picture is
                                                     key to
                                                     finding a new home.</p>
@@ -613,7 +619,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                     <div className="mt-3 space-y-2">
                                                         {profileFiles.map((file, index) => (
                                                             <div
-                                                                key={index}
+                                                                key={`${file.name}-${file.lastModified}`}
                                                                 className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
                                                             >
                                                                 <span
@@ -756,7 +762,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 confirmText={isEditMode ? "Update Profile" : "Create Profile"}
                 cancelText="Review Again"
             />
-
         </>
     )
 }

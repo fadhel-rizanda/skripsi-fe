@@ -1,4 +1,5 @@
 import type { Tag } from './general';
+import {Attachment} from "@/types/attachment";
 
 export interface Pet {
   id: string | number;
@@ -18,10 +19,10 @@ export interface Pet {
   updated_at?: string;
 
   /* Detail-specific fields (merged from PetDetail) */
-  profile_pictures?: PetProfilePicture[];
+  profile_pictures?: Attachment[];
   physique_tags?: Tag[];
   personality_tags?: Tag[];
-  additional_records?: PetAdditionalRecord[];
+  additional_records?: Attachment[];
 }
 
 export type PetDetail = Pet;
@@ -47,3 +48,10 @@ export interface PetFilterState {
   tag_personality_id?: string;
   search?: string;
 }
+
+export const sizeOptions = ["small", "medium", "large", "extra large"] as const
+export type PetSize = typeof sizeOptions[number]
+
+export const genderOptions = ["male", "female"] as const
+export type PetGender = typeof genderOptions[number]
+

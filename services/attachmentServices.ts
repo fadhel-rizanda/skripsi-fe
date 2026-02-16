@@ -41,8 +41,10 @@ export const attachmentService = {
         });
     },
 
-    generateDownloadUrl: async (id: string) => {
-        const response = await api.get(`/v1/attachments/${id}/download-url`);
+    generateDownloadUrl: async (id: string, mode?: 'preview' | 'download') => {
+        const response = await api.get(`/v1/attachments/${id}/download-url`,{
+            params: {mode},
+        });
         return response.data.data;
     },
 

@@ -1,6 +1,6 @@
 "use client"
 
-import {ChangeEvent, useMemo, useState} from "react"
+import {ChangeEvent, useEffect, useMemo, useState} from "react"
 import {useForm} from "react-hook-form"
 import {format} from "date-fns"
 import {Card, CardContent} from "@/components/ui/card"
@@ -27,7 +27,7 @@ import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Calendar} from "@/components/ui/calendar";
 import {Icon} from "@iconify/react";
 import {TagBadge} from "@/components/badge/TagBadge";
-import {uploadAttachment} from "@/lib/attachment-helpers";
+import {openAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 import {CreatePetSchema} from "@/schemas/pet.schema";
 import {CreatePetPayload, petService} from "@/services/petServices";
 import {useTagsOptions} from "@/hooks/useFilterOptions";
@@ -35,11 +35,21 @@ import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {useRouter} from "next/navigation";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {ActionDialog} from "@/components/dialog/ActionDialog";
+import {genderOptions, PetGender, PetSize, sizeOptions} from "@/types/pet";
+import {Attachment} from "@/types/attachment";
 
-export default function PetForm() {
+type PetFormProps = {
+    mode: "create" | "edit"
+    petId?: string
+}
+
+export default function PetForm({mode, petId}: PetFormProps) {
+    const isEditMode = mode === "edit"
+
     const router = useRouter()
     const [profileFiles, setProfileFiles] = useState<File[]>([])
     const [additionalFiles, setAdditionalFiles] = useState<File[]>([])
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const {
@@ -87,19 +97,34 @@ export default function PetForm() {
     async function handleFinalSubmit() {
         const values = form.getValues()
 
-        const [profilePictureIds, additionalRecordIds] = await Promise.all([
-            Promise.all(profileFiles.map(file => uploadAttachment(file, true))),
+        const uploadedProfileIds =
+            profileFiles.length > 0
+                ? await Promise.all(profileFiles.map(file => uploadAttachment(file, true)))
+                : []
+
+        const uploadedAdditionalIds =
             additionalFiles.length > 0
-                ? Promise.all(additionalFiles.map(file => uploadAttachment(file)))
-                : Promise.resolve([])
-        ])
+                ? await Promise.all(additionalFiles.map(file => uploadAttachment(file)))
+                : []
 
         const payload: CreatePetPayload = {
             ...values,
             date_of_birth: values.date_of_birth.toISOString(),
-            profile_picture_ids: profilePictureIds,
+            profile_picture_ids: [
+                ...(values.profile_picture_ids ?? []),
+                ...uploadedProfileIds,
+            ],
             special_needs: values.special_needs ?? false,
-            additional_record_ids: additionalRecordIds,
+            additional_record_ids: [
+                ...(values.additional_record_ids ?? []),
+                ...uploadedAdditionalIds,
+            ],
+        }
+
+        console.log("payloadna: ", payload)
+
+        if (isEditMode) {
+            return await petService.updatePet(petId!, payload)
         }
 
         return await petService.createPet(payload)
@@ -142,6 +167,117 @@ export default function PetForm() {
         [personalityTags]
     )
 
+    const [existingProfilePictures, setExistingProfilePictures] = useState<
+        { id: string; filename?: string; mime_type?: string }[]
+    >([])
+
+    const [existingAdditionalRecords, setExistingAdditionalRecords] = useState<
+        { id: string; filename?: string; mime_type?: string }[]
+    >([])
+
+    const removeExistingProfileFile = (id: string) => {
+        setExistingProfilePictures(prev =>
+            prev.filter(file => file.id !== id)
+        )
+
+        const updatedIds = form.getValues().profile_picture_ids?.filter(existingId => existingId !== id)
+
+        form.setValue("profile_picture_ids", updatedIds)
+    }
+
+    const removeExistingAdditionalFile = (id: string) => {
+        setExistingAdditionalRecords(prev =>
+            prev.filter(file => file.id !== id)
+        )
+
+        const updatedIds = form.getValues().additional_record_ids?.filter(existingId => existingId !== id)
+
+        form.setValue("additional_record_ids", updatedIds)
+    }
+
+    const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+    const handleOpenExistingFile = async (file: Attachment) => {
+        try {
+            setDownloadingId(file.id)
+            await openAttachment(file)
+        } finally {
+            setDownloadingId(null)
+        }
+    }
+
+    const handleOpenNewFile = (file: File) => {
+        const fileUrl = URL.createObjectURL(file)
+        window.open(fileUrl, "_blank")
+
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
+    }
+
+    useEffect(() => {
+        if (!isEditMode || !petId) return
+
+        const fetchDetail = async () => {
+            try {
+                setIsLoadingDetail(true)
+
+                const res = await petService.getPetById(petId)
+
+                const safeSize: PetSize =
+                    sizeOptions.includes(res.size as PetSize)
+                        ? (res.size as PetSize)
+                        : "small"
+                const safeGender: PetGender =
+                    genderOptions.includes(res.gender as PetGender)
+                        ? (res.gender as PetGender)
+                        : "male"
+
+                form.reset({
+                    name: res.name ?? "",
+                    breed: res.breed ?? "",
+                    size: safeSize,
+                    date_of_birth: res.date_of_birth
+                        ? new Date(res.date_of_birth)
+                        : undefined,
+                    gender: safeGender,
+                    about: res.about ?? "",
+                    special_needs: res.special_needs ?? false,
+                    type_of_animal_id: res.type_of_animal_id ?? "",
+                    physique_ids: res.physique_tags?.map(p => String(p.id)) ?? [],
+                    personality_ids: res.personality_tags?.map(p => String(p.id)) ?? [],
+                    profile_picture_ids:
+                        res.profile_pictures?.map(p => String(p.id)) ?? [],
+                    additional_record_ids:
+                        res.additional_records?.map(p => String(p.id)) ?? [],
+                })
+
+                console.log("responena: ", res)
+
+                setExistingProfilePictures(
+                    res.profile_pictures?.map(p => ({
+                        id: String(p.id),
+                        filename: p.filename ?? "Existing Image",
+                        mime_type: p.mime_type,
+                    })) ?? []
+                )
+
+                setExistingAdditionalRecords(
+                    res.additional_records?.map(p => ({
+                        id: String(p.id),
+                        filename: p.filename ?? "Existing File",
+                        mime_type: p.mime_type,
+                    })) ?? []
+                )
+            } finally {
+                setIsLoadingDetail(false)
+            }
+        }
+        fetchDetail()
+    }, [form, isEditMode, petId])
+
+    if (isEditMode && isLoadingDetail) {
+        return <div className="p-10 text-center">Loading pet data...</div>
+    }
+
     return (
         <>
             <div className="min-h-screen bg-green-50 py-12 px-4">
@@ -155,8 +291,9 @@ export default function PetForm() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         {/* LEFT COLUMN */}
                                         <div className="space-y-6">
-                                            <h3 className="text-xl font-semibold mb-6 border-b pb-2">Pet
-                                                Information</h3>
+                                            <h3 className="text-xl font-semibold mb-6 border-b pb-2">
+                                                {isEditMode ? "Edit Pet Information" : "Pet Information"}
+                                            </h3>
                                             <FormField
                                                 control={form.control}
                                                 name="name"
@@ -232,7 +369,8 @@ export default function PetForm() {
                                                                     <SelectItem value="small">Small</SelectItem>
                                                                     <SelectItem value="medium">Medium</SelectItem>
                                                                     <SelectItem value="large">Large</SelectItem>
-                                                                    <SelectItem value="extra large">Extra Large</SelectItem>
+                                                                    <SelectItem value="extra large">Extra
+                                                                        Large</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                             <FormMessage/>
@@ -451,16 +589,42 @@ export default function PetForm() {
                                                     key to
                                                     finding a new home.</p>
 
+                                                {/* EXISTING FILES */}
+                                                {existingProfilePictures.length > 0 && (
+                                                    <div className="mt-3 space-y-2">
+                                                        {existingProfilePictures.map((file, index) => (
+                                                            <div
+                                                                key={file.id}
+                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
+                                                            >
+                                                                <span
+                                                                    onClick={() => handleOpenExistingFile(file as Attachment)}
+                                                                    className="truncate flex-1 cursor-pointer hover:underline"
+                                                                >{downloadingId === file.id ? "Opening..." : file.filename}</span>
+
+                                                                <Icon
+                                                                    icon="ph:trash"
+                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
+                                                                    onClick={() => removeExistingProfileFile(file.id)}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* NEW FILES */}
                                                 {profileFiles.length > 0 && (
                                                     <div className="mt-3 space-y-2">
                                                         {profileFiles.map((file, index) => (
                                                             <div
                                                                 key={index}
-                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
-                                                            <span
-                                                                className="flex items-center gap-2 text-[#424242] truncate flex-1">
-                                                                {file.name}
-                                                            </span>
+                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
+                                                            >
+                                                                <span
+                                                                    onClick={() => handleOpenNewFile(file)}
+                                                                    className="truncate flex-1 cursor-pointer hover:underline"
+                                                                >{file.name}</span>
+
                                                                 <Icon
                                                                     icon="ph:trash"
                                                                     className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
@@ -506,6 +670,30 @@ export default function PetForm() {
                                                     <span className="font-medium"> Make sure the filename is relevant and descriptive.</span>
                                                 </p>
 
+                                                {/* EXISTING FILES */}
+                                                {existingAdditionalRecords.length > 0 && (
+                                                    <div className="mt-3 space-y-2">
+                                                        {existingAdditionalRecords.map((file, index) => (
+                                                            <div
+                                                                key={file.id}
+                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
+                                                            >
+                                                                <span
+                                                                    onClick={() => handleOpenExistingFile(file as Attachment)}
+                                                                    className="truncate flex-1 cursor-pointer hover:underline"
+                                                                >{downloadingId === file.id ? "Opening..." : file.filename}</span>
+
+                                                                <Icon
+                                                                    icon="ph:trash"
+                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
+                                                                    onClick={() => removeExistingAdditionalFile(file.id)}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* NEW FILES */}
                                                 {additionalFiles.length > 0 && (
                                                     <div className="mt-3 space-y-2">
                                                         {additionalFiles.map((file, index) => (
@@ -513,9 +701,9 @@ export default function PetForm() {
                                                                 key={index}
                                                                 className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
                                                             <span
-                                                                className="flex items-center gap-2 text-[#424242] truncate flex-1">
-                                                                {file.name}
-                                                            </span>
+                                                                onClick={() => handleOpenNewFile(file)}
+                                                                className="truncate flex-1 cursor-pointer hover:underline"
+                                                            >{file.name}</span>
                                                                 <Icon
                                                                     icon="ph:trash"
                                                                     className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
@@ -549,7 +737,7 @@ export default function PetForm() {
                                         />
                                         <Button type="submit"
                                                 className="mt-4 bg-green-600 hover:bg-green-700 text-white">
-                                            Submit new pet profile
+                                            {isEditMode ? "Update Pet Profile" : "Submit new pet profile"}
                                         </Button>
                                     </div>
                                 </form>
@@ -563,13 +751,16 @@ export default function PetForm() {
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
                 onContinue={() => router.push("/find-pet")}
-                title="Create Pet Profile?"
-                description="Please review the pet's information, health records, and photos before continuing."
-                successTitle="Pet Profile Created Successfully"
-                successDescription="Your pet profile is now live and ready to find a loving forever home."
-                confirmText="Create Profile"
+                title={isEditMode ? "Update Pet Profile?" : "Create Pet Profile?"}
+                description="Please review the pet's information before continuing."
+                successTitle={isEditMode
+                    ? "Pet Profile Updated Successfully"
+                    : "Pet Profile Created Successfully"}
+                successDescription="Your pet profile is now live."
+                confirmText={isEditMode ? "Update Profile" : "Create Profile"}
                 cancelText="Review Again"
             />
+
         </>
     )
 }

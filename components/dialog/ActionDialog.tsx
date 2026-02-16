@@ -64,8 +64,11 @@ export function ActionDialog({
             try {
                 await onConfirm()
                 setInternalStatus("success")
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error)
+                if (error.response?.status === 422) {
+                    console.log("Validation Errors:", error.response.data.errors)
+                }
                 setInternalStatus("error")
             }
         }

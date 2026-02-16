@@ -1,0 +1,77 @@
+"use client";
+
+import { Search, PenSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+interface PostFiltersProps {
+    searchQuery: string;
+    setSearchQuery: (value: string) => void;
+    sortBy: string;
+    setSortBy: (value: string) => void;
+    filterTag: string;
+    setFilterTag: (value: string) => void;
+}
+
+export function PostFilters({
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    filterTag,
+    setFilterTag,
+}: PostFiltersProps) {
+    return (
+        <div className="w-full flex flex-col space-y-4">
+            <div className="flex flex-col md:flex-row gap-3 w-full">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                        placeholder="Search by name..."
+                        className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-full md:w-[150px] bg-white border-gray-200 rounded-lg">
+                        <SelectValue placeholder="Sort By" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="newest">Newest</SelectItem>
+                        <SelectItem value="popular">Popular</SelectItem>
+                        <SelectItem value="oldest">Oldest</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={filterTag} onValueChange={setFilterTag}>
+                    <SelectTrigger className="w-full md:w-[150px] bg-white border-gray-200 rounded-lg">
+                        <SelectValue placeholder="Tag" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Tags</SelectItem>
+                        <SelectItem value="Adoption">Adoption</SelectItem>
+                        <SelectItem value="Training">Training</SelectItem>
+                        <SelectItem value="Cat">Cat</SelectItem>
+                        <SelectItem value="Tips">Tips</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="flex justify-end pt-2">
+                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-auto">
+                    <PenSquare className="mr-2 h-4 w-4" />
+                    Create Post
+                </Button>
+            </div>
+        </div>
+    );
+}

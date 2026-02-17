@@ -30,6 +30,7 @@ export default function AllPostPage() {
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
     const [animalTypes, setAnimalTypes] = useState<Tag[]>([]);
+    const [tagError, setTagError] = useState<string | null>(null);
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,7 +49,7 @@ export default function AllPostPage() {
                 const types = await generalService.getAnimalTypes();
                 setAnimalTypes(types);
             } catch (error) {
-                console.error("Failed to fetch animal types:", error);
+                setTagError("Failed to load animal tags.");
             }
         };
         fetchAnimalTypes();
@@ -205,6 +206,12 @@ export default function AllPostPage() {
                         <p className="text-gray-500 text-center mb-6 text-[18px]">
                             Connect with fellow pet lovers, share your stories, and get valuable advice.
                         </p>
+
+                        {tagError && (
+                            <p className="text-red-500 text-sm text-center mb-4 bg-red-50 p-2 rounded-md">
+                                {tagError}
+                            </p>
+                        )}
 
                         <PostFilters
                             searchQuery={searchQuery}

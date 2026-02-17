@@ -10,6 +10,7 @@ import {
     Loader2
 } from "lucide-react";
 
+import { CommunityHeader } from "@/components/community/CommunityHeader";
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { postService, Post, PostListParams } from "@/services/postServices";
@@ -172,56 +173,23 @@ export default function AllPostPage() {
         <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-[family-name:var(--font-manrope)]">
             <div className="max-w-6xl mx-auto space-y-6">
 
-                {/* Header Card */}
-                <Card className="rounded-2xl shadow-sm border-0 bg-white">
-                    <CardContent className="pt-8 pb-6 px-6 md:px-10 flex flex-col items-center">
-                        <h1 className="text-[36px] font-bold text-gray-900 mb-6 font-sans">Community Hub</h1>
-
-                        {/* Tabs */}
-                        <div className="flex w-full justify-center border-b border-gray-300 mb-8 overflow-x-auto">
-                            <div className="flex gap-8">
-                                <Link
-                                    href="/community/all-post"
-                                    className="pb-3 border-b-2 border-green-600 text-green-700 font-semibold text-base whitespace-nowrap"
-                                >
-                                    All Posts
-                                </Link>
-                                <Link
-                                    href="/community/all-communities"
-                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-base whitespace-nowrap transition-colors"
-                                >
-                                    All Communities
-                                </Link>
-                                <Link
-                                    href="/community/all-users"
-                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-base whitespace-nowrap transition-colors"
-                                >
-                                    All Users
-                                </Link>
-                            </div>
-                        </div>
-
-                        <p className="text-gray-500 text-center mb-6 text-[18px]">
-                            Connect with fellow pet lovers, share your stories, and get valuable advice.
+                <CommunityHeader>
+                    {tagError && (
+                        <p className="text-red-500 text-sm text-center mb-4 bg-red-50 p-2 rounded-md">
+                            {tagError}
                         </p>
+                    )}
 
-                        {tagError && (
-                            <p className="text-red-500 text-sm text-center mb-4 bg-red-50 p-2 rounded-md">
-                                {tagError}
-                            </p>
-                        )}
-
-                        <PostFilters
-                            searchQuery={searchQuery}
-                            setSearchQuery={setSearchQuery}
-                            sortBy={sortBy}
-                            setSortBy={setSortBy}
-                            filterTag={filterTag}
-                            setFilterTag={setFilterTag}
-                            animalTypes={animalTypes}
-                        />
-                    </CardContent>
-                </Card>
+                    <PostFilters
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        sortBy={sortBy}
+                        setSortBy={setSortBy}
+                        filterTag={filterTag}
+                        setFilterTag={setFilterTag}
+                        animalTypes={animalTypes}
+                    />
+                </CommunityHeader>
 
                 {/* Loading State */}
                 {loading && (

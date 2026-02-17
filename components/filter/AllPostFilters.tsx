@@ -59,7 +59,7 @@ export function PostFilters({
                         <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Animal Type</SelectItem>
+                        <SelectItem value="all">Animal Tag</SelectItem>
                         {animalTypes.map((tag) => (
                             <SelectItem key={tag.id} value={tag.name}>
                                 {tag.name}

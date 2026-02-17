@@ -84,10 +84,12 @@ export default function AllPostPage() {
                     params.search = searchQuery;
                 }
 
-                // Add tag filter (you'll need to get tag_id from tag name)
+                // Add tag filter
                 if (filterTag !== "all") {
-                    // For now, we'll filter on frontend. Ideally, you'd map tag name to tag_id
-                    // params.tag_id = tagId;
+                    const selectedTag = animalTypes.find(t => t.name === filterTag);
+                    if (selectedTag) {
+                        params.tag_id = selectedTag.id;
+                    }
                 }
 
                 const response = await postService.getPosts(params);
@@ -117,7 +119,7 @@ export default function AllPostPage() {
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page]);
+    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page, animalTypes]);
 
     const handleLikePost = async (postId: string) => {
         try {
@@ -141,10 +143,8 @@ export default function AllPostPage() {
         }
     };
 
-    // Filter posts by tag on frontend (if tag filter is applied)
-    const filteredPosts = filterTag === "all"
-        ? posts
-        : posts.filter(post => post.tags.some(tag => tag.name === filterTag));
+    // Use posts directly since filtering is now done on backend
+    const filteredPosts = posts;
 
     // Pagination handlers
     const handlePageChange = (page: number) => {

@@ -294,34 +294,34 @@ export default function AllPostPage() {
                                                 </div>
                                             )}
 
-                                            {/* Footer Actions */}
-                                            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                                                <div className="flex gap-4 md:gap-6">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2"
-                                                        onClick={() => handleLikePost(post.id)}
-                                                    >
-                                                        <ThumbsUp className="h-6 w-6" />
-                                                        <span className="text-xs md:text-sm font-medium">{post.likes_count} Likes</span>
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
-                                                        <MessageSquare className="h-6 w-6" />
-                                                        <span className="text-xs md:text-sm font-medium">{post.comments_count} Comments</span>
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5 px-2">
-                                                        <Flag className="h-6 w-6" />
-                                                        <span className="text-xs md:text-sm font-medium">Report</span>
-                                                    </Button>
-                                                </div>
-                                                <Link href={`/community/all-post/${post.id}`}>
-                                                    <Button variant="ghost" size="sm" className="text-black hover:text-gray-900 font-medium text-xs md:text-sm">
-                                                        Reply
-                                                    </Button>
-                                                </Link>
-                                            </div>
+
                                         </div>
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-100">
+                                        <div className="flex gap-4 md:gap-6">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2"
+                                                onClick={() => handleLikePost(post.id)}
+                                            >
+                                                <ThumbsUp className="h-6 w-6" />
+                                                <span className="text-xs md:text-sm font-medium">{post.likes_count} Likes</span>
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
+                                                <MessageSquare className="h-6 w-6" />
+                                                <span className="text-xs md:text-sm font-medium">{post.comments_count} Comments</span>
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5 px-2">
+                                                <Flag className="h-6 w-6" />
+                                                <span className="text-xs md:text-sm font-medium">Report</span>
+                                            </Button>
+                                        </div>
+                                        <Link href={`/community/all-post/${post.id}`}>
+                                            <Button variant="ghost" size="sm" className="text-black hover:text-gray-900 font-medium text-xs md:text-sm">
+                                                Reply
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </Card>
                             ))

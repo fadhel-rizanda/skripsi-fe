@@ -8,3 +8,12 @@ export interface Tag {
     name: string;
     color_code?: string | null;
 }
+export interface Address {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    zip_code: string;
+    notes?: string;
+    link?: string;
+}

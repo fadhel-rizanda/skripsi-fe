@@ -1,10 +1,10 @@
 "use client"
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
-import { format } from "date-fns"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {ChangeEvent, useEffect, useMemo, useRef, useState} from "react"
+import {useForm} from "react-hook-form"
+import {format} from "date-fns"
+import {Card, CardContent} from "@/components/ui/card"
+import {Button} from "@/components/ui/button"
 import {
     Form,
     FormControl,
@@ -13,8 +13,8 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import {Input} from "@/components/ui/input"
+import {Textarea} from "@/components/ui/textarea"
 import {
     Select,
     SelectContent,
@@ -22,28 +22,28 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Icon } from "@iconify/react";
-import { TagBadge } from "@/components/badge/TagBadge";
-import { openAttachment, uploadAttachment } from "@/lib/attachment-helpers";
-import { CreatePetSchema } from "@/schemas/pet.schema";
-import { CreatePetPayload, petService } from "@/services/petServices";
-import { useTagsOptions } from "@/hooks/useFilterOptions";
-import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ActionDialog } from "@/components/dialog/ActionDialog";
-import { genderOptions, PetGender, PetSize, sizeOptions } from "@/types/pet";
-import { Attachment } from "@/types/attachment";
+import {Checkbox} from "@/components/ui/checkbox"
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Calendar} from "@/components/ui/calendar";
+import {Icon} from "@iconify/react";
+import {TagBadge} from "@/components/badge/TagBadge";
+import {openAttachment, uploadAttachment} from "@/lib/attachment-helpers";
+import {CreatePetSchema} from "@/schemas/pet.schema";
+import {CreatePetPayload, petService} from "@/services/petServices";
+import {useTagsOptions} from "@/hooks/useFilterOptions";
+import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
+import {useRouter} from "next/navigation";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {ActionDialog} from "@/components/dialog/ActionDialog";
+import {genderOptions, PetGender, PetSize, sizeOptions} from "@/types/pet";
+import {Attachment} from "@/types/attachment";
 
 type PetFormProps = {
     mode: "create" | "edit"
     petId?: string
 }
 
-export default function PetForm({ mode, petId }: PetFormProps) {
+export default function PetForm({mode, petId}: PetFormProps) {
     const isEditMode = mode === "edit"
 
     const router = useRouter()
@@ -94,18 +94,20 @@ export default function PetForm({ mode, petId }: PetFormProps) {
         },
     })
 
+    const [currentPetId, setCurrentPetId] = useState<string | undefined>(petId);
+
     async function handleFinalSubmit() {
-        const values = form.getValues()
+        const values = form.getValues();
 
         const uploadedProfileIds =
             profileFiles.length > 0
                 ? await Promise.all(profileFiles.map(file => uploadAttachment(file, true)))
-                : []
+                : [];
 
         const uploadedAdditionalIds =
             additionalFiles.length > 0
                 ? await Promise.all(additionalFiles.map(file => uploadAttachment(file)))
-                : []
+                : [];
 
         const payload: CreatePetPayload = {
             ...values,
@@ -119,13 +121,25 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                 ...(values.additional_record_ids ?? []),
                 ...uploadedAdditionalIds,
             ],
+        };
+
+        let response;
+
+        if (!isEditMode) {
+            response = await petService.createPet(payload);
+
+            if (response?.data?.id) {
+                setCurrentPetId(response.data.id);
+            }
+        } else {
+            if (!currentPetId) {
+                throw new Error("Pet ID is missing in edit mode.");
+            }
+
+            response = await petService.updatePet(currentPetId, payload);
         }
 
-        if (isEditMode) {
-            return await petService.updatePet(petId!, payload)
-        }
-
-        return await petService.createPet(payload)
+        return response;
     }
 
     function onSubmit() {
@@ -144,6 +158,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
         if (!files) return
         setProfileFiles([...profileFiles, ...Array.from(files)])
         setIsSubmitted(true)
+        e.target.value = ""
     }
 
     const handleAdditionalUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -153,11 +168,19 @@ export default function PetForm({ mode, petId }: PetFormProps) {
     }
 
     const removeProfileFile = (index: number) => {
-        setProfileFiles(profileFiles.filter((_, i) => i !== index))
+        setProfileFiles(prev => prev.filter((_, i) => i !== index))
+
+        if (profileInputRef.current) {
+            profileInputRef.current.value = ""
+        }
     }
 
     const removeAdditionalFile = (index: number) => {
-        setAdditionalFiles(additionalFiles.filter((_, i) => i !== index))
+        setAdditionalFiles(prev => prev.filter((_, i) => i !== index))
+
+        if (additionalInputRef.current) {
+            additionalInputRef.current.value = ""
+        }
     }
 
     const physiqueTagsMap = useMemo(
@@ -216,13 +239,16 @@ export default function PetForm({ mode, petId }: PetFormProps) {
         setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
     }
 
+    const profileInputRef = useRef<HTMLInputElement | null>(null)
+    const additionalInputRef = useRef<HTMLInputElement | null>(null)
+
     useEffect(() => {
         if (!isEditMode || !petId) return
 
         const fetchDetail = async () => {
             setIsLoadingDetail(true)
             try {
-                const res = await petService.getPetById(petId)
+                const res = await petService.getPetById(petId||"")
 
                 const safeSize: PetSize =
                     sizeOptions.includes(res.size as PetSize)
@@ -275,7 +301,12 @@ export default function PetForm({ mode, petId }: PetFormProps) {
     }, [form, isEditMode, petId])
 
     if (isEditMode && isLoadingDetail) {
-        return <div className="p-10 text-center bg-green-50 min-h-screen py-12 px-4">Loading pet data...</div>
+        return (
+            <div className="p-10 text-center bg-green-50 min-h-screen py-12 px-4">
+                <Icon icon="ph:circle-notch" className="w-8 h-8 animate-spin mx-auto mb-4"/>
+                <p>Loading pet data...</p>
+            </div>
+        )
     }
 
     return (
@@ -297,13 +328,13 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="name"
-                                                render={({ field }) => (
+                                                render={({field}) => (
                                                     <FormItem>
                                                         <FormLabel>Name *</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="e.g. Buddy" {...field} />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage/>
                                                     </FormItem>
                                                 )}
                                             />
@@ -311,13 +342,13 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="breed"
-                                                render={({ field }) => (
+                                                render={({field}) => (
                                                     <FormItem>
                                                         <FormLabel>Breed *</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="e.g. Golden Retriever" {...field} />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage/>
                                                     </FormItem>
                                                 )}
                                             />
@@ -326,7 +357,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="type_of_animal_id"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Type *</FormLabel>
                                                             <FormControl>
@@ -345,7 +376,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                     mode={"single"}
                                                                 />
                                                             </FormControl>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                         </FormItem>
                                                     )}
                                                 />
@@ -353,7 +384,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="size"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Size *</FormLabel>
                                                             <Select
@@ -362,7 +393,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                             >
                                                                 <FormControl className="w-full">
                                                                     <SelectTrigger>
-                                                                        <SelectValue placeholder="Select" />
+                                                                        <SelectValue placeholder="Select"/>
                                                                     </SelectTrigger>
                                                                 </FormControl>
                                                                 <SelectContent>
@@ -373,7 +404,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                         Large</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                         </FormItem>
                                                     )}
                                                 />
@@ -383,7 +414,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="date_of_birth"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem className="flex flex-col">
                                                             <FormLabel>Date of Birth *</FormLabel>
                                                             <Popover>
@@ -392,7 +423,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                         <Button
                                                                             variant="outline"
                                                                             className={`pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
-                                                                                }`}
+                                                                            }`}
                                                                         >
                                                                             {field.value ? (
                                                                                 format(field.value, "PPP")
@@ -400,7 +431,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                                 <span>Pick a date</span>
                                                                             )}
                                                                             <Icon icon="ph:calendar-blank"
-                                                                                className="ml-auto h-4 w-4 opacity-50" />
+                                                                                  className="ml-auto h-4 w-4 opacity-50"/>
                                                                         </Button>
                                                                     </FormControl>
                                                                 </PopoverTrigger>
@@ -415,7 +446,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                     />
                                                                 </PopoverContent>
                                                             </Popover>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                         </FormItem>
                                                     )}
                                                 />
@@ -423,7 +454,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="gender"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Gender *</FormLabel>
                                                             <Select
@@ -432,7 +463,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                             >
                                                                 <FormControl className="w-full">
                                                                     <SelectTrigger>
-                                                                        <SelectValue placeholder="Select" />
+                                                                        <SelectValue placeholder="Select"/>
                                                                     </SelectTrigger>
                                                                 </FormControl>
                                                                 <SelectContent>
@@ -440,7 +471,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                     <SelectItem value="female">Female</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                         </FormItem>
                                                     )}
                                                 />
@@ -449,7 +480,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="about"
-                                                render={({ field }) => (
+                                                render={({field}) => (
                                                     <FormItem>
                                                         <FormLabel>About *</FormLabel>
                                                         <FormControl>
@@ -459,7 +490,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                 {...field}
                                                             />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage/>
                                                     </FormItem>
                                                 )}
                                             />
@@ -468,7 +499,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="physique_ids"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Physique *</FormLabel>
                                                             <FormControl>
@@ -489,7 +520,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                     mode={"multiple"}
                                                                 />
                                                             </FormControl>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                             <div className="flex flex-wrap gap-2 mt-2">
                                                                 {field.value.map(tagId => (
                                                                     <TagBadge
@@ -511,7 +542,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="personality_ids"
-                                                    render={({ field }) => (
+                                                    render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Personality *</FormLabel>
                                                             <FormControl>
@@ -532,7 +563,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                                     mode={"multiple"}
                                                                 />
                                                             </FormControl>
-                                                            <FormMessage />
+                                                            <FormMessage/>
                                                             <div className="flex flex-wrap gap-2 mt-2">
                                                                 {field.value.map(tagId => (
                                                                     <TagBadge
@@ -558,19 +589,20 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                     Picture*</h3>
                                                 <div
                                                     className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
-                                                    <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3" />
+                                                    <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile
                                                         Picture</p>
                                                     <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX.
                                                         800x800px)</p>
                                                     <label htmlFor="profile-upload">
                                                         <Button type="button" variant="outline"
-                                                            className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
-                                                            asChild>
+                                                                className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
+                                                                asChild>
                                                             <span>Select File</span>
                                                         </Button>
                                                     </label>
                                                     <input
+                                                        ref={profileInputRef}
                                                         id="profile-upload"
                                                         type="file"
                                                         className="hidden"
@@ -643,7 +675,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                 <div
                                                     className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
                                                     <Icon icon="ph:cloud-arrow-up"
-                                                        className="w-12 h-12 text-[#BDBDBD] mb-3" />
+                                                          className="w-12 h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Click to upload or
                                                         drag
                                                         and drop</p>
@@ -652,12 +684,13 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                                         records</p>
                                                     <label htmlFor="additional-upload">
                                                         <Button type="button" variant="outline"
-                                                            className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
-                                                            asChild>
+                                                                className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
+                                                                asChild>
                                                             <span>Upload Files</span>
                                                         </Button>
                                                     </label>
                                                     <input
+                                                        ref={additionalInputRef}
                                                         id="additional-upload"
                                                         type="file"
                                                         className="hidden"
@@ -722,7 +755,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                         <FormField
                                             control={form.control}
                                             name="special_needs"
-                                            render={({ field }) => (
+                                            render={({field}) => (
                                                 <FormItem className="flex items-center space-x-3 pt-4">
                                                     <FormControl>
                                                         <Checkbox
@@ -737,7 +770,7 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                                             )}
                                         />
                                         <Button type="submit"
-                                            className="mt-4 bg-green-600 hover:bg-green-700 text-white">
+                                                className="mt-4 bg-green-600 hover:bg-green-700 text-white">
                                             {isEditMode ? "Update Pet Profile" : "Submit new pet profile"}
                                         </Button>
                                     </div>
@@ -751,7 +784,9 @@ export default function PetForm({ mode, petId }: PetFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() => router.push("/pets")}
+                onContinue={() =>
+                    router.push(currentPetId ? `/pets/${currentPetId}` : "/pets")
+                }
                 title={isEditMode ? "Update Pet Profile?" : "Create Pet Profile?"}
                 description="Please review the pet's information before continuing."
                 successTitle={isEditMode

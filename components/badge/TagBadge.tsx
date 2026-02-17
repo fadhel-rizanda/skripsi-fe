@@ -1,18 +1,29 @@
-import {Badge} from "@/components/ui/badge";
-import {Icon} from "@iconify/react";
+import {Badge} from "@/components/ui/badge"
+import {Icon} from "@iconify/react"
+import {cn} from "@/lib/utils"
 
-export const TagBadge = ({label, onRemove}: { label: string; onRemove?: () => void }) => (
+interface TagBadgeProps {
+    label: string
+    onRemove?: () => void
+    disabled?: boolean
+}
+
+export const TagBadge = ({label, onRemove, disabled = false}: TagBadgeProps) => (
     <Badge
         variant="secondary"
-        className="bg-[#E7F3E7] text-[#4CAF50] hover:bg-[#D7E8D7] px-3 py-1.5 rounded-xl flex gap-2 items-center font-medium text-sm border-0 transition-colors"
+        className={cn(
+            "bg-[#E7F3E7] text-[#4CAF50] px-3 py-1.5 rounded-xl flex gap-2 items-center font-medium text-sm border-0 transition-colors",
+            !disabled && "hover:bg-[#D7E8D7]",
+            disabled && "opacity-50 cursor-not-allowed"
+        )}
     >
         {label}
-        {onRemove && (
+        {onRemove && !disabled && (
             <button
                 type="button"
                 onClick={(e) => {
-                    e.preventDefault();
-                    onRemove();
+                    e.preventDefault()
+                    onRemove()
                 }}
                 className="flex items-center justify-center"
             >
@@ -23,4 +34,4 @@ export const TagBadge = ({label, onRemove}: { label: string; onRemove?: () => vo
             </button>
         )}
     </Badge>
-);
+)

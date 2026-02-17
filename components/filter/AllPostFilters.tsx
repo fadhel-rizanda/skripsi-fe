@@ -18,6 +18,7 @@ interface PostFiltersProps {
     setSortBy: (value: string) => void;
     filterTag: string;
     setFilterTag: (value: string) => void;
+    animalTypes: { id: string; name: string }[];
 }
 
 export function PostFilters({
@@ -27,6 +28,7 @@ export function PostFilters({
     setSortBy,
     filterTag,
     setFilterTag,
+    animalTypes = [],
 }: PostFiltersProps) {
     return (
         <div className="w-full flex flex-col space-y-4 items-center">
@@ -34,7 +36,7 @@ export function PostFilters({
                 <div className="relative w-full md:w-[309px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
                     <Input
-                        placeholder="Search by name..."
+                        placeholder="Search by title..."
                         className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500 h-12"
 
                         value={searchQuery}
@@ -48,7 +50,6 @@ export function PostFilters({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="newest">Newest</SelectItem>
-                        <SelectItem value="popular">Popular</SelectItem>
                         <SelectItem value="oldest">Oldest</SelectItem>
                     </SelectContent>
                 </Select>
@@ -58,11 +59,12 @@ export function PostFilters({
                         <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Tags</SelectItem>
-                        <SelectItem value="Adoption">Adoption</SelectItem>
-                        <SelectItem value="Training">Training</SelectItem>
-                        <SelectItem value="Cat">Cat</SelectItem>
-                        <SelectItem value="Tips">Tips</SelectItem>
+                        <SelectItem value="all">Animal Type</SelectItem>
+                        {animalTypes.map((tag) => (
+                            <SelectItem key={tag.id} value={tag.name}>
+                                {tag.name}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>

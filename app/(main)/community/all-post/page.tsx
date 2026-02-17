@@ -13,6 +13,7 @@ import {
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { postService, Post, PostListParams } from "@/services/postServices";
+import { generalService, Tag } from "@/services/generalServices";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +29,7 @@ export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
+    const [animalTypes, setAnimalTypes] = useState<Tag[]>([]);
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -38,6 +40,19 @@ export default function AllPostPage() {
         total: 0,
         last_page: 1,
     });
+
+    // Fetch animal types
+    useEffect(() => {
+        const fetchAnimalTypes = async () => {
+            try {
+                const types = await generalService.getAnimalTypes();
+                setAnimalTypes(types);
+            } catch (error) {
+                console.error("Failed to fetch animal types:", error);
+            }
+        };
+        fetchAnimalTypes();
+    }, []);
 
     // Fetch posts from API
     useEffect(() => {
@@ -55,8 +70,10 @@ export default function AllPostPage() {
                 // Map sortBy to API parameter
                 if (sortBy === "newest") {
                     params.sort_by = "created_at";
+                    params.sort_direction = "desc";
                 } else if (sortBy === "oldest") {
                     params.sort_by = "created_at";
+                    params.sort_direction = "asc";
                 } else if (sortBy === "popular") {
                     params.sort_by = "created_at"; // You might want to add likes_count sorting in BE
                 }
@@ -100,6 +117,28 @@ export default function AllPostPage() {
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page]);
+
+    const handleLikePost = async (postId: string) => {
+        try {
+            const response: any = await postService.likePost(postId);
+            if (response.status === true || response.status === 'success') {
+                setPosts(currentPosts => currentPosts.map(post => {
+                    if (post.id === postId) {
+                        // Check message to determine if liked or unliked
+                        // Backend returns "Post liked successfully." or "Post unliked successfully."
+                        const isLiked = response.message.toLowerCase().includes('liked') && !response.message.toLowerCase().includes('unliked');
+                        return {
+                            ...post,
+                            likes_count: isLiked ? post.likes_count + 1 : Math.max(0, post.likes_count - 1)
+                        };
+                    }
+                    return post;
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to like post:", error);
+        }
+    };
 
     // Filter posts by tag on frontend (if tag filter is applied)
     const filteredPosts = filterTag === "all"
@@ -173,6 +212,7 @@ export default function AllPostPage() {
                             setSortBy={setSortBy}
                             filterTag={filterTag}
                             setFilterTag={setFilterTag}
+                            animalTypes={animalTypes}
                         />
                     </CardContent>
                 </Card>
@@ -222,7 +262,7 @@ export default function AllPostPage() {
                                                     <span className="font-bold text-gray-900 text-sm md:text-base">{post.created_by.name}</span>
                                                     <span className="text-xs text-gray-500">• {formatRelativeTime(post.created_at)}</span>
                                                 </div>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-900 hover:text-gray-900">
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -256,11 +296,16 @@ export default function AllPostPage() {
                                             {/* Footer Actions */}
                                             <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                                                 <div className="flex gap-4 md:gap-6">
-                                                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2"
+                                                        onClick={() => handleLikePost(post.id)}
+                                                    >
                                                         <ThumbsUp className="h-4 w-4" />
                                                         <span className="text-xs md:text-sm font-medium">{post.likes_count} Likes</span>
                                                     </Button>
-                                                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
+                                                    <Button variant="ghost" size="sm" className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
                                                         <MessageSquare className="h-4 w-4" />
                                                         <span className="text-xs md:text-sm font-medium">{post.comments_count} Comments</span>
                                                     </Button>

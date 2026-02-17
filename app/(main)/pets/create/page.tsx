@@ -1,4 +1,4 @@
-import PetForm from "@/components/Form/PetForm";
+import PetForm from "@/components/form/PetForm";
 
 export default function RehomePetPage() {
     return <>

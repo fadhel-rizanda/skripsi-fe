@@ -123,7 +123,7 @@ export default function AllPostPage() {
 
     const handleLikePost = async (postId: string) => {
         try {
-            const response: any = await postService.likePost(postId);
+            const response: { status: boolean | 'success'; message: string } = await postService.likePost(postId);
             if (response.status === true || response.status === 'success') {
                 setPosts(currentPosts => currentPosts.map(post => {
                     if (post.id === postId) {

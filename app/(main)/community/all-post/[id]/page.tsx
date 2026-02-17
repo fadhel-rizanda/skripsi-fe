@@ -120,7 +120,7 @@ export default function PostDetailPage() {
     if (error || !post) {
         return (
             <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-sans">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-6xl mx-auto">
                     <Card className="rounded-2xl border-0 shadow-sm">
                         <CardContent className="p-8 text-center">
                             <p className="text-red-600 font-medium">{error || "Post not found"}</p>
@@ -138,7 +138,7 @@ export default function PostDetailPage() {
 
     return (
         <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-sans">
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-6">
                 {/* Back Button */}
                 <Link href="/community/all-post">
                     <Button variant="ghost" className="text-gray-700 hover:text-gray-900 font-medium">

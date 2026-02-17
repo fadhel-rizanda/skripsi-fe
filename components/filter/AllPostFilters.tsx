@@ -31,7 +31,7 @@ export function PostFilters({
     return (
         <div className="w-full flex flex-col space-y-4">
             <div className="flex flex-col md:flex-row gap-3 w-full">
-                <div className="relative flex-1">
+                <div className="relative flex-1 md:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                         placeholder="Search by name..."
@@ -42,7 +42,7 @@ export function PostFilters({
                 </div>
 
                 <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[150px] bg-white border-gray-200 rounded-lg">
+                    <SelectTrigger className="w-full md:w-[180px] bg-white border-gray-200 rounded-lg">
                         <SelectValue placeholder="Sort By" />
                     </SelectTrigger>
                     <SelectContent>
@@ -53,7 +53,7 @@ export function PostFilters({
                 </Select>
 
                 <Select value={filterTag} onValueChange={setFilterTag}>
-                    <SelectTrigger className="w-full md:w-[150px] bg-white border-gray-200 rounded-lg">
+                    <SelectTrigger className="w-full md:w-[180px] bg-white border-gray-200 rounded-lg">
                         <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>

@@ -131,7 +131,7 @@ export default function AllPostPage() {
 
     return (
         <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-sans">
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-6">
 
                 {/* Header Card */}
                 <Card className="rounded-2xl shadow-sm border-0 bg-white">

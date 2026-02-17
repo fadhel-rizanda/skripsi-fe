@@ -137,12 +137,12 @@ export function SearchableCombobox({
                                         setSearchValue("")
                                     }}
                                 >
-                                    <Check
+                                    {mode=="single" && <Check
                                         className={cn(
                                             "mr-2 h-4 w-4",
                                             selectedValues.includes(option.id) ? "opacity-100" : "opacity-0"
                                         )}
-                                    />
+                                    />}
                                     {option.name}
                                 </CommandItem>
                             ))}

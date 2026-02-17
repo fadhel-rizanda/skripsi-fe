@@ -34,7 +34,7 @@ export function PostFilters({
         <div className="w-full flex flex-col space-y-4 items-center">
             <div className="flex flex-col md:flex-row gap-3 w-full max-w-3xl">
                 <div className="relative w-full md:w-[309px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-black" />
                     <Input
                         placeholder="Search by title..."
                         className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500 h-12"
@@ -70,8 +70,8 @@ export function PostFilters({
             </div>
 
             <div className="flex justify-end pt-2 w-full max-w-3xl">
-                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12">
-                    <PenSquare className="mr-2 h-4 w-4" />
+                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]">
+                    <PenSquare className="mr-2 h-6 w-6" />
                     Create Post
                 </Button>
             </div>

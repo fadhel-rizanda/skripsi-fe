@@ -52,7 +52,7 @@ export interface PostListParams {
     page?: number;
     per_page?: number;
     search?: string;
-    sort_by?: "title" | "created_at" | "updated_at";
+    sort_by?: "title" | "created_at" | "updated_at" | "popular";
     sort_direction?: "asc" | "desc";
     community_id?: string;
     tag_id?: string;

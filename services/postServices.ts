@@ -148,9 +148,9 @@ export const postService = {
     },
 
     // Get comments for a post
-    getComments: async (postId: string): Promise<Comment[]> => {
-        const response = await api.get<CommentListResponse>(`/v1/posts/${postId}/comments`);
-        return response.data.data;
+    getComments: async (postId: string, params?: { page?: number; per_page?: number }): Promise<CommentListResponse> => {
+        const response = await api.get<CommentListResponse>(`/v1/posts/${postId}/comments`, { params });
+        return response.data;
     },
 
     // Create a comment on a post

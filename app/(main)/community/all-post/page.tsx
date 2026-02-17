@@ -130,39 +130,39 @@ export default function AllPostPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-sans">
+        <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-[family-name:var(--font-manrope)]">
             <div className="max-w-6xl mx-auto space-y-6">
 
                 {/* Header Card */}
                 <Card className="rounded-2xl shadow-sm border-0 bg-white">
                     <CardContent className="pt-8 pb-6 px-6 md:px-10 flex flex-col items-center">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-6 font-sans">Community Hub</h1>
+                        <h1 className="text-[36px] font-bold text-gray-900 mb-6 font-sans">Community Hub</h1>
 
                         {/* Tabs */}
                         <div className="flex w-full justify-center border-b border-gray-100 mb-8 overflow-x-auto">
                             <div className="flex gap-8">
                                 <Link
                                     href="/community/all-post"
-                                    className="pb-3 border-b-2 border-green-600 text-green-700 font-semibold text-sm whitespace-nowrap"
+                                    className="pb-3 border-b-2 border-green-600 text-green-700 font-semibold text-base whitespace-nowrap"
                                 >
                                     All Posts
                                 </Link>
                                 <Link
                                     href="/community/all-communities"
-                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-sm whitespace-nowrap transition-colors"
+                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-base whitespace-nowrap transition-colors"
                                 >
                                     All Communities
                                 </Link>
                                 <Link
                                     href="/community/all-users"
-                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-sm whitespace-nowrap transition-colors"
+                                    className="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 font-medium text-base whitespace-nowrap transition-colors"
                                 >
                                     All Users
                                 </Link>
                             </div>
                         </div>
 
-                        <p className="text-gray-500 text-center mb-6 text-sm">
+                        <p className="text-gray-500 text-center mb-6 text-[18px]">
                             Connect with fellow pet lovers, share your stories, and get valuable advice.
                         </p>
 
@@ -204,71 +204,79 @@ export default function AllPostPage() {
                             </Card>
                         ) : (
                             filteredPosts.map((post) => (
-                                <Card key={post.id} className="rounded-2xl border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                                    <CardHeader className="p-4 pb-2 md:p-6 md:pb-3 flex flex-row items-start gap-3 space-y-0">
-                                        <Avatar className="h-10 w-10 border border-gray-100">
-                                            <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
-                                            <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex flex-col flex-1">
-                                            <div className="flex items-center justify-between">
+                                <Card key={post.id} className="rounded-2xl border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow p-4 md:p-6">
+                                    <div className="flex gap-4">
+                                        {/* Avatar Section */}
+                                        <div className="flex-shrink-0">
+                                            <Avatar className="h-10 w-10 border border-gray-100">
+                                                <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
+                                                <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            </Avatar>
+                                        </div>
+
+                                        {/* Content Section */}
+                                        <div className="flex-1 min-w-0">
+                                            {/* Header */}
+                                            <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-bold text-gray-900 text-sm md:text-base">{post.created_by.name}</span>
                                                     <span className="text-xs text-gray-500">• {formatRelativeTime(post.created_at)}</span>
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600">
-                                                        <Pencil className="h-4 w-4" />
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600">
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+
+                                            {/* Body */}
+                                            <Link href={`/community/all-post/${post.id}`} className="block hover:opacity-80 transition-opacity mb-3">
+                                                {post.title && (
+                                                    <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1">{post.title}</h3>
+                                                )}
+                                                <p className="text-gray-700 leading-relaxed text-sm md:text-base line-clamp-3">
+                                                    {post.content}
+                                                </p>
+                                            </Link>
+
+                                            {/* Tags */}
+                                            {post.tags && post.tags.length > 0 && (
+                                                <div className="flex gap-2 mb-4 flex-wrap">
+                                                    {post.tags.map(tag => (
+                                                        <Badge
+                                                            key={tag.id}
+                                                            variant="secondary"
+                                                            className="bg-green-50 text-green-700 hover:bg-green-100 text-xs font-normal"
+                                                            style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
+                                                        >
+                                                            #{tag.name}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Footer Actions */}
+                                            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                                                <div className="flex gap-4 md:gap-6">
+                                                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2">
+                                                        <ThumbsUp className="h-4 w-4" />
+                                                        <span className="text-xs md:text-sm font-medium">{post.likes_count} Likes</span>
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
+                                                        <MessageSquare className="h-4 w-4" />
+                                                        <span className="text-xs md:text-sm font-medium">{post.comments_count} Comments</span>
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5 px-2">
+                                                        <Flag className="h-4 w-4" />
+                                                        <span className="text-xs md:text-sm font-medium">Report</span>
                                                     </Button>
                                                 </div>
+                                                <Link href={`/community/all-post/${post.id}`}>
+                                                    <Button variant="ghost" size="sm" className="text-black hover:text-gray-900 font-medium text-xs md:text-sm">
+                                                        Reply
+                                                    </Button>
+                                                </Link>
                                             </div>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4 pt-1 md:p-6 md:pt-2 space-y-3">
-                                        <Link href={`/community/all-post/${post.id}`} className="block hover:opacity-80 transition-opacity">
-                                            {post.title && (
-                                                <h3 className="font-bold text-gray-900 text-base md:text-lg">{post.title}</h3>
-                                            )}
-                                            <p className="text-gray-700 leading-relaxed text-sm md:text-base line-clamp-3">
-                                                {post.content}
-                                            </p>
-                                        </Link>
-                                        {post.tags && post.tags.length > 0 && (
-                                            <div className="flex gap-2 mt-2 flex-wrap">
-                                                {post.tags.map(tag => (
-                                                    <Badge
-                                                        key={tag.id}
-                                                        variant="secondary"
-                                                        className="bg-green-50 text-green-700 hover:bg-green-100 text-xs font-normal"
-                                                        style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
-                                                    >
-                                                        #{tag.name}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                    <CardFooter className="p-3 md:p-4 bg-gray-50/50 flex justify-between items-center border-t border-gray-100">
-                                        <div className="flex gap-4 md:gap-6">
-                                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2">
-                                                <ThumbsUp className="h-4 w-4" />
-                                                <span className="text-xs md:text-sm font-medium">{post.likes_count} Likes</span>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
-                                                <MessageSquare className="h-4 w-4" />
-                                                <span className="text-xs md:text-sm font-medium">{post.comments_count} Comments</span>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600 hover:bg-red-50 gap-1.5 px-2">
-                                                <Flag className="h-4 w-4" />
-                                                <span className="text-xs md:text-sm font-medium">Report</span>
-                                            </Button>
-                                        </div>
-                                        <Link href={`/community/all-post/${post.id}`}>
-                                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900 font-medium text-xs md:text-sm">
-                                                Reply
-                                            </Button>
-                                        </Link>
-                                    </CardFooter>
+                                    </div>
                                 </Card>
                             ))
                         )}

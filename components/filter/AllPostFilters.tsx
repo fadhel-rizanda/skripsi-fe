@@ -29,20 +29,21 @@ export function PostFilters({
     setFilterTag,
 }: PostFiltersProps) {
     return (
-        <div className="w-full flex flex-col space-y-4">
-            <div className="flex flex-col md:flex-row gap-3 w-full">
-                <div className="relative flex-1 md:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="w-full flex flex-col space-y-4 items-center">
+            <div className="flex flex-col md:flex-row gap-3 w-full max-w-3xl">
+                <div className="relative w-full md:w-[309px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
                     <Input
                         placeholder="Search by name..."
-                        className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500"
+                        className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500 h-12"
+
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
 
                 <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[180px] bg-white border-gray-200 rounded-lg">
+                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg" style={{ height: '48px' }}>
                         <SelectValue placeholder="Sort By" />
                     </SelectTrigger>
                     <SelectContent>
@@ -53,7 +54,7 @@ export function PostFilters({
                 </Select>
 
                 <Select value={filterTag} onValueChange={setFilterTag}>
-                    <SelectTrigger className="w-full md:w-[180px] bg-white border-gray-200 rounded-lg">
+                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg" style={{ height: '48px' }}>
                         <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>
@@ -66,8 +67,8 @@ export function PostFilters({
                 </Select>
             </div>
 
-            <div className="flex justify-end pt-2">
-                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-auto">
+            <div className="flex justify-end pt-2 w-full max-w-3xl">
+                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12">
                     <PenSquare className="mr-2 h-4 w-4" />
                     Create Post
                 </Button>

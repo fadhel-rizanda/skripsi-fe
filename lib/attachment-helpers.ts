@@ -1,6 +1,7 @@
 import { PresignedUrlSchema } from "@/schemas/attachment.schema";
 import {attachmentService} from "@/services/attachmentServices";
 import { Attachment } from "@/types/attachment";
+import {toast} from "sonner";
 
 export async function uploadAttachment(file: File, isPublic:boolean=false): Promise<string> {
     const sanitizedFilename = file.name
@@ -59,18 +60,26 @@ export async function downloadAttachment(
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error("downloadAttachment failed:", error);
-        alert(`Failed to download "${attachment.filename}". Please try again.`);
+        toast.info(`Failed to download "${attachment.filename}". Please try again.`);
     }
 }
+
+const SAFE_PREVIEW_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "application/pdf",
+]);
 
 export async function openAttachment(
     attachment: Attachment,
     onProgress?: (percent: number) => void
 ) {
     try {
-        const isPreviewable =
-            attachment.mime_type?.startsWith("image/") ||
-            attachment.mime_type === "application/pdf";
+        const isPreviewable = SAFE_PREVIEW_TYPES.has(
+            attachment.mime_type ?? ""
+        );
 
         const { download_url } =
             await attachmentService.generateDownloadUrl(
@@ -79,14 +88,14 @@ export async function openAttachment(
             );
 
         if (isPreviewable) {
-            window.open(download_url, "_blank");
+            window.open(download_url, "_blank", "noopener,noreferrer");
             return;
         }
 
         await downloadAttachment(attachment, onProgress);
     } catch (error) {
         console.error("openAttachment failed:", error);
-        alert(`Failed to open "${attachment.filename}". Please try again.`);
+        toast.info(`Failed to open "${attachment.filename}". Please try again.`);
     }
 }
 

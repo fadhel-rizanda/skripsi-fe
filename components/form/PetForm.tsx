@@ -94,18 +94,20 @@ export default function PetForm({mode, petId}: PetFormProps) {
         },
     })
 
+    const [currentPetId, setCurrentPetId] = useState<string | undefined>(petId);
+
     async function handleFinalSubmit() {
-        const values = form.getValues()
+        const values = form.getValues();
 
         const uploadedProfileIds =
             profileFiles.length > 0
                 ? await Promise.all(profileFiles.map(file => uploadAttachment(file, true)))
-                : []
+                : [];
 
         const uploadedAdditionalIds =
             additionalFiles.length > 0
                 ? await Promise.all(additionalFiles.map(file => uploadAttachment(file)))
-                : []
+                : [];
 
         const payload: CreatePetPayload = {
             ...values,
@@ -119,18 +121,25 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 ...(values.additional_record_ids ?? []),
                 ...uploadedAdditionalIds,
             ],
-        }
+        };
 
-        let response
-        if (isEditMode) {
-            response = await petService.updatePet(petId!, payload)
+        let response;
+
+        if (!isEditMode) {
+            response = await petService.createPet(payload);
+
+            if (response?.data?.id) {
+                setCurrentPetId(response.data.id);
+            }
         } else {
-            response = await petService.createPet(payload)
+            if (!currentPetId) {
+                throw new Error("Pet ID is missing in edit mode.");
+            }
+
+            response = await petService.updatePet(currentPetId, payload);
         }
 
-        petId = response?.data.id
-
-        return response
+        return response;
     }
 
     function onSubmit() {
@@ -775,7 +784,9 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() => router.push("/pets/"+(petId ? `/${petId}` : ""))}
+                onContinue={() =>
+                    router.push(currentPetId ? `/pets/${currentPetId}` : "/pets")
+                }
                 title={isEditMode ? "Update Pet Profile?" : "Create Pet Profile?"}
                 description="Please review the pet's information before continuing."
                 successTitle={isEditMode

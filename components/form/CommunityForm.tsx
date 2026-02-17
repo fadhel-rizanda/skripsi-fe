@@ -46,7 +46,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         setSearch: setCommunitySearch,
         loadMore: loadMoreCommunityTags,
         hasMore: hasMoreCommunityTags
-    } = useTagsOptions("physique");
+    } = useTagsOptions("community");
 
     const {
         options: usersOptions,
@@ -77,6 +77,8 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         },
     })
 
+    const [currentCommunityId, setCurrentCommunityId] = useState<string | undefined>(communityId);
+
     async function handleFinalSubmit() {
         const values = form.getValues()
 
@@ -88,15 +90,22 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         }
 
         let response
-        if (isEditMode) {
-            response = await communityService.updateCommunity(communityId!, payload);
-        }else {
+
+        if (!isEditMode) {
             response = await communityService.createCommunity(payload)
+
+            if (response?.data?.id) {
+                setCurrentCommunityId(response.data.id);
+            }
+        } else {
+            if (!currentCommunityId) {
+                throw new Error("Community ID is missing in edit mode.");
+            }
+
+            response = await communityService.updateCommunity(currentCommunityId, payload);
         }
 
-        communityId = response?.data.id
-
-        return response
+        return response;
     }
 
     function onSubmit() {
@@ -208,8 +217,8 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                         state: res.address?.state ?? "",
                         zip_code: res.address?.zip_code ?? "",
                         country: res.address?.country ?? "",
-                        notes: res.address.notes || undefined,
-                        link: res.address.link || undefined,
+                        notes: res.address?.notes || undefined,
+                        link: res.address?.link || undefined,
                     },
                 })
 
@@ -453,7 +462,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                         <FormLabel>Notes</FormLabel>
                                                         <FormControl>
                                                             <Textarea
-                                                                placeholder="Describe the community, its mission, and what makes it unique..."
+                                                                placeholder="Describe the address in more detail..."
                                                                 className="min-h-30"
                                                                 {...field}
                                                             />
@@ -602,7 +611,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() => router.push("/communities/" + communityId)}
+                onContinue={() =>
+                    router.push(currentCommunityId ? `/communities/${currentCommunityId}` : "/communities")
+                }
                 title={isEditMode ? "Update Community Profile?" : "Create Community Profile?"}
                 description="Please review the community's information before continuing."
                 successTitle={isEditMode

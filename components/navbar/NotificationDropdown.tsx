@@ -24,7 +24,7 @@ export function NotificationDropdown() {
     const [hasMore, setHasMore] = useState(true)
     const [fetchingMore, setFetchingMore] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
-    const {hasUnread} = useNotificationStore()
+    const {hasUnread, clear} = useNotificationStore()
 
     useEffect(() => {
         fetchInitial()
@@ -50,6 +50,7 @@ export function NotificationDropdown() {
             setHasMore(response.has_more_pages)
             setPage(1)
             setUnreadCount(response.unread_count)
+            clear()
         } catch (error) {
             console.error("Failed to fetch notifications", error)
         } finally {
@@ -86,7 +87,7 @@ export function NotificationDropdown() {
 
             setNotifications(prev =>
                 prev.map(n =>
-                    n.id === id ? {...n, read_at: new Date().toISOString()} : n
+                    n.id === id ? {...n, read_at: "SERVER_GENERATED_TIMESTAMP"} : n
                 )
             )
 
@@ -102,7 +103,7 @@ export function NotificationDropdown() {
 
             setNotifications(prev =>
                 prev.map(n =>
-                    !n.read_at ? {...n, read_at: new Date().toISOString()} : n
+                    !n.read_at ? {...n, read_at: "SERVER_GENERATED_TIMESTAMP"} : n
                 )
             )
 
@@ -127,7 +128,7 @@ export function NotificationDropdown() {
                 </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-95" align="end" forceMount>
+            <DropdownMenuContent className="w-96" align="end" forceMount>
                 <DropdownMenuLabel>
                     <div className="flex items-center justify-between">
                         <span>Notifications</span>

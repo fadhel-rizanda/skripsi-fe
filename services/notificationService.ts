@@ -8,27 +8,27 @@ export const notificationService = {
     },
 
     markAsRead: async (id: string): Promise<void> => {
-        const response = await api.post(`/v1/notifications/${id}/mark-as-read`);
-        return response.data.data;
+        await api.post(`/v1/notifications/${id}/mark-as-read`);
+        return;
     },
 
     markAsUnread: async (id: string): Promise<void> => {
-        const response = await api.post(`/v1/notifications/${id}/mark-as-unread`);
-        return response.data.data;
+        await api.post(`/v1/notifications/${id}/mark-as-unread`);
+        return;
     },
 
     markAllAsRead: async (): Promise<void> => {
-        const response = await api.post(`/v1/notifications/mark-all-as-read`);
-        return response.data.data;
+        await api.post(`/v1/notifications/mark-all-as-read`);
+        return;
     },
 
     markAllAsUnread: async (): Promise<void> => {
-        const response = await api.post(`/v1/notifications/mark-all-as-unread`);
-        return response.data.data;
+        await api.post(`/v1/notifications/mark-all-as-unread`);
+        return;
     },
 
     deleteNotification: async (id: string): Promise<void> => {
-        const response = await api.delete(`/v1/notifications/${id}`);
-        return response.data.data;
+        await api.delete(`/v1/notifications/${id}`);
+        return;
     },
 }

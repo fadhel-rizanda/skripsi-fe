@@ -1,22 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, PenSquare } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { CommunityHeader } from "@/components/community/CommunityHeader";
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
-import { postService, Post, PostListParams } from "@/services/postServices";
+import { postService, Post, GetPostsParams } from "@/services/postServices";
 import { generalService, Tag } from "@/services/generalServices";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
+import { Button } from "@/components/ui/button";
 
 export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
     const [animalTypes, setAnimalTypes] = useState<Tag[]>([]);
+
+    const { data: session } = useSession();
+    const router = useRouter();
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,7 +56,7 @@ export default function AllPostPage() {
                 setError(null);
 
                 // Build query parameters
-                const params: PostListParams = {
+                const params: GetPostsParams = {
                     per_page: pagination.per_page,
                     page: pagination.current_page,
                 };
@@ -73,10 +80,7 @@ export default function AllPostPage() {
 
                 // Add tag filter
                 if (filterTag !== "all") {
-                    const selectedTag = animalTypes.find(t => t.name === filterTag);
-                    if (selectedTag) {
-                        params.tag_id = selectedTag.id;
-                    }
+                    params.tag_id = filterTag;
                 }
 
                 const response = await postService.getPosts(params);
@@ -107,6 +111,16 @@ export default function AllPostPage() {
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page, animalTypes]);
+
+    const handleCreatePost = () => {
+        if (!session) {
+            toast.error("You must be logged in to create a post.");
+            router.push("/login?callbackUrl=/community/all-post");
+            return;
+        }
+
+        router.push("/community/create-post");
+    };
 
     const handleLikePost = async (postId: string) => {
         try {
@@ -170,6 +184,15 @@ export default function AllPostPage() {
                         setFilterTag={setFilterTag}
                         animalTypes={animalTypes}
                     />
+                    <div className="flex justify-end pt-4 w-full max-w-3xl">
+                        <Button
+                            onClick={handleCreatePost}
+                            className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]"
+                        >
+                            <PenSquare className="mr-2 h-6 w-6" />
+                            Create Post
+                        </Button>
+                    </div>
                 </CommunityHeader>
 
                 {/* Loading State */}

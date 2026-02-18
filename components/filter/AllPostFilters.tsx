@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, PenSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 import {
     Select,
     SelectContent,
@@ -30,6 +31,8 @@ export function PostFilters({
     setFilterTag,
     animalTypes = [],
 }: PostFiltersProps) {
+    const [tagSearch, setTagSearch] = useState("");
+
     return (
         <div className="w-full flex flex-col space-y-4 items-center">
             <div className="flex flex-col md:flex-row gap-3 w-full max-w-3xl">
@@ -54,26 +57,22 @@ export function PostFilters({
                     </SelectContent>
                 </Select>
 
-                <Select value={filterTag} onValueChange={setFilterTag}>
-                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg" style={{ height: '48px' }}>
-                        <SelectValue placeholder="Tag" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Animal Tag</SelectItem>
-                        {animalTypes.map((tag) => (
-                            <SelectItem key={tag.id} value={tag.name}>
-                                {tag.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
-            <div className="flex justify-end pt-2 w-full max-w-3xl">
-                <Button className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]">
-                    <PenSquare className="mr-2 h-6 w-6" />
-                    Create Post
-                </Button>
+                <div className="w-full md:w-[220px]">
+                    <SearchableCombobox
+                        options={[
+                            { id: "all", name: "All Animals" },
+                            ...animalTypes
+                        ].filter(type =>
+                            type.name.toLowerCase().includes(tagSearch.toLowerCase())
+                        )}
+                        selectedValues={[filterTag]}
+                        onSelect={(id) => setFilterTag(id)}
+                        onSearch={setTagSearch}
+                        placeholder="Filter by Tag"
+                        mode="single"
+                        className="w-full bg-white border-gray-200 rounded-lg h-[48px]"
+                    />
+                </div>
             </div>
         </div>
     );

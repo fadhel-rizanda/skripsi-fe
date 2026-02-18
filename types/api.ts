@@ -1,3 +1,5 @@
+import {Notification} from "@/types/notification";
+
 export interface ApiResponse<T = unknown> {
     error: boolean
     status: string
@@ -6,11 +8,10 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T> {
-    meta: {
-        current_page: number
-        total: number
-        per_page: number
-    }
+    current_page: number
+    per_page: number
+    total: number | null
+    has_more_pages: boolean
 }
 
 export interface GetAllParams {
@@ -24,4 +25,8 @@ export interface GetAllParams {
 export interface AdoptionFilterState extends GetAllParams{
     status_id?: string;
     stage_tag_id?: string;
+}
+
+export interface NotificationPaginatedResponse extends PaginatedResponse<Notification[]> {
+    unread_count: number
 }

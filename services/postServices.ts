@@ -48,14 +48,12 @@ export interface PostDetailResponse {
     data: Post;
 }
 
-export interface GetAllParams {
-    page?: number;
-    per_page?: number;
-    search?: string;
-    sort_by?: "title" | "created_at" | "updated_at" | "popular";
-    sort_direction?: "asc" | "desc";
+import { GetAllParams } from "@/types/api";
+
+export interface GetPostsParams extends GetAllParams {
     community_id?: string;
     tag_id?: string;
+    sort_direction?: "asc" | "desc"; // Extended to match backend expectation
     [key: string]: any;
 }
 
@@ -75,7 +73,7 @@ export interface UpdatePostPayload {
 }
 
 export const postService = {
-    getPosts: async (params?: GetAllParams): Promise<PostListResponse> => {
+    getPosts: async (params?: GetPostsParams): Promise<PostListResponse> => {
         const response = await api.get<PostListResponse>("/v1/posts", { params });
         return response.data;
     },
@@ -99,7 +97,7 @@ export const postService = {
         const response = await api.post(`/v1/posts/${id}/likes`);
         return response.data;
     },
-    searchPosts: async (query: string, params?: Omit<GetAllParams, 'search'>): Promise<PostListResponse> => {
+    searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PostListResponse> => {
         const response = await api.get<PostListResponse>("/v1/posts", {
             params: { ...params, search: query }
         });

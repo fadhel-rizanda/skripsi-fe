@@ -30,14 +30,14 @@ export interface CreateCommentPayload {
     content: string;
 }
 
-export interface GetAllParams {
-    page?: number;
-    per_page?: number;
-    [key: string]: string | number | undefined;
+import { GetAllParams } from "@/types/api";
+
+export interface GetCommentsParams extends GetAllParams {
+    [key: string]: any;
 }
 
 export const commentService = {
-    getComments: async (postId: string, params?: GetAllParams): Promise<CommentListResponse> => {
+    getComments: async (postId: string, params?: GetCommentsParams): Promise<CommentListResponse> => {
         const response = await api.get<CommentListResponse>(`/v1/posts/${postId}/comments`, { params });
         return response.data;
     },

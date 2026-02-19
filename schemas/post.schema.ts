@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createPostSchema = z.object({
+export const CreatePostSchema = z.object({
     title: z
         .string()
         .min(1, { message: "Title is required" })
@@ -8,14 +8,12 @@ export const createPostSchema = z.object({
     content: z
         .string()
         .min(1, { message: "Content is required" }),
-    community_id: z.string().optional(),
-    tag_ids: z.array(z.string()).optional(),
-    attachment_id: z.string().optional(),
+    community_id: z.string().uuid().optional(),
+    tag_ids: z.array(z.string().uuid()).optional(),
+    attachment_id: z.string().uuid().optional(),
 });
 
-export const updatePostSchema = createPostSchema.partial();
+export const UpdatePostSchema = CreatePostSchema.partial();
 
-export type CreatePostInput = z.infer<typeof createPostSchema>;
-export type UpdatePostInput = z.infer<typeof updatePostSchema>;
-
-
+export type CreatePostInput = z.infer<typeof CreatePostSchema>;
+export type UpdatePostInput = z.infer<typeof UpdatePostSchema>;

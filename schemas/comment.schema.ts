@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createCommentSchema = z.object({
+export const CreateCommentSchema = z.object({
     content: z
         .string()
         .min(1, { message: "Content is required" })
@@ -9,4 +9,4 @@ export const createCommentSchema = z.object({
     parent_id: z.string().uuid().optional(),
 });
 
-export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+export type CreateCommentInput = z.infer<typeof CreateCommentSchema>;

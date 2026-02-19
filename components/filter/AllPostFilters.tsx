@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 import {
     Select,
@@ -11,6 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useTagsOptions } from "@/hooks/useFilterOptions";
 
 interface PostFiltersProps {
     searchQuery: string;
@@ -19,7 +19,6 @@ interface PostFiltersProps {
     setSortBy: (value: string) => void;
     filterTag: string;
     setFilterTag: (value: string) => void;
-    animalTypes: { id: string; name: string }[];
 }
 
 export function PostFilters({
@@ -29,9 +28,14 @@ export function PostFilters({
     setSortBy,
     filterTag,
     setFilterTag,
-    animalTypes = [],
 }: PostFiltersProps) {
-    const [tagSearch, setTagSearch] = useState("");
+    const {
+        options: tags,
+        isLoading: isLoadingTags,
+        setSearch: setTagSearch,
+        loadMore: loadMoreTags,
+        hasMore: hasMoreTags
+    } = useTagsOptions("type_of_animal");
 
     return (
         <div className="w-full flex flex-col space-y-4 items-center">
@@ -59,16 +63,21 @@ export function PostFilters({
 
                 <div className="w-full md:w-[220px]">
                     <SearchableCombobox
-                        options={[
-                            { id: "all", name: "All Animals" },
-                            ...animalTypes
-                        ].filter(type =>
-                            type.name.toLowerCase().includes(tagSearch.toLowerCase())
-                        )}
-                        selectedValues={[filterTag]}
-                        onSelect={(id) => setFilterTag(id)}
+                        options={tags}
+                        selectedValues={[filterTag].filter(Boolean)}
+                        onSelect={(value) => {
+                            if (value === filterTag) {
+                                setFilterTag("");
+                            } else {
+                                setFilterTag(value);
+                            }
+                        }}
                         onSearch={setTagSearch}
+                        onLoadMore={loadMoreTags}
+                        isLoading={isLoadingTags}
+                        hasMore={hasMoreTags}
                         placeholder="Filter by Tag"
+                        emptyMessage="No tags found."
                         mode="single"
                         className="w-full bg-white border-gray-200 rounded-lg h-[48px]"
                     />

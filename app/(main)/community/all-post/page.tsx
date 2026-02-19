@@ -6,11 +6,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { CommunityHeader } from "@/components/community/CommunityHeader";
 import { PostFilters } from "@/components/filter/AllPostFilters";
+import { CommunityPageLayout } from "../layout";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { postService, Post, GetPostsParams } from "@/services/postServices";
-import { generalService, Tag } from "@/services/generalServices";
+
 
 import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
@@ -20,7 +20,6 @@ export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
-    const [animalTypes, setAnimalTypes] = useState<Tag[]>([]);
 
     const { data: session } = useSession();
     const router = useRouter();
@@ -35,18 +34,7 @@ export default function AllPostPage() {
         last_page: 1,
     });
 
-    // Fetch animal types
-    useEffect(() => {
-        const fetchAnimalTypes = async () => {
-            try {
-                const types = await generalService.getAnimalTypes();
-                setAnimalTypes(types);
-            } catch (error) {
-                console.error("Failed to load animal tags:", error);
-            }
-        };
-        fetchAnimalTypes();
-    }, []);
+
 
     // Fetch posts from API
     useEffect(() => {
@@ -110,7 +98,7 @@ export default function AllPostPage() {
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page, animalTypes]);
+    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page]);
 
     const handleCreatePost = () => {
         if (!session) {
@@ -171,80 +159,76 @@ export default function AllPostPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-[family-name:var(--font-manrope)]">
-            <div className="max-w-4xl mx-auto space-y-6">
+        <>
+            <CommunityPageLayout>
+                <PostFilters
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    filterTag={filterTag}
+                    setFilterTag={setFilterTag}
+                />
+                <div className="flex justify-end pt-4 w-full max-w-3xl">
+                    <Button
+                        onClick={handleCreatePost}
+                        className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]"
+                    >
+                        <PenSquare className="mr-2 h-6 w-6" />
+                        Create Post
+                    </Button>
+                </div>
+            </CommunityPageLayout>
 
-                <CommunityHeader>
-                    <PostFilters
-                        searchQuery={searchQuery}
-                        setSearchQuery={setSearchQuery}
-                        sortBy={sortBy}
-                        setSortBy={setSortBy}
-                        filterTag={filterTag}
-                        setFilterTag={setFilterTag}
-                        animalTypes={animalTypes}
-                    />
-                    <div className="flex justify-end pt-4 w-full max-w-3xl">
-                        <Button
-                            onClick={handleCreatePost}
-                            className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]"
-                        >
-                            <PenSquare className="mr-2 h-6 w-6" />
-                            Create Post
-                        </Button>
-                    </div>
-                </CommunityHeader>
+            {/* Loading State */}
+            {loading && (
+                <div className="flex justify-center items-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                </div>
+            )}
 
-                {/* Loading State */}
-                {loading && (
-                    <div className="flex justify-center items-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                    </div>
-                )}
+            {/* Error State */}
+            {error && !loading && (
+                <Card className="rounded-2xl border-0 shadow-sm">
+                    <CardContent className="p-8 text-center">
+                        <p className="text-red-600 font-medium">{error}</p>
+                    </CardContent>
+                </Card>
+            )}
 
-                {/* Error State */}
-                {error && !loading && (
-                    <Card className="rounded-2xl border-0 shadow-sm">
-                        <CardContent className="p-8 text-center">
-                            <p className="text-red-600 font-medium">{error}</p>
-                        </CardContent>
-                    </Card>
-                )}
+            {/* Posts List */}
+            {!loading && !error && (
+                <div className="space-y-4">
+                    {filteredPosts.length === 0 ? (
+                        <Card className="rounded-2xl border-0 shadow-sm">
+                            <CardContent className="p-8 text-center">
+                                <p className="text-gray-500">No posts found</p>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        filteredPosts.map((post) => (
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                onLike={handleLikePost}
+                                formatRelativeTime={formatRelativeTime}
+                            />
+                        ))
+                    )}
+                </div>
+            )}
 
-                {/* Posts List */}
-                {!loading && !error && (
-                    <div className="space-y-4">
-                        {filteredPosts.length === 0 ? (
-                            <Card className="rounded-2xl border-0 shadow-sm">
-                                <CardContent className="p-8 text-center">
-                                    <p className="text-gray-500">No posts found</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            filteredPosts.map((post) => (
-                                <PostCard
-                                    key={post.id}
-                                    post={post}
-                                    onLike={handleLikePost}
-                                    formatRelativeTime={formatRelativeTime}
-                                />
-                            ))
-                        )}
-                    </div>
-                )}
-
-                {/* Pagination */}
-                {!loading && !error && filteredPosts.length > 0 && (
-                    <PaginationBar
-                        current_page={pagination.current_page}
-                        total={pagination.total}
-                        per_page={pagination.per_page}
-                        onPageChange={handlePageChange}
-                        onDataPerPageChange={handlePerPageChange}
-                        dataPerPageOptions={[10, 15, 25, 50]}
-                    />
-                )}
-            </div>
-        </div>
+            {/* Pagination */}
+            {!loading && !error && filteredPosts.length > 0 && (
+                <PaginationBar
+                    current_page={pagination.current_page}
+                    total={pagination.total}
+                    per_page={pagination.per_page}
+                    onPageChange={handlePageChange}
+                    onDataPerPageChange={handlePerPageChange}
+                    dataPerPageOptions={[10, 15, 25, 50]}
+                />
+            )}
+        </>
     );
 }

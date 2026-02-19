@@ -1,5 +1,6 @@
 import axios, {AxiosError} from "axios";
 import {getSession, signOut} from "next-auth/react";
+import {toast} from "sonner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -44,6 +45,9 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
       if (error instanceof AxiosError) {
+        if(error.message !== 'canceled') {
+          toast.error(error.response?.data?.message || "An error occurred. Please try again.");
+        }
         if (error.response?.status === 401) {
           cachedSession = null;
           sessionPromise = null;

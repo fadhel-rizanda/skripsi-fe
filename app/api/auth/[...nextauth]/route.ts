@@ -22,17 +22,13 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 
         const data = await res.json()
 
-        // cek backend response JSON
-        if (data.error) {
-            console.error("Backend error refreshing token:", data)
-            console.error("Access token:", token.accessToken)
+        if (!res.ok || data.error) {
             return {
                 ...token,
-                error: data.message || "RefreshAccessTokenError",
+                error: "RefreshAccessTokenError",
             }
         }
 
-        // update token baru
         return {
             ...token,
             accessToken: data.data.access_token,
@@ -41,8 +37,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
             refreshExpiresAt: Date.now() + data.data.refresh_expires_in * 1000,
             error: undefined,
         }
-    } catch (error) {
-        console.error("Error refreshing access token:", error)
+    } catch {
         return {
             ...token,
             error: "RefreshAccessTokenError",
@@ -127,11 +122,8 @@ export const authOptions: AuthOptions = {
         async signIn({ user, account }) {
             if (account?.provider === "google") {
                 try {
-                    // const selectedRole = (user as UserRole).selectedRole || "adopter"
                     const cookieStore = await cookies()
                     const selectedRole = cookieStore.get('selectedRole')?.value || 'adopter'
-
-                    console.log("selected Role: ", selectedRole);
 
                     const res = await fetch(`${API_URL}/v1/auth/provider`, {
                         method: "POST",
@@ -146,11 +138,10 @@ export const authOptions: AuthOptions = {
                         }),
                     })
 
-
                     const data = await res.json()
 
                     if (!res.ok || data.error) {
-                        throw new Error(data.message || "Google login failed")
+                        throw new Error("Google login failed")
                     }
 
                     const userData = data.data.user
@@ -174,8 +165,7 @@ export const authOptions: AuthOptions = {
                     cookieStore.delete('selectedRole')
 
                     return true
-                } catch (error) {
-                    console.error("Google sign-in error:", error)
+                } catch {
                     return false
                 }
             }
@@ -199,11 +189,26 @@ export const authOptions: AuthOptions = {
                 }
             }
 
+            if (token.error === "RefreshAccessTokenError") {
+                return token
+            }
+
+            if (
+                token.refreshExpiresAt &&
+                Date.now() > token.refreshExpiresAt
+            ) {
+                return {
+                    ...token,
+                    error: "RefreshAccessTokenError",
+                }
+            }
+
             if (!token.expiresAt) {
                 return token
             }
 
             const bufferTime = 5 * 60 * 1000
+
             if (Date.now() < token.expiresAt - bufferTime) {
                 return token
             }

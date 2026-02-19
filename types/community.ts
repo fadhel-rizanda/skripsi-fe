@@ -15,4 +15,6 @@ export interface Community {
     status: Status;
     created_at: string;
     updated_at: string;
+    is_member: boolean;
+    is_admin: boolean;
 }

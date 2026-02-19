@@ -30,25 +30,7 @@ export interface Post {
     created_by: CreatedBy;
 }
 
-export interface PostListResponse {
-    error: boolean;
-    status: string;
-    message: string;
-    data: Post[];
-    current_page: number;
-    per_page: number;
-    total: number;
-    has_more_pages: boolean;
-}
-
-export interface PostDetailResponse {
-    error: boolean;
-    status: string;
-    message: string;
-    data: Post;
-}
-
-import { GetAllParams } from "@/types/api";
+import { ApiResponse, PaginatedResponse, GetAllParams } from "@/types/api";
 
 export interface GetPostsParams extends GetAllParams {
     community_id?: string;
@@ -73,12 +55,12 @@ export interface UpdatePostPayload {
 }
 
 export const postService = {
-    getPosts: async (params?: GetPostsParams): Promise<PostListResponse> => {
-        const response = await api.get<PostListResponse>("/v1/posts", { params });
+    getPosts: async (params?: GetPostsParams): Promise<PaginatedResponse<Post[]>> => {
+        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", { params });
         return response.data;
     },
     getPostById: async (id: string): Promise<Post> => {
-        const response = await api.get<PostDetailResponse>(`/v1/posts/${id}`);
+        const response = await api.get<ApiResponse<Post>>(`/v1/posts/${id}`);
         return response.data.data;
     },
     createPost: async (data: CreatePostPayload) => {
@@ -97,11 +79,10 @@ export const postService = {
         const response = await api.post(`/v1/posts/${id}/likes`);
         return response.data;
     },
-    searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PostListResponse> => {
-        const response = await api.get<PostListResponse>("/v1/posts", {
+    searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PaginatedResponse<Post[]>> => {
+        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {
             params: { ...params, search: query }
         });
         return response.data;
     },
 };
-

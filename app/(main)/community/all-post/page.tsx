@@ -76,10 +76,10 @@ export default function AllPostPage() {
                 if (!response.error && response.status === "success") {
                     setPosts(response.data);
                     setPagination({
-                        current_page: response.current_page,
-                        per_page: response.per_page,
-                        total: response.total,
-                        last_page: Math.ceil(response.total / response.per_page),
+                        current_page: response.meta.current_page,
+                        per_page: response.meta.per_page,
+                        total: response.meta.total,
+                        last_page: Math.ceil(response.meta.total / response.meta.per_page),
                     });
                 } else {
                     setError("Failed to fetch posts");

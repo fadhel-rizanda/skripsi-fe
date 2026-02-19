@@ -9,12 +9,13 @@ import { toast } from "sonner";
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { CommunityPageLayout } from "../layout";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
-import { postService, Post, GetPostsParams } from "@/services/postServices";
+import { postService, GetPostsParams } from "@/services/postServices";
 
 
 import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
 import { Button } from "@/components/ui/button";
+import {Post} from "@/types/post";
 
 export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -67,7 +68,7 @@ export default function AllPostPage() {
                 }
 
                 // Add tag filter
-                if (filterTag !== "all") {
+                if (filterTag !== "all" && filterTag !== "") {
                     params.tag_id = filterTag;
                 }
 
@@ -121,7 +122,8 @@ export default function AllPostPage() {
                         const isLiked = response.message.toLowerCase().includes('liked') && !response.message.toLowerCase().includes('unliked');
                         return {
                             ...post,
-                            likes_count: isLiked ? post.likes_count + 1 : Math.max(0, post.likes_count - 1)
+                            likes_count: isLiked ? post.likes_count + 1 : Math.max(0, post.likes_count - 1),
+                            is_liked: isLiked,
                         };
                     }
                     return post;
@@ -169,12 +171,12 @@ export default function AllPostPage() {
                     filterTag={filterTag}
                     setFilterTag={setFilterTag}
                 />
-                <div className="flex justify-end pt-4 w-full max-w-3xl">
+                <div className="flex justify-end pt-6 w-full max-w-3xl">
                     <Button
                         onClick={handleCreatePost}
-                        className="bg-[#19E619] hover:bg-green-500 text-black font-semibold rounded-lg px-6 w-full md:w-[188px] h-12 text-[18px]"
+                        className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold"
                     >
-                        <PenSquare className="mr-2 h-6 w-6" />
+                        <PenSquare  />
                         Create Post
                     </Button>
                 </div>

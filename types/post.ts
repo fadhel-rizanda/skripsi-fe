@@ -14,4 +14,5 @@ export interface Post {
     likes_count: number;
     comments_count: number;
     created_by: UserProfile;
+    is_liked: boolean;
 }

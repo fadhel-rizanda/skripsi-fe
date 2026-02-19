@@ -1,36 +1,6 @@
-
 import api from "@/lib/axios";
-
-export interface Tag {
-    id: string;
-    name: string;
-    type: string;
-    color_code: string;
-}
-
-export interface CreatedBy {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string | null;
-    is_active: boolean;
-}
-
-export interface Post {
-    id: string;
-    title: string;
-    content: string;
-    image_url: string | null;
-    attachment: any;
-    created_at: string;
-    updated_at: string;
-    tags: Tag[];
-    likes_count: number;
-    comments_count: number;
-    created_by: CreatedBy;
-}
-
-import { ApiResponse, PaginatedResponse, GetAllParams } from "@/types/api";
+import {ApiResponse, PaginatedResponse, GetAllParams} from "@/types/api";
+import {Post} from "@/types/post";
 
 export interface GetPostsParams extends GetAllParams {
     community_id?: string;
@@ -56,7 +26,7 @@ export interface UpdatePostPayload {
 
 export const postService = {
     getPosts: async (params?: GetPostsParams): Promise<PaginatedResponse<Post[]>> => {
-        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", { params });
+        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {params});
         return response.data;
     },
     getPostById: async (id: string): Promise<Post> => {
@@ -81,7 +51,7 @@ export const postService = {
     },
     searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PaginatedResponse<Post[]>> => {
         const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {
-            params: { ...params, search: query }
+            params: {...params, search: query}
         });
         return response.data;
     },

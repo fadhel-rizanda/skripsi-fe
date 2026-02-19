@@ -1,10 +1,11 @@
-import { Post } from "@/services/postServices";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ThumbsUp, MessageSquare, Flag, Pencil } from "lucide-react";
+import {Post} from "@/types/post";
+import {useSession} from "next-auth/react";
 
 interface PostCardProps {
   post: Post;
@@ -13,11 +14,12 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
+  const { data: session } = useSession()
   return (
     <Card className="rounded-2xl border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow p-4 md:p-6 flex flex-col gap-1">
       <div className="flex gap-4">
         {/* Avatar Section */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Avatar className="h-10 w-10 border border-gray-300">
             <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
             <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -32,9 +34,9 @@ export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
               <span className="font-bold text-gray-900 text-sm md:text-base">{post.created_by.name}</span>
               <span className="text-base text-gray-500">• {formatRelativeTime(post.created_at)}</span>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-900 hover:text-gray-900">
+            {post.created_by.id === session?.user.id && <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-900 hover:text-gray-900">
               <Pencil className="h-4 w-4" />
-            </Button>
+            </Button>}
           </div>
 
           {/* Body */}
@@ -69,11 +71,13 @@ export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2"
+            className={`text - gray - 900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? 'text-green-600 bg-green-50' : ''}`}
             onClick={() => onLike(post.id)}
           >
             <ThumbsUp className="h-6 w-6" />
-            <span className="text-base font-medium">{post.likes_count} Likes</span>
+            <span className="text-base font-medium">
+              {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
+            </span>
           </Button>
           <Button variant="ghost" size="sm" className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
             <MessageSquare className="h-6 w-6" />

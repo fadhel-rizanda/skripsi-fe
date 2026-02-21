@@ -1,6 +1,6 @@
-import {Address, Status, Tag} from "@/types/general";
-import {UserProfile} from "@/types/user";
-import {Attachment} from "@/types/attachment";
+import { Address, Status, Tag } from "@/types/general";
+import { UserProfile } from "@/types/user";
+import { Attachment } from "@/types/attachment";
 
 export interface Community {
     id: string;
@@ -8,6 +8,7 @@ export interface Community {
     description: string;
     website?: string;
     attachment?: Attachment;
+    image_url?: string;
     tags: Tag[];
     admins: UserProfile[];
     members_count: number;

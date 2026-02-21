@@ -1,10 +1,10 @@
 "use client"
 
-import {ReactNode, useState} from "react"
+import { ReactNode, useState } from "react"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import CommunityForm from "@/components/form/CommunityForm"
-import {Icon} from "@iconify/react";
+import { Icon } from "@iconify/react";
 
 type CommunityFormDialogProps = {
     mode: "create" | "edit"

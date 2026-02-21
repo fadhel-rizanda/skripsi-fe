@@ -47,8 +47,8 @@ export default function AllCommunityPage() {
                     page: pagination.current_page,
                     search: searchQuery || undefined,
                     sort_by: sortBy === "members" ? "members_count" : "created_at",
-                    sort_order: sortBy === "oldest" ? "asc" : "desc",
-                };
+                    order_by: sortBy === "oldest" ? "asc" : "desc",
+                } as any;
 
                 if (filterTag) {
                     params.tag_id = filterTag;

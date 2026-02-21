@@ -20,7 +20,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
                             alt={community.name}
                             className="object-cover"
                         />
-                        <AvatarFallback className="rounded-full bg-[#FAEDEB] text-[#DE9B76] font-semibold text-xl">
+                        <AvatarFallback className="rounded-full bg-pink-100 text-amber-700 font-semibold text-xl">
                             {community.name.substring(0, 1).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>

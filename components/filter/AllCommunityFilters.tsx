@@ -79,7 +79,7 @@ export function CommunityFilters({
                         placeholder="Filter by Tag"
                         emptyMessage="No tags found."
                         mode="single"
-                        className="w-full bg-white border-gray-200 rounded-lg h-[48px]"
+                        className="w-full bg-white border-gray-200 rounded-lg h-12"
                     />
                 </div>
             </div>

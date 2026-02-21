@@ -113,7 +113,7 @@ export default function AllCommunityPage() {
                 <div className="flex justify-end pt-6 w-full max-w-3xl">
                     <CommunityFormDialog mode="create" trigger={
                         <Button
-                            className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold"
+className="bg-green-400 hover:bg-green-500 text-black p-5 font-bold"
                             onClick={handleCreateCommunity}
                         >
                             <Icon icon="ph:users-three" /> Create Community

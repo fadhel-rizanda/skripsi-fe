@@ -14,7 +14,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
             <div className="flex gap-4">
                 {/* Community Image Section */}
                 <div className="shrink-0">
-                    <Avatar className="h-16 w-16 border border-gray-100 rounded-full bg-[#FAEDEB]">
+                    <Avatar className="h-16 w-16 border border-gray-100 rounded-full bg-pink-100">
                         <AvatarImage
                             src={community.image_url || community.attachment?.public_url || undefined}
                             alt={community.name}

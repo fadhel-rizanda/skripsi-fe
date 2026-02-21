@@ -35,7 +35,7 @@ export function CommunityFilters({
         setSearch: setTagSearch,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags
-    } = useTagsOptions("physique");
+    } = useTagsOptions("community");
 
     return (
         <div className="w-full flex flex-col space-y-4 items-center">

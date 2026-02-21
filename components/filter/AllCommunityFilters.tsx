@@ -51,7 +51,7 @@ export function CommunityFilters({
                 </div>
 
                 <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg" style={{ height: '48px' }}>
+                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg h-12">
                         <SelectValue placeholder="Sort By" />
                     </SelectTrigger>
                     <SelectContent>

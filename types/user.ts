@@ -1,10 +1,14 @@
 export interface UserProfile {
     id: string
     name: string
-    email: string
-    role: Role
-    channels: Channel[]
+    email?: string
+    role?: Role
+    role_name?: string
+    channels?: Channel[]
     avatar?: string
+    created_at?: string
+    updated_at?: string
+    phone?: string
 }
 
 export interface Role {

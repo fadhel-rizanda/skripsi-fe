@@ -5,7 +5,6 @@ import { UserProfile } from "@/types/user";
 export interface GetUsersParams extends GetAllParams {
     role_id?: string;
     sort_direction?: "asc" | "desc";
-    [key: string]: any;
 }
 
 export const userService = {

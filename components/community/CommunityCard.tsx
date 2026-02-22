@@ -9,17 +9,23 @@ interface CommunityCardProps {
 }
 
 export function CommunityCard({ community }: CommunityCardProps) {
+    const rawImageUrl = community.image_url || community.attachment?.public_url;
+    const isValidImageUrl = rawImageUrl?.startsWith('http://') || rawImageUrl?.startsWith('https://');
+    const safeImageUrl = isValidImageUrl ? rawImageUrl : undefined;
+
     return (
         <Card className="rounded-2xl border-0 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow p-6">
             <div className="flex gap-4">
                 {/* Community Image Section */}
                 <div className="shrink-0">
                     <Avatar className="h-16 w-16 border border-gray-100 rounded-full bg-pink-100">
-                        <AvatarImage
-                            src={community.image_url || community.attachment?.public_url || undefined}
-                            alt={community.name}
-                            className="object-cover"
-                        />
+                        {safeImageUrl ? (
+                            <AvatarImage
+                                src={safeImageUrl}
+                                alt={community.name}
+                                className="object-cover"
+                            />
+                        ) : null}
                         <AvatarFallback className="rounded-full bg-pink-100 text-amber-700 font-semibold text-xl">
                             {community.name.substring(0, 1).toUpperCase()}
                         </AvatarFallback>

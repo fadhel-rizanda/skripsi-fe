@@ -1,8 +1,8 @@
-import {useState, useEffect} from "react";
-import {generalService, Tag} from "@/services/generalServices";
-import {Status} from "@/types/general";
+import React, { useState, useEffect } from "react";
+import { generalService, Tag } from "@/services/generalServices";
+import { Status } from "@/types/general";
 import axios from "axios";
-import {GetAllParams, UserProfile} from "@/types";
+import { GetAllParams, UserProfile } from "@/types";
 
 interface UseFilterOptionsResult<T> {
     options: T[];
@@ -76,7 +76,7 @@ function useFilterOptions<T>(
         }
     };
 
-    return {options, isLoading, error, setSearch, setPage, loadMore, hasMore};
+    return { options, isLoading, error, setSearch, setPage, loadMore, hasMore };
 }
 
 export const useTagsOptions = (type?: string, fetchOnMount: boolean = true) =>
@@ -84,6 +84,24 @@ export const useTagsOptions = (type?: string, fetchOnMount: boolean = true) =>
 
 export const useStatusesOptions = (type?: string, fetchOnMount: boolean = true) =>
     useFilterOptions<Status>(generalService.getStatuses, type, fetchOnMount);
+
+const fetchRoles = (_: string, signal: AbortSignal, page: number, search?: string) =>
+    generalService.getRoles(signal, page, search);
+
+export const useRolesOptions = (fetchOnMount: boolean = true) => {
+    const { options, ...rest } = useFilterOptions<{ id: string, name: string }>(
+        fetchRoles,
+        "roles", // a dummy type is passed to satisfy the hook signature, it is ignored in fetcher
+        fetchOnMount
+    );
+
+    const capitalizedOptions = React.useMemo(() => options.map(role => ({
+        ...role,
+        name: role.name.charAt(0).toUpperCase() + role.name.slice(1)
+    })), [options]);
+
+    return { options: capitalizedOptions, ...rest };
+}
 
 export function useUsersOptions(fetchOnMount: boolean = true) {
     const [options, setOptions] = useState<UserProfile[]>([]);
@@ -104,18 +122,18 @@ export function useUsersOptions(fetchOnMount: boolean = true) {
 
             try {
                 const data = await generalService.getUsers(
-                        {
-                            page,
-                            search,
-                        } as GetAllParams,
-                        abortController.signal,
-                    )
-                ;
+                    {
+                        page,
+                        search,
+                    } as GetAllParams,
+                    abortController.signal,
+                )
+                    ;
 
                 if (page === 1) {
-                    setOptions(data.map(user => ({...user, name: user.email})));
+                    setOptions(data.map(user => ({ ...user, name: user.email })));
                 } else {
-                    setOptions(prev => [...prev, ...data.map(user => ({...user, name: user.email}))]);
+                    setOptions(prev => [...prev, ...data.map(user => ({ ...user, name: user.email }))]);
                 }
 
                 setHasMore(data.length > 0);
@@ -142,5 +160,5 @@ export function useUsersOptions(fetchOnMount: boolean = true) {
         }
     };
 
-    return {options, isLoading, error, setSearch, setPage, loadMore, hasMore};
+    return { options, isLoading, error, setSearch, setPage, loadMore, hasMore };
 }

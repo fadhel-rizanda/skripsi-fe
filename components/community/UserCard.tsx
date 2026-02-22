@@ -11,14 +11,16 @@ interface UserCardProps {
 
 export function UserCard({ user }: UserCardProps) {
     const joinedYear = user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear();
+    const isValidAvatarUrl = user.avatar?.startsWith('http://') || user.avatar?.startsWith('https://');
+    const safeAvatarUrl = isValidAvatarUrl ? user.avatar : undefined;
 
     return (
         <Card className="rounded-[16px] border-0 shadow-sm hover:shadow-md transition-shadow p-6 bg-white">
             <div className="flex justify-between items-start">
                 <div className="flex gap-5">
                     <Avatar className="h-16 w-16 border border-gray-100 rounded-full bg-[#E6E0D2]">
-                        {user.avatar ? (
-                            <AvatarImage src={user.avatar} alt={user.name} className="object-cover" />
+                        {safeAvatarUrl ? (
+                            <AvatarImage src={safeAvatarUrl} alt={user.name} className="object-cover" />
                         ) : (
                             <AvatarFallback className="bg-[#E6E0D2] text-[10px] leading-[12px] font-medium text-gray-500 flex flex-col items-center justify-center rounded-full w-full h-full border border-transparent">
                                 <span>PAWS</span>

@@ -5,7 +5,7 @@ export interface UserProfile {
     role: Role
     role_name: string
     channels: Channel[]
-    avatar: string
+    avatar?: string
     created_at: string
     updated_at: string
     phone: string

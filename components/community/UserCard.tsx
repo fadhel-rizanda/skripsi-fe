@@ -10,7 +10,7 @@ interface UserCardProps {
 }
 
 export function UserCard({ user }: UserCardProps) {
-    const joinedYear = user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear();
+    const joinedYear = user.created_at ? new Date(user.created_at).getFullYear() : null;
     const isValidAvatarUrl = user.avatar?.startsWith('http://') || user.avatar?.startsWith('https://');
     const safeAvatarUrl = isValidAvatarUrl ? user.avatar : undefined;
 

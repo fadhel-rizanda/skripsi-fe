@@ -1,9 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { toast } from "sonner";
+import Link from "next/link";
 import { UserProfile } from "@/types/user";
 import { ExternalLink } from "lucide-react";
 
@@ -13,18 +11,6 @@ interface UserCardProps {
 
 export function UserCard({ user }: UserCardProps) {
     const joinedYear = user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear();
-    const { data: session } = useSession();
-    const router = useRouter();
-
-    const handleViewProfile = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (!session) {
-            toast.error("You must be logged in to view a user profile.");
-            router.push(`/login?callbackUrl=/profile/${user.id}`);
-        } else {
-            router.push(`/profile/${user.id}`);
-        }
-    };
 
     return (
         <Card className="rounded-[16px] border-0 shadow-sm hover:shadow-md transition-shadow p-6 bg-white">
@@ -45,14 +31,13 @@ export function UserCard({ user }: UserCardProps) {
                     <div className="flex flex-col pt-1">
                         <h3 className="font-bold text-gray-900 text-[18px] leading-tight mb-1">{user.name}</h3>
                         <p className="text-gray-500 text-[15px] mb-3">Joined in {joinedYear}</p>
-                        <a
-                            href="#"
-                            onClick={handleViewProfile}
+                        <Link
+                            href={`/profile/${user.id}`}
                             className="font-bold text-black text-[15px] hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
                             View Profile
                             <ExternalLink className="h-4 w-4" />
-                        </a>
+                        </Link>
                     </div>
                 </div>
 

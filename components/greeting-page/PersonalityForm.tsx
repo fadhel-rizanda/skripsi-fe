@@ -11,7 +11,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import { Textarea } from "@/components/ui/textarea";
-import { useTagsOptions } from "@/hooks/useFilterOptions";
+import { useTagsOptions } from "@/hooks/useTagsOptions";
 
 interface Props {
   value: string | null;
@@ -23,6 +23,7 @@ export default function PersonalityForm({ value, onChange }: Props) {
     options: personalityTags,
     isLoading: isLoadingPersonalityTags,
     error,
+    setSearch: setPersonalitySearch,
     loadMore: loadMorePersonality,
     hasMore: hasMorePersonality,
   } = useTagsOptions("personality");
@@ -45,7 +46,7 @@ export default function PersonalityForm({ value, onChange }: Props) {
           </div>
         ) : error ? (
           <div className="text-center py-4 text-red-500">
-            Error loading tags: {error.message}
+            Error loading tags: {error}
           </div>
         ) : personalityTags.length === 0 ? (
           <div className="text-center py-4 text-gray-500">

@@ -35,7 +35,7 @@ export default function PersonalityForm({ value, onChange }: Props) {
           Personality
         </CardTitle>
         <CardDescription className="text-md text-left">
-          What's your living situation?
+          Help us understand your personality to find a suitable pet.
         </CardDescription>
       </CardHeader>
 

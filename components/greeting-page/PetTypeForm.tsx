@@ -34,7 +34,7 @@ export default function PetExperiencesForm({ value, onChange }: Props) {
           Pet Type Preferences
         </CardTitle>
         <CardDescription className="text-md text-left">
-          What type of animals you prefer to have experience with?
+          What type of animals are you interested in?
         </CardDescription>
       </CardHeader>
 

@@ -7,20 +7,21 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import PersonalityForm from "@/components/greeting-page/PersonalityForm";
-import PetExperiencesForm from "@/components/greeting-page/PetExperiencesForm";
-import PetPreferencesForm from "@/components/greeting-page/PetPreferencesForm";
+import PetExperiencesForm from "@/components/greeting-page/PetTypeForm";
+import { toast } from "sonner";
 
 export default function GreetingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [personality, setPersonality] = useState<string | null>(null);
-  const [experience, setExperience] = useState<string | null>(null);
-  const [preferences, setPreferences] = useState<string | null>(null);
+  const [petType, setPetType] = useState<string | null>(null);
 
   const handleSubmit = () => {
-    if (!personality || !experience || !preferences) {
-      alert("Please complete all sections first.");
+    if (!personality || !petType) {
+      toast.error("Incomplete Form", {
+        description: "Please complete all sections first."
+      });
       return;
     }
 
@@ -86,8 +87,7 @@ export default function GreetingPage() {
 
         <section className="flex flex-col gap-10 justify-center">
           <PersonalityForm value={personality} onChange={setPersonality} />
-          <PetExperiencesForm value={experience} onChange={setExperience} />
-          <PetPreferencesForm value={preferences} onChange={setPreferences} />
+          <PetExperiencesForm value={petType} onChange={setPetType} />
 
           <div className="flex items-center justify-between mt-6">
             <Button

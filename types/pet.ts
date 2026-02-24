@@ -2,7 +2,7 @@ import type { Tag } from './general';
 import {Attachment} from "@/types/attachment";
 
 export interface Pet {
-  id: string | number;
+  id: string;
   name: string;
   type_of_animal_name?: string;
   type_of_animal_id?: string;

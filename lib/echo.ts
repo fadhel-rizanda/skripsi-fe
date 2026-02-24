@@ -24,7 +24,6 @@ export function getEcho(token: string) {
     window.Pusher = Pusher
 
     if (echoInstance && currentToken !== token) {
-        console.log("Token changed, disconnecting old Echo instance...");
         echoInstance.disconnect();
         echoInstance = null;
     }

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {ReactNode} from "react";
+import {toast} from "sonner";
 
 type DialogStatus = "idle" | "loading" | "success" | "error"
 
@@ -23,7 +25,7 @@ interface ActionDialogProps {
     onContinue?: () => void
     status?: DialogStatus
     title?: string
-    description?: string
+    description?: ReactNode
     successTitle?: string
     successDescription?: string
     errorTitle?: string
@@ -67,7 +69,7 @@ export function ActionDialog({
             } catch (error: any) {
                 console.error(error)
                 if (error.response?.status === 422) {
-                    console.log("Validation Errors:", error.response.data.errors)
+                    toast.error("Validation Errors:", error.response.data.errors)
                 }
                 setInternalStatus("error")
             }
@@ -118,11 +120,13 @@ export function ActionDialog({
                         </AlertDialogTitle>
 
                         {/* Description */}
-                        <AlertDialogDescription className="text-center text-sm text-gray-600 max-w-sm">
-                            {isIdle && description}
-                            {isLoading && "Please wait while we process your request."}
-                            {isSuccess && successDescription}
-                            {isError && errorDescription}
+                        <AlertDialogDescription asChild className="text-center text-sm text-gray-600 max-w-sm">
+                            <div>
+                                {isIdle && description}
+                                {isLoading && "Please wait while we process your request."}
+                                {isSuccess && successDescription}
+                                {isError && errorDescription}
+                            </div>
                         </AlertDialogDescription>
                     </div>
                 </AlertDialogHeader>

@@ -7,8 +7,10 @@ import {Adoption} from "@/types/adoption";
 import {adoptionServices} from "@/services/adoptionServices";
 import {AdoptionFilterBar} from "@/components/filter/AdoptionFilterBar";
 import {AdoptionFilterState} from "@/types";
+import {useSession} from "next-auth/react";
 
 export default function AdoptionsPage() {
+    const { data: session } = useSession();
     // Pagination
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState<number | undefined>(undefined);
@@ -49,7 +51,7 @@ export default function AdoptionsPage() {
 
                 if (requestIdRef.current === currentRequestId) {
                     console.error(err);
-                    setError("Failed to load adoption-process. Please try again later.");
+                    setError("Failed to load adoptions. Please try again later.");
                 }
             } finally {
                 if (requestIdRef.current === currentRequestId) {
@@ -114,7 +116,7 @@ export default function AdoptionsPage() {
                     {!loading &&
                         !error &&
                         adoptions.map((adoption) => (
-                            <AdoptionCard key={adoption.id} adoption={adoption}/>
+                            <AdoptionCard key={adoption.id} adoption={adoption} currentUser={session?.user}/>
                         ))}
                 </div>
             </section>

@@ -17,6 +17,8 @@ import {isValidUrl} from "@/lib/utils";
 import {Attachment} from "@/types/attachment";
 import {getEcho} from "@/lib/echo";
 import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
+import {AxiosError} from "axios";
+import {ErrorResponse} from "@/types";
 
 export default function ChatWindow({chat}: { chat: Chat }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -70,7 +72,10 @@ export default function ChatWindow({chat}: { chat: Chat }) {
 
         } catch (error) {
             console.error("Failed to load more messages:", error);
-            toast.error("Failed to load more messages");
+            if (error instanceof AxiosError) {
+                const errData = error.response?.data as ErrorResponse;
+                toast.error(errData?.message);
+            }
         } finally {
             setLoadingMore(false);
         }
@@ -114,7 +119,10 @@ export default function ChatWindow({chat}: { chat: Chat }) {
 
         } catch (error: any) {
             console.error("Failed to send message", error);
-            toast.error(error?.message ?? "Failed to send message.");
+            if (error instanceof AxiosError) {
+                const errData = error.response?.data as ErrorResponse;
+                toast.error(errData?.message);
+            }
         } finally {
             setIsSending(false);
         }

@@ -9,6 +9,7 @@ import { Channel } from "@/types";
 import { usePathname } from "next/navigation";
 import {useChatStore} from "@/store/useChatStore";
 import { useNotificationStore } from "@/store/useNotificationStore"
+import {useAdoptionStore} from "@/store/useAdoptionStore";
 
 export const CHANNEL_ICON_MAP: Record<string, string> = {
     notification: "ph:bell",
@@ -20,12 +21,20 @@ export const CHANNEL_ICON_MAP: Record<string, string> = {
     'adoption.meetngreet': "ph:users",
 }
 
+const adoptionTypes = [
+    'adoption',
+    'adoption.requirement',
+    'adoption.handover',
+    'adoption.meetngreet'
+];
+
 export function useNotificationToast() {
     const { data: session } = useSession()
     const pathname = usePathname();
     const currentUserId = session?.user?.id;
     const { triggerRefresh } = useChatStore();
     const { setHasUnread } = useNotificationStore()
+    const { triggerAdoptionRefresh } = useAdoptionStore();
 
     useEffect(() => {
         if (!session?.accessToken) return
@@ -43,6 +52,11 @@ export function useNotificationToast() {
 
             channel.listen(`.${eventName}`, (data: any) => {
                 const messageData = data.data;
+
+                if (adoptionTypes.includes(messageData.reference_type)) {
+                    triggerAdoptionRefresh();
+                }
+
                 setHasUnread(true)
                 if (!messageData) return;
                 if (messageData.sender?.id === currentUserId) return;
@@ -70,5 +84,5 @@ export function useNotificationToast() {
                 echo.leave(`private-${channelName}`)
             })
         }
-    }, [session?.accessToken, session?.user.channels, pathname, currentUserId, triggerRefresh])
+    }, [session?.accessToken, session?.user.channels, pathname, currentUserId, triggerRefresh, setHasUnread, triggerAdoptionRefresh])
 }

@@ -17,3 +17,11 @@ export interface Address {
     notes?: string;
     link?: string;
 }
+export interface Schedule {
+    id: string;
+    scheduled_time: string;
+    address_id: string;
+    address: Address;
+    created_by: string;
+    updated_by: string;
+}

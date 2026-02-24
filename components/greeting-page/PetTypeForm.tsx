@@ -16,9 +16,11 @@ import { useTagsOptions } from "@/hooks/useFilterOptions";
 interface Props {
   value: string | null;
   onChange: (value: string | null) => void;
+  description: string;
+  onDescriptionChange: (value: string) => void;
 }
 
-export default function PetExperiencesForm({ value, onChange }: Props) {
+export default function PetExperiencesForm({ value, onChange, description, onDescriptionChange }: Props) {
   const {
     options: petExperienceTags,
     isLoading: isLoadingPetExperienceTags,
@@ -83,6 +85,8 @@ export default function PetExperiencesForm({ value, onChange }: Props) {
             <Textarea
               placeholder="Describe your pet experiences"
               className="mt-4"
+              value={description}
+              onChange={(e) => onDescriptionChange(e.target.value)}
             />
           </>
         )}

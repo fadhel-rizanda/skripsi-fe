@@ -9,6 +9,8 @@ import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { userService } from "@/services/userServices";
 import { UserProfile } from "@/types/user";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
+import { NotesDialog } from "@/components/dialog/NotesDialog";
+import { toast } from "sonner";
 
 type DialogMode = "activate" | "terminate" | null;
 
@@ -22,9 +24,14 @@ export default function AdminUsersPage() {
     const [totalUsers, setTotalUsers] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogMode, setDialogMode] = useState<DialogMode>(null);
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+    const [dialogMode, setDialogMode] = useState<DialogMode>(null);
+
+    // Step 1 — Confirm dialog
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    // Step 2 — Notes dialog
+    const [notesOpen, setNotesOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
@@ -48,25 +55,41 @@ export default function AdminUsersPage() {
         fetchUsers();
     }, [fetchUsers]);
 
-    const openDialog = (user: UserProfile, mode: DialogMode) => {
+    const openConfirmDialog = (user: UserProfile, mode: DialogMode) => {
         setSelectedUser(user);
         setDialogMode(mode);
-        setDialogOpen(true);
+        setConfirmOpen(true);
     };
 
-    const handleConfirm = async () => {
+    // Step 1 → Step 2: ActionDialog confirms → open NotesDialog
+    const handleConfirmContinue = () => {
+        setConfirmOpen(false);
+        setNotesOpen(true);
+    };
+
+    // Step 2: NotesDialog submit → API call → toast feedback
+    const handleNotesSubmit = async (notes: string) => {
         if (!selectedUser || !dialogMode) return;
-        if (dialogMode === "terminate") {
-            await userService.deactivateUser(selectedUser.id, "Terminated by admin");
-        } else {
-            await userService.activateUser(selectedUser.id, "Activated by admin");
+        const currentMode = dialogMode;
+        setIsSubmitting(true);
+        try {
+            if (currentMode === "terminate") {
+                await userService.deactivateUser(selectedUser.id, notes);
+            } else {
+                await userService.activateUser(selectedUser.id, notes);
+            }
+            setNotesOpen(false);
+            toast.success(currentMode === "terminate" ? "User terminated successfully." : "User activated successfully.");
+            fetchUsers();
+        } catch (error) {
+            console.error("Action failed:", error);
+            setNotesOpen(false);
+            toast.error("Action failed. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+            setSelectedUser(null);
+            setDialogMode(null);
         }
-    };
-
-    const handleContinue = () => {
-        setSelectedUser(null);
-        setDialogMode(null);
-        fetchUsers();
     };
 
     const isTerminate = dialogMode === "terminate";
@@ -125,7 +148,7 @@ export default function AdminUsersPage() {
                                                 <td className="px-8 py-5 text-gray-800 whitespace-nowrap text-xs font-mono">
                                                     {user.id.substring(0, 8)}...
                                                 </td>
-                                                <td className="px-8 py-5 text-gray-800 whitespace-normal leading-snug">
+                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-normal leading-snug">
                                                     <span>{user.name}</span>
                                                 </td>
                                                 <td className="px-8 py-5 whitespace-nowrap">
@@ -136,9 +159,9 @@ export default function AdminUsersPage() {
                                                         {user.role_name || user.role?.name || "Member"}
                                                     </Badge>
                                                 </td>
-                                                <td className="px-8 py-5 text-gray-800 whitespace-nowrap">{user.email || "-"}</td>
-                                                <td className="px-8 py-5 text-gray-800 whitespace-nowrap">{user.phone || "-"}</td>
-                                                <td className="px-8 py-5 text-gray-800 whitespace-nowrap">
+                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.email || "-"}</td>
+                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.phone || "-"}</td>
+                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">
                                                     {new Date(user.created_at)
                                                         .toLocaleDateString("en-GB", {
                                                             year: "numeric",
@@ -149,15 +172,14 @@ export default function AdminUsersPage() {
                                                         .reverse()
                                                         .join("-")}
                                                 </td>
-
                                                 <td className="px-8 py-5 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">
                                                         {!isActive && (
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="h-[30px] px-4 font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-                                                                onClick={() => openDialog(user, "activate")}
+                                                                className="w-24 h-[30px] text-sm font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                                                                onClick={() => openConfirmDialog(user, "activate")}
                                                             >
                                                                 Activate
                                                             </Button>
@@ -166,8 +188,8 @@ export default function AdminUsersPage() {
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                className="h-[30px] px-4 font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
-                                                                onClick={() => openDialog(user, "terminate")}
+                                                                className="w-24 h-[30px] text-sm font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
+                                                                onClick={() => openConfirmDialog(user, "terminate")}
                                                             >
                                                                 Terminate
                                                             </Button>
@@ -197,11 +219,12 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
+            {/* Step 1 – Confirmation */}
             <ActionDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                onConfirm={handleConfirm}
-                onContinue={handleContinue}
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                onConfirm={async () => { }} // no API call here
+                onContinue={handleConfirmContinue}
                 title={
                     isTerminate
                         ? "Are you sure want to terminate this user?"
@@ -220,15 +243,30 @@ export default function AdminUsersPage() {
                 }
                 confirmText={isTerminate ? "Terminate" : "Activate"}
                 confirmVariant={isTerminate ? "destructive" : "default"}
-                successTitle={isTerminate ? "User Terminated" : "User Activated"}
-                successDescription={
-                    isTerminate
-                        ? "The user has been successfully terminated."
-                        : "The user has been successfully activated."
-                }
-                errorTitle="Action Failed"
-                errorDescription="An unexpected error occurred. Please try again."
+                successTitle="Almost done!"
+                successDescription="Please provide a reason to complete this action."
             />
+
+            {/* Step 2 – Notes Input */}
+            <NotesDialog
+                open={notesOpen}
+                onOpenChange={setNotesOpen}
+                onConfirm={handleNotesSubmit}
+                title={isTerminate ? "Reason for Termination" : "Reason for Activation"}
+                placeholder={
+                    isTerminate
+                        ? "Reason for termination (required)..."
+                        : "Reason for activation (required)..."
+                }
+                confirmText={isTerminate ? "Terminate" : "Activate"}
+                confirmClassName={
+                    isTerminate
+                        ? "bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl h-11 disabled:opacity-50"
+                        : "bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl h-11 disabled:opacity-50"
+                }
+                isLoading={isSubmitting}
+            />
+
         </div>
     );
 }

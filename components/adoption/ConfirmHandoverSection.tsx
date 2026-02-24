@@ -17,7 +17,6 @@ interface ConfirmHandoverSectionProps {
     adoptionId: string;
     handover: Handover;
     role: "adopter" | "provider";
-    isReadOnly?: boolean;
     onConfirmChange?: () => void;
 }
 
@@ -26,17 +25,19 @@ export default function ConfirmHandoverSection({
                                                    adoptionId,
                                                    handover,
                                                    role,
-                                                   isReadOnly = false,
                                                    onConfirmChange,
                                                }: ConfirmHandoverSectionProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
+
     const adopterFinalized = handover.adopter_finalized;
     const providerFinalized = handover.provider_finalized;
     const attachments: Attachment[] = handover.attachments ?? [];
     const hasEvidence = attachments.length > 0;
+
+    // Status apakah user saat ini sudah menekan checkbox/finalized
     const isChecked = role === "adopter" ? adopterFinalized : providerFinalized;
 
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +86,6 @@ export default function ConfirmHandoverSection({
                 </p>
             </div>
 
-            {/* Hidden file input */}
             <input
                 ref={fileInputRef}
                 type="file"
@@ -94,7 +94,6 @@ export default function ConfirmHandoverSection({
                 onChange={handleFileChange}
             />
 
-            {/* Upload area */}
             <div
                 className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 py-6 px-4 transition-colors ${
                     hasEvidence ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"
@@ -104,18 +103,16 @@ export default function ConfirmHandoverSection({
                         <CheckCircle2 className="h-7 w-7 text-green-500"/>
                         <p className="text-xs text-green-700 font-medium">{attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded</p>
 
-                        {/* Attachment list */}
                         <div className="flex flex-wrap gap-1.5 mt-1 justify-center">
                             {attachments.map((att) => (
-                                att.uploaded_by == currentUser?.id || currentUser?.role.name === "admin" ? (
+                                (att.uploaded_by === currentUser?.id || currentUser?.role?.name === "admin") ? (
                                     <button
                                         key={att.id}
                                         onClick={() => handleDownload(att)}
                                         className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-green-200 hover:border-green-400 hover:bg-green-50 transition-colors"
                                     >
                                         <FileText className="h-3 w-3 text-green-600 shrink-0"/>
-                                        <span
-                                            className="text-xs text-green-700 font-medium max-w-30 truncate">{att.filename}</span>
+                                        <span className="text-xs text-green-700 font-medium max-w-30 truncate">{att.filename}</span>
                                     </button>
                                 ) : (
                                     <div
@@ -129,15 +126,15 @@ export default function ConfirmHandoverSection({
                             ))}
                         </div>
 
-                        {!isReadOnly || attachments.some(att => att.uploaded_by !== currentUser?.id) && (
+                        {/* Jika user belum konfirmasi final, mereka masih boleh tambah/ganti file */}
+                        {!isChecked && (
                             <Button
                                 variant="outline"
                                 className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 border-slate-300 mt-1"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploading}
                             >
-                                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> :
-                                    <Upload className="h-3.5 w-3.5"/>}
+                                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Add / Replace Files"}
                             </Button>
                         )}
@@ -148,73 +145,59 @@ export default function ConfirmHandoverSection({
                         <p className="text-xs text-slate-500 text-center">
                             Drag &amp; drop a photo of the pet with the new owner or a signed agreement.
                         </p>
-                        {!isReadOnly && (
-                            <Button
-                                className="bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-8 px-4 text-xs font-bold gap-1.5"
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={uploading}
-                            >
-                                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> :
-                                    <Upload className="h-3.5 w-3.5"/>}
-                                {uploading ? "Uploading..." : "Browse Files"}
-                            </Button>
-                        )}
+                        <Button
+                            className="bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-8 px-4 text-xs font-bold gap-1.5"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                        >
+                            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
+                            {uploading ? "Uploading..." : "Browse Files"}
+                        </Button>
                     </>
                 )}
             </div>
 
             {/* Confirmation cards */}
-            <div className="grid grid-cols-3 gap-3">
-                {/* Adopter */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Card Adopter */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Adopter Confirmation</span>
-                    <label className={`flex items-start gap-2 ${
-                        !isReadOnly && role === "adopter" && hasEvidence && !isChecked ? "cursor-pointer" : "cursor-default"
-                    }`}>
+                    <label className={`flex items-start gap-2 ${role === "adopter" && hasEvidence && !adopterFinalized ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={adopterFinalized}
-                            disabled={isReadOnly || role !== "adopter" || !hasEvidence || isChecked}
-                            onChange={role === "adopter" && !isChecked ? () => setDialogOpen(true) : undefined}
+                            disabled={role !== "adopter" || !hasEvidence || adopterFinalized}
+                            onChange={role === "adopter" && !adopterFinalized ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>
                     </label>
                 </div>
 
-                {/* Provider */}
+                {/* Card Provider */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Provider Confirmation</span>
-                    <label className={`flex items-start gap-2 ${
-                        !isReadOnly && role === "provider" && hasEvidence && !isChecked ? "cursor-pointer" : "cursor-default"
-                    }`}>
+                    <label className={`flex items-start gap-2 ${role === "provider" && hasEvidence && !providerFinalized ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={providerFinalized}
-                            disabled={isReadOnly || role !== "provider" || !hasEvidence || isChecked}
-                            onChange={role === "provider" && !isChecked ? () => setDialogOpen(true) : undefined}
+                            disabled={role !== "provider" || !hasEvidence || providerFinalized}
+                            onChange={role === "provider" && !providerFinalized ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>
                     </label>
                 </div>
 
-                {/* Admin */}
+                {/* Card Admin */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Admin Confirmation</span>
-                    <label className={`flex items-start gap-2 ${
-                        currentUser?.role?.name === "admin" && hasEvidence && !handover.admin_finalized
-                            ? "cursor-pointer"
-                            : "cursor-default"
-                    }`}>
+                    <label className={`flex items-start gap-2 ${currentUser?.role?.name === "admin" && hasEvidence && !handover.admin_finalized ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={handover.admin_finalized}
                             disabled={currentUser?.role?.name !== "admin" || !hasEvidence || handover.admin_finalized}
-                            onChange={currentUser?.role?.name === "admin" && !handover.admin_finalized
-                                ? () => setDialogOpen(true)
-                                : undefined
-                            }
+                            onChange={currentUser?.role?.name === "admin" && !handover.admin_finalized ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>
@@ -222,7 +205,6 @@ export default function ConfirmHandoverSection({
                 </div>
             </div>
 
-            {/* Confirmation Dialog */}
             <ActionDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}

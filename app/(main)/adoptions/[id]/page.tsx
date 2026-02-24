@@ -34,7 +34,7 @@ export default function AdoptionDetailPage() {
 
     useEffect(() => {
         if(adoptionId) {
-            fetchAdoptionDetail().then(r => r);
+            fetchAdoptionDetail();
         } else {
             router.push("/adoptions");
         }
@@ -43,7 +43,7 @@ export default function AdoptionDetailPage() {
     return (
         <>
             <div className="w-full flex flex-col items-center justify-start gap-4 bg-[#E8F5E9] min-h-screen pb-10">
-                <AdoptionHeader stage={adoption?.stage_tag.name}/>
+                <AdoptionHeader stage={adoption?.stage_tag.name} petName={adoption?.pet.name}/>
                 <SubmittedCollapsible currentUser={session?.user} adoption={adoption} />
 
                 <ReviewedCollapsible currentUser={session?.user} adoption={adoption}/>

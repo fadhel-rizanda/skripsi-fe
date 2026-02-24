@@ -84,7 +84,7 @@ export default function RequirementCard({
             triggerAdoptionRefresh();
         } catch (e) {
             toast.error("Failed to upload file. Please try again.");
-            console.log(e)
+            console.error(e)
         } finally {
             setUploading(false);
         }
@@ -141,13 +141,13 @@ export default function RequirementCard({
                 )}
 
                 {hasFile && (
-                    <div className="flex items-center gap-1 mt-0.5 cursor-default hover:underline"
-                         onClick={() => handleDownload(requirement.attachment!)}>
+                    <button type="button" className="flex items-center gap-1 mt-0.5 cursor-pointer hover:underline"
+                            onClick={() => handleDownload(requirement.attachment!)}>
                         {getFileIcon(statusName)}
                         <span className={`text-xs truncate ${getFileTextColor(statusName)}`}>
                             {requirement.attachment?.filename}
                         </span>
-                    </div>
+                    </button>
                 )}
             </div>
 

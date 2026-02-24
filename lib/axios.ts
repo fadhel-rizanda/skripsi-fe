@@ -48,7 +48,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
           cachedSession = null;
           sessionPromise = null;
-          toast.error(error.message);
+          toast.error("Your session has expired. Please log in again.");
           if (typeof window !== "undefined") {
             await signOut({ redirect: false });
             window.location.href = "/login";

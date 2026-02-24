@@ -1,8 +1,9 @@
 interface AdoptionHeaderProps {
     stage?: string;
+    petName?: string;
 }
 
-export default function AdoptionHeader({ stage }: AdoptionHeaderProps) {
+export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) {
     const isRejected = stage === 'Rejected';
     const isCancelled = stage === 'Cancelled';
     const isFailed = isRejected || isCancelled;
@@ -48,7 +49,7 @@ export default function AdoptionHeader({ stage }: AdoptionHeaderProps) {
                         ? "We're sorry, your application was not approved at this time."
                         : isCancelled
                             ? "This application has been withdrawn."
-                            : "Track your adoption journey for Mittens."}
+                            : `Track your adoption journey for ${petName || 'your future pet'}.`}
                 </p>
             </div>
 

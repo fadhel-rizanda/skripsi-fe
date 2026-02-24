@@ -32,6 +32,10 @@ export default function AdoptionTerminateButton({
     const loadingLabel = isProvider ? "Rejecting..." : "Cancelling...";
 
     const handleTerminate = async () => {
+        if (!adoption?.pet?.id || !adoption?.id) {
+            toast.error("Unable to perform action: Missing adoption details.");
+            return;
+        }
         try {
             setIsLoading(true);
             await petService[action](

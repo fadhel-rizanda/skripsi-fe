@@ -52,8 +52,6 @@ export default function ScheduleCard({
 
     const userProposedLast = didCurrentUserPropose(schedule, currentUserId);
 
-    console.log(meetNGreet);
-
     return (
         <div className={`${isCompleted || isApproved  ? "bg-slate-50 border border-slate-200" : "bg-yellow-50 border border-yellow-200"} rounded-xl px-4 py-3 flex flex-col gap-3 `}>
             {/* Status label */}

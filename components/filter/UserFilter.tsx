@@ -15,6 +15,16 @@ export interface UserFilterProps {
 export function UserFilter({ onSearchChange, onRoleChange }: UserFilterProps) {
     const [roles, setRoles] = useState<{ id: string, name: string }[]>([]);
     const [selectedRole, setSelectedRole] = useState<string>("all");
+    const [search, setSearch] = useState("");
+
+    // Debounce pencarian 500ms
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onSearchChange?.(search);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search, onSearchChange]);
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -38,7 +48,8 @@ export function UserFilter({ onSearchChange, onRoleChange }: UserFilterProps) {
                 <InputGroupInput
                     placeholder="Search by name..."
                     className="text-base h-full"
-                    onChange={(e) => onSearchChange?.(e.target.value)}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                 />
             </InputGroup>
 

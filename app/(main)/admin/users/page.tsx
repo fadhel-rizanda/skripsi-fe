@@ -92,6 +92,16 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleSearchChange = useCallback((search: string) => {
+        setSearchQuery(search);
+        setCurrentPage(1);
+    }, []);
+
+    const handleRoleChange = useCallback((role: string) => {
+        setSelectedRole(role);
+        setCurrentPage(1);
+    }, []);
+
     const isTerminate = dialogMode === "terminate";
 
     return (
@@ -103,14 +113,8 @@ export default function AdminUsersPage() {
                 </div>
 
                 <UserFilter
-                    onSearchChange={(search) => {
-                        setSearchQuery(search);
-                        setCurrentPage(1);
-                    }}
-                    onRoleChange={(role) => {
-                        setSelectedRole(role);
-                        setCurrentPage(1);
-                    }}
+                    onSearchChange={handleSearchChange}
+                    onRoleChange={handleRoleChange}
                 />
 
                 <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white py-2 flex flex-col">

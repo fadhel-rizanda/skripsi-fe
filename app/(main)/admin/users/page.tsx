@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
                                     </tr>
                                 ) : (
                                     users.map((user) => {
-                                        const isActive = user.status;
+                                        const isActive = user.is_active;
                                         return (
                                             <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                                 <td className="px-8 py-5 text-gray-800 whitespace-nowrap text-xs font-mono">

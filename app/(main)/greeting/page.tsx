@@ -4,66 +4,13 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
-import PersonalityForm from '@/components/greeting-page/PersonalityForm';
-import PetExperiencesForm from '@/components/greeting-page/PetTypeForm';
+import { AlertCircle, User } from 'lucide-react';
 import { toast } from 'sonner';
+import UserGreetingForm from '@/components/form/UserGreetingForm';
 
 export default function GreetingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  const [personality, setPersonality] = useState<string | null>(null);
-  const [personalityDescription, setPersonalityDescription] = useState<string>('');
-  const [petType, setPetType] = useState<string | null>(null);
-  const [petExperienceDescription, setPetExperienceDescription] = useState<string>('');
-
-  const handleSubmit = () => {
-    if (!personality || !petType) {
-      toast.error('Incomplete Form', {
-        description: 'Please complete all sections first.'
-      });
-      return;
-    }
-
-    // Save greeting data
-    saveGreetingData();
-  };
-
-  const saveGreetingData = async () => {
-    try {
-      const token = session?.accessToken;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/greeting`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          personality_tag_id: personality,
-          personality_description: personalityDescription,
-          pet_experience_tag_id: petType,
-          pet_experience_description: petExperienceDescription,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Greeting completed!');
-        router.push('/find-pet');
-      } else {
-        const error = await response.json();
-        toast.error('Error', {
-          description: error.message || 'Failed to save greeting data'
-        });
-      }
-    } catch (error) {
-      console.error('Error saving greeting:', error);
-      toast.error('Error', {
-        description: 'Failed to save greeting data'
-      });
-    }
-  };
 
   // Redirect if not authenticated or not an adopter
   useEffect(() => {
@@ -123,34 +70,7 @@ export default function GreetingPage() {
         </div>
 
         <section className="flex flex-col gap-10 justify-center">
-          <PersonalityForm 
-            value={personality} 
-            onChange={setPersonality}
-            description={personalityDescription}
-            onDescriptionChange={setPersonalityDescription}
-          />
-          <PetExperiencesForm 
-            value={petType} 
-            onChange={setPetType}
-            description={petExperienceDescription}
-            onDescriptionChange={setPetExperienceDescription}
-          />
-
-          <div className="flex items-center justify-between mt-6">
-            <Button
-              asChild
-              className="py-6 bg-transparent hover:bg-transparent rounded-lg text-md text-black"
-            >
-              <Link href="/dashboard">Skip for now</Link>
-            </Button>
-
-            <Button
-              onClick={handleSubmit}
-              className="py-6 bg-green-500 hover:bg-green-600 rounded-lg text-md font-bold"
-            >
-              Save & Continue
-            </Button>
-          </div>
+          <UserGreetingForm />
         </section>
       </div>
     </div>

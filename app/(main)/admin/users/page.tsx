@@ -167,15 +167,7 @@ export default function AdminUsersPage() {
                                                 <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.email || "-"}</td>
                                                 <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.phone || "-"}</td>
                                                 <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">
-                                                    {new Date(user.created_at)
-                                                        .toLocaleDateString("en-GB", {
-                                                            year: "numeric",
-                                                            month: "2-digit",
-                                                            day: "2-digit",
-                                                        })
-                                                        .split("/")
-                                                        .reverse()
-                                                        .join("-")}
+                                                    {new Date(user.created_at).toLocaleDateString('en-CA')}
                                                 </td>
                                                 <td className="px-8 py-5 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">

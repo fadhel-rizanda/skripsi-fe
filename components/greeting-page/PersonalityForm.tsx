@@ -1,24 +1,29 @@
-"use client";
+'use client';
 
+import { useTagsOptions } from '@/hooks/useFilterOptions';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
-import { Textarea } from "@/components/ui/textarea";
-import { useTagsOptions } from "@/hooks/useTagsOptions";
+} from '@/components/ui/card';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
   value: string | null;
   onChange: (value: string | null) => void;
+  description: string;
+  onDescriptionChange: (value: string) => void;
 }
 
-export default function PersonalityForm({ value, onChange }: Props) {
+export default function PersonalityForm({ 
+  value, 
+  onChange,
+  description,
+  onDescriptionChange
+}: Props) {
   const {
     options: personalityTags,
     isLoading: isLoadingPersonalityTags,
@@ -26,7 +31,7 @@ export default function PersonalityForm({ value, onChange }: Props) {
     setSearch: setPersonalitySearch,
     loadMore: loadMorePersonality,
     hasMore: hasMorePersonality,
-  } = useTagsOptions("personality");
+  } = useTagsOptions('personality');
 
   return (
     <Card className="shadow-lg">
@@ -58,14 +63,14 @@ export default function PersonalityForm({ value, onChange }: Props) {
               type="single"
               value={value ?? undefined}
               onValueChange={(val) => onChange(val ?? null)}
-              spacing={3}
-              className="flex flex-wrap"
+              className="flex flex-wrap gap-2 justify-start"
             >
               {personalityTags.map((tag) => (
                 <ToggleGroupItem
-                  key={String(tag.id)}
-                  value={String(tag.id)}
+                  key={tag.id}
+                  value={tag.id}
                   aria-label={tag.name}
+                  className="px-4 py-2 rounded-full border"
                 >
                   {tag.name}
                 </ToggleGroupItem>
@@ -75,7 +80,7 @@ export default function PersonalityForm({ value, onChange }: Props) {
             {hasMorePersonality && (
               <button
                 onClick={loadMorePersonality}
-                className="mt-4 text-green-600 hover:text-green-700 font-semibold"
+                className="mt-4 text-green-600 hover:text-green-700 font-semibold text-sm"
               >
                 Load More
               </button>
@@ -84,6 +89,8 @@ export default function PersonalityForm({ value, onChange }: Props) {
             <Textarea
               placeholder="Describe your personality"
               className="mt-4"
+              value={description}
+              onChange={(e) => onDescriptionChange(e.target.value)}
             />
           </>
         )}

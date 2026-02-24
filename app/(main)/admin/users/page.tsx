@@ -46,6 +46,7 @@ export default function AdminUsersPage() {
             setTotalUsers(response.total || response.data.length);
         } catch (error) {
             console.error("Failed to fetch users:", error);
+            toast.error("Failed to fetch users. Please try again.");
         } finally {
             setIsLoading(false);
         }

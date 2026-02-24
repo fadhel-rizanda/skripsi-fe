@@ -90,4 +90,14 @@ export const petService = {
     const response = await api.post(`/v1/pets/${petId}/adopt`, { note });
     return response.data;
   },
+
+  reject: async (petId: string, adoptionId: string, signal?: AbortSignal) => {
+    const response = await api.post(`/v1/pets/${petId}/adopt/${adoptionId}/reject`, {signal});
+    return response.data;
+  },
+
+  cancel: async (petId: string, adoptionId: string, signal?: AbortSignal) => {
+    const response = await api.post(`/v1/pets/${petId}/adopt/${adoptionId}/cancel`, {signal});
+    return response.data;
+  },
 };

@@ -109,7 +109,6 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
     }
 
     function onSubmit() {
-        console.log("submit triggered")
         setDialogOpen(true)
     }
 
@@ -272,7 +271,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                     onSubmit={form.handleSubmit(
                                         onSubmit,
                                         (errors) => {
-                                            console.log("Validation errors:", errors)
+                                            console.error("Validation errors:", errors)
                                         })}
                                 >
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

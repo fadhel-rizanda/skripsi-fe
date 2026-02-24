@@ -1,5 +1,3 @@
-import {UserProfile} from "@/types/user";
-
 export interface Attachment {
     id: string;
     filename: string;
@@ -9,5 +7,5 @@ export interface Attachment {
     status: string;
     uploaded_at: string;
     public_url?: string;
-    updated_by: UserProfile;
+    uploaded_by: string;
 }

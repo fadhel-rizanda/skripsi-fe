@@ -30,3 +30,11 @@ export interface AdoptionFilterState extends GetAllParams{
 export interface NotificationPaginatedResponse extends PaginatedResponse<Notification[]> {
     unread_count: number
 }
+
+export interface ErrorResponse {
+    error: boolean;
+    status: string;
+    message: string;
+    errors?: Record<string, string[]>;
+    data?: Record<string, string[]>;
+}

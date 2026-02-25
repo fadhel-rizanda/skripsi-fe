@@ -1,22 +1,11 @@
 import api from "@/lib/axios";
 import { PaginatedResponse, GetAllParams } from "@/types/api";
 import { UserProfile } from "@/types/user";
+import { GreetingFormInput } from "@/schemas/greeting.schema";
 
 export interface GetUsersParams extends GetAllParams {
     role_id?: string;
     sort_direction?: "asc" | "desc";
-}
-
-export interface SaveGreetingPayload {
-    personality_ids: string[];
-    personality_description?: string;
-    pet_experience: string;
-    pet_experience_description?: string;
-    physique_ids: string[];
-    physique_description?: string;
-    type_of_animal_ids: string[];
-    type_of_animal_description?: string;
-    open_to_special_needs: boolean;
 }
 
 export const userService = {
@@ -38,7 +27,7 @@ export const userService = {
         return response.data;
     },
 
-    putUsers: async (_userId: string, data: SaveGreetingPayload): Promise<void> => {
+    putUsers: async (_userId: string, data: GreetingFormInput): Promise<void> => {
         const payload = {
             personality_tags: data.personality_ids,
             personality: data.personality_description,

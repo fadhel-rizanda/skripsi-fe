@@ -101,7 +101,7 @@ export default function UserGreetingForm() {
 
     async function onSubmit(values: GreetingFormInput) {
         try {
-            await userService.saveGreeting(session?.user?.id ?? "", values);
+            await userService.putUsers(session?.user?.id ?? "", values);
             toast.success("Preferences saved! Let's find your perfect pet.");
             router.push("/dashboard");
         } catch {

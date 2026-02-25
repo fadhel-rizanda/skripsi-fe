@@ -9,6 +9,7 @@ export interface UserProfile {
     created_at: string
     updated_at: string
     phone: string
+    is_active: boolean
 }
 
 export interface Role {

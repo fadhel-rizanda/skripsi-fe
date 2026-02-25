@@ -10,9 +10,20 @@ import { userService } from "@/services/userServices";
 import { UserProfile } from "@/types/user";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
 import { NotesDialog } from "@/components/dialog/NotesDialog";
-import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertCircle } from "lucide-react";
 
 type DialogMode = "activate" | "terminate" | null;
+type ActionStatus = "idle" | "loading" | "success" | "error";
 
 export default function AdminUsersPage() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -27,11 +38,13 @@ export default function AdminUsersPage() {
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const [dialogMode, setDialogMode] = useState<DialogMode>(null);
 
-    // Step 1 — Confirm dialog
+    // Step 1 — Confirm dialog (simple yes/no)
     const [confirmOpen, setConfirmOpen] = useState(false);
-    // Step 2 — Notes dialog
+    // Step 2 — Notes dialog (collect reason)
     const [notesOpen, setNotesOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Step 3 — Action/Result dialog (loading → success/error)
+    const [actionOpen, setActionOpen] = useState(false);
+    const [actionStatus, setActionStatus] = useState<ActionStatus>("idle");
 
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
@@ -46,7 +59,6 @@ export default function AdminUsersPage() {
             setTotalUsers(response.total || response.data.length);
         } catch (error) {
             console.error("Failed to fetch users:", error);
-            toast.error("Failed to fetch users. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -56,41 +68,49 @@ export default function AdminUsersPage() {
         fetchUsers();
     }, [fetchUsers]);
 
+    // Open Step 1
     const openConfirmDialog = (user: UserProfile, mode: DialogMode) => {
         setSelectedUser(user);
         setDialogMode(mode);
         setConfirmOpen(true);
     };
 
-    // Step 1 → Step 2: ActionDialog confirms → open NotesDialog
-    const handleConfirmContinue = () => {
+    // Step 1 → Step 2: user confirmed → open NotesDialog
+    const handleConfirmYes = () => {
         setConfirmOpen(false);
         setNotesOpen(true);
     };
 
-    // Step 2: NotesDialog submit → API call → toast feedback
+    // Step 2 → Step 3: notes submitted → run API → show ActionDialog result
     const handleNotesSubmit = async (notes: string) => {
         if (!selectedUser || !dialogMode) return;
         const currentMode = dialogMode;
-        setIsSubmitting(true);
+        setNotesOpen(false);
+
+        // Open action dialog in loading state
+        setActionStatus("loading");
+        setActionOpen(true);
+
         try {
             if (currentMode === "terminate") {
                 await userService.deactivateUser(selectedUser.id, notes);
             } else {
                 await userService.activateUser(selectedUser.id, notes);
             }
-            setNotesOpen(false);
-            toast.success(currentMode === "terminate" ? "User terminated successfully." : "User activated successfully.");
+            setActionStatus("success");
             fetchUsers();
         } catch (error) {
             console.error("Action failed:", error);
-            setNotesOpen(false);
-            toast.error("Action failed. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-            setSelectedUser(null);
-            setDialogMode(null);
+            setActionStatus("error");
         }
+    };
+
+    // Step 3 done — close and reset
+    const handleActionClose = () => {
+        setActionOpen(false);
+        setActionStatus("idle");
+        setSelectedUser(null);
+        setDialogMode(null);
     };
 
     const handleSearchChange = useCallback((search: string) => {
@@ -216,35 +236,53 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            {/* Step 1 – Confirmation */}
-            <ActionDialog
-                open={confirmOpen}
-                onOpenChange={setConfirmOpen}
-                onConfirm={async () => { }} // no API call here
-                onContinue={handleConfirmContinue}
-                title={
-                    isTerminate
-                        ? "Are you sure want to terminate this user?"
-                        : "Are you sure want to activate this user?"
-                }
-                description={
-                    isTerminate
-                        ? <>
-                            {selectedUser && <><strong>&ldquo;{selectedUser.name}&rdquo;</strong>{" "}</>}
-                            This action can&apos;t be undone. Please make sure you really want to proceed.
-                        </>
-                        : <>
-                            {selectedUser && <><strong>&ldquo;{selectedUser.name}&rdquo;</strong>{" "}</>}
-                            This will restore the user&apos;s access to the platform.
-                        </>
-                }
-                confirmText={isTerminate ? "Terminate" : "Activate"}
-                confirmVariant={isTerminate ? "destructive" : "default"}
-                successTitle="Almost done!"
-                successDescription="Please provide a reason to complete this action."
-            />
+            {/* Step 1 – Confirm Dialog */}
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogContent className="sm:max-w-md w-fit p-10">
+                    <AlertDialogHeader>
+                        <div className="items-center flex flex-col gap-4">
+                            <AlertCircle className="h-10 w-10 text-gray-600" />
+                            <AlertDialogTitle className="text-center text-xl font-semibold">
+                                {isTerminate
+                                    ? "Are you sure want to terminate this user?"
+                                    : "Are you sure want to activate this user?"}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription asChild className="text-center text-sm text-gray-600 max-w-sm">
+                                <div>
+                                    {isTerminate ? (
+                                        <>
+                                            {selectedUser && <><strong>&ldquo;{selectedUser.name}&rdquo;</strong>{" "}</>}
+                                            This action can&apos;t be undone. Please make sure you really want to proceed.
+                                        </>
+                                    ) : (
+                                        <>
+                                            {selectedUser && <><strong>&ldquo;{selectedUser.name}&rdquo;</strong>{" "}</>}
+                                            This will restore the user&apos;s access to the platform.
+                                        </>
+                                    )}
+                                </div>
+                            </AlertDialogDescription>
+                        </div>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center gap-2 mt-2">
+                        <AlertDialogCancel className="w-32 border-red-500! text-red-500! hover:bg-red-50!">
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleConfirmYes}
+                            className={
+                                isTerminate
+                                    ? "w-32 bg-red-500! hover:bg-red-600!"
+                                    : "w-32 bg-green-500! hover:bg-green-600! text-white!"
+                            }
+                        >
+                            {isTerminate ? "Terminate" : "Activate"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-            {/* Step 2 – Notes Input */}
+            {/* Step 2 – Notes Dialog */}
             <NotesDialog
                 open={notesOpen}
                 onOpenChange={setNotesOpen}
@@ -261,9 +299,29 @@ export default function AdminUsersPage() {
                         ? "bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl h-11 disabled:opacity-50"
                         : "bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl h-11 disabled:opacity-50"
                 }
-                isLoading={isSubmitting}
             />
 
+            {/* Step 3 – Action / Result Dialog */}
+            <ActionDialog
+                open={actionOpen}
+                onOpenChange={(open) => { if (!open) handleActionClose(); }}
+                status={actionStatus}
+                title={isTerminate ? "Terminating user..." : "Activating user..."}
+                description={isTerminate
+                    ? "Please wait while we process the termination."
+                    : "Please wait while we process the activation."
+                }
+                successTitle={isTerminate ? "User Terminated" : "User Activated"}
+                successDescription={
+                    isTerminate
+                        ? `"${selectedUser?.name ?? "User"}" has been successfully terminated.`
+                        : `"${selectedUser?.name ?? "User"}" has been successfully activated.`
+                }
+                errorTitle="Action Failed"
+                errorDescription="An error occurred while processing the action. Please try again."
+                confirmText={isTerminate ? "Terminate" : "Activate"}
+                confirmVariant={isTerminate ? "destructive" : "default"}
+            />
         </div>
     );
 }

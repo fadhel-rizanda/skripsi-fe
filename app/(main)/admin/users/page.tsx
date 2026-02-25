@@ -141,27 +141,27 @@ export default function AdminUsersPage() {
                 <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white py-2 flex flex-col">
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full text-sm text-left">
-                            <thead className="text-[12px] font-extrabold uppercase tracking-wider text-gray-700 border-b border-gray-100">
+                            <thead className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 border-b border-gray-100">
                                 <tr>
-                                    <th className="px-8 py-5">USER ID</th>
-                                    <th className="px-8 py-5">USER</th>
-                                    <th className="px-8 py-5">ROLE</th>
-                                    <th className="px-8 py-5">EMAIL ADDRESS</th>
-                                    <th className="px-8 py-5">PHONE NUMBER</th>
-                                    <th className="px-8 py-5">CREATED AT</th>
-                                    <th className="px-8 py-5">ACTIONS</th>
+                                    <th className="px-4 py-3">USER ID</th>
+                                    <th className="px-4 py-3">USER</th>
+                                    <th className="px-4 py-3">ROLE</th>
+                                    <th className="px-4 py-3">EMAIL</th>
+                                    <th className="px-4 py-3">PHONE</th>
+                                    <th className="px-4 py-3">CREATED AT</th>
+                                    <th className="px-4 py-3">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={7} className="px-8 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
                                             Loading users...
                                         </td>
                                     </tr>
                                 ) : users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-8 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
                                             No users found.
                                         </td>
                                     </tr>
@@ -170,32 +170,32 @@ export default function AdminUsersPage() {
                                         const isActive = user.is_active;
                                         return (
                                             <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-8 py-5 text-gray-800 whitespace-nowrap text-xs font-mono">
+                                                <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
                                                     {user.id.substring(0, 8)}...
                                                 </td>
-                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-normal leading-snug">
+                                                <td className="px-4 py-3 text-xs text-gray-800 whitespace-normal leading-snug">
                                                     <span>{user.name}</span>
                                                 </td>
-                                                <td className="px-8 py-5 whitespace-nowrap">
+                                                <td className="px-4 py-3 whitespace-nowrap">
                                                     <Badge
                                                         variant="secondary"
-                                                        className="bg-[#D1F2D6]/60 text-[#16A34A] hover:bg-[#D1F2D6]/80 border-none shadow-none font-medium px-4 py-1 text-xs capitalize"
+                                                        className="bg-[#D1F2D6]/60 text-[#16A34A] hover:bg-[#D1F2D6]/80 border-none shadow-none font-medium px-3 py-1 text-xs capitalize"
                                                     >
                                                         {user.role_name || user.role?.name || "Member"}
                                                     </Badge>
                                                 </td>
-                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.email || "-"}</td>
-                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">{user.phone || "-"}</td>
-                                                <td className="px-8 py-5 text-sm text-gray-800 whitespace-nowrap">
+                                                <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">{user.email || "-"}</td>
+                                                <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">{user.phone || "-"}</td>
+                                                <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">
                                                     {new Date(user.created_at).toLocaleDateString('en-CA')}
                                                 </td>
-                                                <td className="px-8 py-5 whitespace-nowrap">
+                                                <td className="px-4 py-3 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">
                                                         {!isActive && (
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="w-24 h-[30px] text-sm font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                                                                className="w-20 h-[28px] text-xs font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
                                                                 onClick={() => openConfirmDialog(user, "activate")}
                                                             >
                                                                 Activate
@@ -205,7 +205,7 @@ export default function AdminUsersPage() {
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                className="w-24 h-[30px] text-sm font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
+                                                                className="w-20 h-[28px] text-xs font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
                                                                 onClick={() => openConfirmDialog(user, "terminate")}
                                                             >
                                                                 Terminate

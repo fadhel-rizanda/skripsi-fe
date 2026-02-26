@@ -322,7 +322,7 @@ export default function AdminPostsPage() {
                         </div>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="sm:justify-center gap-2 mt-2">
-                        <AlertDialogCancel className="w-32 border-red-500! text-red-500! hover:bg-red-50!">
+                        <AlertDialogCancel className="w-32 border-red-500 text-red-500 hover:bg-red-50">
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction

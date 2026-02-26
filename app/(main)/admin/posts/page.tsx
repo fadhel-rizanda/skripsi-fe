@@ -66,7 +66,7 @@ export default function AdminPostsPage() {
             setPosts(response.data);
             setTotalPosts(response.total || response.data.length);
         } catch (error) {
-            console.error("Failed to fetch posts:", error);
+            console.error("Failed to fetch posts with current parameters:", { currentPage, perPage, searchQuery, selectedTag, error });
         } finally {
             setIsLoading(false);
         }

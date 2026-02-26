@@ -32,7 +32,7 @@ export function PostFilter({ onSearchChange, onTagChange }: PostFilterProps) {
                 const response = await generalService.getTags("type_of_animal");
                 setTags(response);
             } catch (error) {
-                console.error("Failed to fetch tags", error);
+                console.error("Failed to fetch tags of type 'type_of_animal':", error);
             }
         };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertCircle, ImageOff } from "lucide-react";
+import { isValidUrl } from "@/lib/utils";
 
 type DialogMode = "takedown" | "restore" | null;
 type ActionStatus = "idle" | "loading" | "success" | "error";
@@ -190,20 +192,26 @@ export default function AdminPostsPage() {
 
                                                 {/* IMAGE */}
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    {post.attachment?.public_url ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img
-                                                            src={post.attachment.public_url}
-                                                            alt="post"
-                                                            className="w-12 h-12 object-cover rounded-lg border border-gray-100"
-                                                        />
-                                                    ) : post.image_url ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img
-                                                            src={post.image_url}
-                                                            alt="post"
-                                                            className="w-12 h-12 object-cover rounded-lg border border-gray-100"
-                                                        />
+                                                    {isValidUrl(post.attachment?.public_url ?? "") ? (
+                                                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                                                            <Image
+                                                                src={post.attachment!.public_url!}
+                                                                alt="post"
+                                                                fill
+                                                                sizes="48px"
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                    ) : isValidUrl(post.image_url ?? "") ? (
+                                                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                                                            <Image
+                                                                src={post.image_url!}
+                                                                alt="post"
+                                                                fill
+                                                                sizes="48px"
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <div className="w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center">
                                                             <ImageOff className="w-4 h-4 text-gray-300" />

@@ -15,4 +15,5 @@ export interface Post {
     comments_count: number;
     created_by: UserProfile;
     is_liked: boolean;
+    is_active: boolean;
 }

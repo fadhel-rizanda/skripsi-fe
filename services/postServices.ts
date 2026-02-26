@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
-import {ApiResponse, PaginatedResponse, GetAllParams} from "@/types/api";
-import {Post} from "@/types/post";
+import { ApiResponse, PaginatedResponse, GetAllParams } from "@/types/api";
+import { Post } from "@/types/post";
 
 export interface GetPostsParams extends GetAllParams {
     community_id?: string;
@@ -26,7 +26,7 @@ export interface UpdatePostPayload {
 
 export const postService = {
     getPosts: async (params?: GetPostsParams): Promise<PaginatedResponse<Post[]>> => {
-        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {params});
+        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", { params });
         return response.data;
     },
     getPostById: async (id: string): Promise<Post> => {
@@ -45,13 +45,19 @@ export const postService = {
         const response = await api.delete(`/v1/posts/${id}`);
         return response.data;
     },
+    takedownPost: async (id: string, notes: string): Promise<void> => {
+        await api.post(`/v1/posts/${id}/takedown`, { notes });
+    },
+    restorePost: async (id: string, notes: string): Promise<void> => {
+        await api.post(`/v1/posts/${id}/restore`, { notes });
+    },
     likePost: async (id: string) => {
         const response = await api.post(`/v1/posts/${id}/likes`);
         return response.data;
     },
     searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PaginatedResponse<Post[]>> => {
         const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {
-            params: {...params, search: query}
+            params: { ...params, search: query }
         });
         return response.data;
     },

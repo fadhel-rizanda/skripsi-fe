@@ -108,7 +108,7 @@ export default function AdminPostsPage() {
             setActionStatus("success");
             fetchPosts();
         } catch (error) {
-            console.error("Action failed:", error);
+            console.error("Action failed for post:", { postId: selectedPost.id, mode: currentMode, error });
             setActionStatus("error");
         }
     };

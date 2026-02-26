@@ -329,8 +329,8 @@ export default function AdminPostsPage() {
                             onClick={handleConfirmYes}
                             className={
                                 isTakedown
-                                    ? "w-32 bg-red-500! hover:bg-red-600!"
-                                    : "w-32 bg-green-500! hover:bg-green-600! text-white!"
+                                    ? "w-32 bg-red-500 hover:bg-red-600"
+                                    : "w-32 bg-green-500 hover:bg-green-600 text-white"
                             }
                         >
                             {isTakedown ? "Take down" : "Restore"}

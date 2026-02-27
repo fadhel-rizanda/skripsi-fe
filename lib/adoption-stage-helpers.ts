@@ -2,8 +2,8 @@ import {Adoption} from "@/types/adoption";
 
 const STAGE_ORDER = [
     "Submitted",
-    "Requirement",
     "Meet & Greet",
+    "Requirement",
     "Handover",
     "Completed",
 ] as const;

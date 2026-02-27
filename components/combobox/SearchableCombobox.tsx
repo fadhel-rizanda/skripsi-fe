@@ -35,6 +35,7 @@ interface SearchableComboboxProps {
     emptyMessage?: string
     mode?: "single" | "multiple"
     className?: string
+    disabled?: boolean
 }
 
 export function SearchableCombobox({
@@ -49,6 +50,7 @@ export function SearchableCombobox({
                                        emptyMessage = "No options found.",
                                        mode = "multiple",
                                        className = "",
+                                        disabled = false,
                                    }: SearchableComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [searchValue, setSearchValue] = React.useState("")
@@ -110,12 +112,13 @@ export function SearchableCombobox({
                     aria-expanded={open}
                     className={`justify-between font-normal ${className}`}
                     size="sm"
+                    disabled={disabled}
                 >
                     {displayValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
+            <PopoverContent className="w-full p-0" align="start" onWheel={(e) => e.stopPropagation()}>
                 <Command shouldFilter={false}>
                     <CommandInput
                         placeholder="Search..."

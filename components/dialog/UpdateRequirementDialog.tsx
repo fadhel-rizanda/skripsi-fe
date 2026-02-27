@@ -34,8 +34,8 @@ export default function UpdateRequirementDialog({
                 )}
             </DialogTrigger>
 
-            <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
-                <DialogTitle className="text-xl font-semibold">Set Requirements</DialogTitle>
+            <DialogContent className="max-w-lg! max-h-[90vh] overflow-y-auto rounded-2xl">
+            <DialogTitle className="text-xl font-semibold">Set Requirements</DialogTitle>
                 <UpdateRequirementForm
                     adoptionId={adoptionId}
                     requirement={requirement}

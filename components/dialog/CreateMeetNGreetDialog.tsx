@@ -46,6 +46,7 @@ export function CreateMeetNGreetDialog({
                             setOpen(false)
                             onSuccessAction?.();
                         }}
+                        context={'meet-n-greet'}
                     />
                 </div>
             </DialogContent>

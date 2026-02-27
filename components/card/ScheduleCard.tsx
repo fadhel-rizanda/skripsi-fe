@@ -27,7 +27,9 @@ function formatAddress(address: Address): string {
 }
 
 function didCurrentUserPropose(schedule: Schedule, currentUserId: string): boolean {
-    return schedule.created_by === currentUserId;
+    const createdBy = schedule.created_by
+    if (typeof createdBy === "string") return createdBy === currentUserId
+    return createdBy?.id === currentUserId
 }
 
 export default function ScheduleCard({

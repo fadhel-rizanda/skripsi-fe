@@ -1,12 +1,6 @@
 import api from "@/lib/axios";
-import { Status } from "@/types/general";
+import {District, Province, Regency, Status, Tag} from "@/types/general";
 import { GetAllParams, UserProfile } from "@/types";
-
-export interface Tag {
-  id: string;
-  name: string;
-  type: string;
-}
 
 export const generalService = {
   // Get all tags with optional type filter
@@ -40,6 +34,21 @@ export const generalService = {
 
   getUsers: async (params: GetAllParams, signal?: AbortSignal): Promise<UserProfile[]> => {
     const response = await api.get("/v1/general/users", { params, signal });
+    return response.data.data;
+  },
+
+  getProvinces: async (params: GetAllParams, signal?: AbortSignal): Promise<Province[]> => {
+    const response = await api.get("/v1/general/provinces", { params, signal });
+    return response.data.data;
+  },
+
+  getRegencies: async (provinceId: string, params: GetAllParams, signal?: AbortSignal): Promise<Regency[]> => {
+    const response = await api.get(`/v1/general/provinces/${provinceId}/regencies`, { params, signal });
+    return response.data.data;
+  },
+
+  getDistricts: async (regencyId: string, params: GetAllParams, signal?: AbortSignal): Promise<District[]> => {
+    const response = await api.get(`/v1/general/regencies/${regencyId}/districts`, { params, signal });
     return response.data.data;
   },
 };

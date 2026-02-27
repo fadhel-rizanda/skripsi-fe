@@ -21,16 +21,14 @@ interface ReviewedCollapsibleProps {
     onUpload?: (req: Requirement) => void;
 }
 
-export default function ReviewedCollapsible({
-                                                currentUser,
-                                                adoption,
-                                            }: ReviewedCollapsibleProps) {
+export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCollapsibleProps) {
     const [requirements, setRequirements] = useState<Requirement[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const role = currentUser?.role?.name === "adopter" ? "adopter" : "provider";
+    const currentUserId = currentUser?.id ?? "";
 
-    const refreshTicket = useAdoptionStore((s) => s.refreshTicket);
+    const reviewTicket = useAdoptionStore((s) => s.reviewTicket);
+    const triggerReviewRefresh = useAdoptionStore((s) => s.triggerReviewRefresh);
     const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
 
     const stageState = getStageState(adoption, "Requirement");
@@ -64,28 +62,56 @@ export default function ReviewedCollapsible({
             cancelled = true;
             controller.abort();
         };
-    }, [adoption?.id, refreshTicket]);
+    }, [adoption?.id, reviewTicket]);
 
-    const handleApprove = async (req: Requirement) => {
-        if (!adoption?.id || isReadOnly) return;
-        await requirementServices.approveRequirement(adoption.id, req.id);
-        triggerAdoptionRefresh();
-    };
+    // ─── Finalize logic ───────────────────────────────────────────────────────
+    const myRequirements = requirements.filter((r) => r.created_by?.id === currentUserId);
+    const canFinalize =
+        !isReadOnly &&
+        myRequirements.length > 0 &&
+        myRequirements.some((r) => r.is_active) &&
+        myRequirements.every((r) => {
+            const s = r.status?.name?.toLowerCase() ?? ""
+            return s.includes("completed") || s.includes("rejected")
+        });
 
+    const canSetRequirements =
+        !isReadOnly && (
+            myRequirements.length === 0 ||
+            myRequirements.every((r) => r.is_active)
+        );
+
+    const allFinalized =
+        requirements.length > 0 &&
+        requirements.every((r) => {
+            const s = r.status?.name?.toLowerCase() ?? ""
+            return s.includes("completed") || s.includes("rejected")
+        });
+
+    // ─── Reject dialog ────────────────────────────────────────────────────────
+    const [selectedReq, setSelectedReq] = useState<Requirement | null>(null);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+
     const handleReject = async (req: Requirement) => {
         if (isReadOnly) return;
         setSelectedReq(req);
         setRejectDialogOpen(true);
     };
+
     const handleConfirmReject = async (reason: string) => {
         if (!selectedReq || !adoption?.id) return;
-        const data = { notes: reason } as RejectInput;
+        const data = {notes: reason} as RejectInput;
         await requirementServices.rejectRequirement(adoption.id, selectedReq.id, data);
-        triggerAdoptionRefresh();
+        triggerReviewRefresh();
     };
 
-    const [selectedReq, setSelectedReq] = useState<Requirement | null>(null);
+    const handleApprove = async (req: Requirement) => {
+        if (!adoption?.id || isReadOnly) return;
+        await requirementServices.approveRequirement(adoption.id, req.id);
+        triggerReviewRefresh();
+    };
+
+    // ─── Action dialog (delete / finalize) ───────────────────────────────────
     const [actionDialogOpen, setActionDialogOpen] = useState(false);
     const [actionConfig, setActionConfig] = useState<{
         title: string;
@@ -93,6 +119,7 @@ export default function ReviewedCollapsible({
         confirmText: string;
         variant: "default" | "destructive";
         onConfirm: () => Promise<void>;
+        onContinue?: () => void;
     } | null>(null);
 
     const handleDelete = (req: Requirement) => {
@@ -104,34 +131,39 @@ export default function ReviewedCollapsible({
             variant: "destructive",
             onConfirm: async () => {
                 await requirementServices.deleteRequirementById(adoption!.id, req.id);
-            }
+            },
+            onContinue: () => {
+                triggerReviewRefresh();
+                setSelectedReq(null);
+                setActionConfig(null);
+            },
         });
         setActionDialogOpen(true);
     };
 
     const handleFinalize = () => {
         setActionConfig({
-            title: "Finalize Requirements?",
-            description: "Are you sure you want to finalize all requirements? This will move the application to the next stage.",
+            title: "Finalize Your Requirements?",
+            description: allFinalized
+                ? "All requirements from both sides are done. This will move the adoption to the next stage."
+                : "This will mark your requirements as finalized. The adoption will proceed once the other party also finalizes.",
             confirmText: "Finalize",
             variant: "default",
             onConfirm: async () => {
                 await requirementServices.finalizeRequirements(adoption!.id);
-            }
+            },
+            onContinue: () => {
+                triggerReviewRefresh();
+                if (allFinalized) triggerAdoptionRefresh();
+                setActionConfig(null);
+            },
         });
         setActionDialogOpen(true);
     };
 
     const hasRequirements = requirements.length > 0;
 
-    const canFinalize =
-        !isReadOnly &&
-        role === "provider" &&
-        hasRequirements &&
-        requirements.every((r) =>
-            ["completed", "rejected"].some((s) => r.status?.name?.toLowerCase().includes(s))
-        );
-
+    // ─── Skeleton ─────────────────────────────────────────────────────────────
     if (!adoption) {
         return (
             <div className="w-full max-w-4xl border rounded-2xl px-4 py-4 bg-white animate-pulse">
@@ -184,18 +216,22 @@ export default function ReviewedCollapsible({
                             additional documents. Please upload the following items for our review.
                         </p>
 
-                        {role === "provider" && !isReadOnly && (
+                        {/* Both roles can set requirements + finalize their own */}
+                        {!isReadOnly && (
                             <div className="flex gap-2 mb-4">
-                                <SetRequirementDialog
-                                    adoptionId={adoption.id}
-                                    onSuccessAction={triggerAdoptionRefresh}
-                                />
+                                {canSetRequirements && (
+                                    <SetRequirementDialog
+                                        adoptionId={adoption.id}
+                                        onSuccessAction={triggerReviewRefresh}
+                                    />
+                                )
+                                }
                                 {canFinalize && (
                                     <Button
                                         className="bg-slate-800 hover:bg-slate-700 text-white rounded-xl h-8 px-3 text-xs font-bold"
                                         onClick={handleFinalize}
                                     >
-                                        Finalized
+                                        Finalize My Requirements
                                     </Button>
                                 )}
                             </div>
@@ -221,7 +257,7 @@ export default function ReviewedCollapsible({
                                             key={req.id}
                                             requirement={req}
                                             adoptionId={adoption.id}
-                                            role={role}
+                                            currentUserId={currentUserId}
                                             onApproveAction={isReadOnly ? undefined : handleApprove}
                                             onRejectAction={isReadOnly ? undefined : handleReject}
                                             onDeleteAction={isReadOnly ? undefined : handleDelete}
@@ -231,7 +267,7 @@ export default function ReviewedCollapsible({
                             ) : (
                                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
                                     <p className="text-xs text-slate-500">
-                                        The required documents have not been determined.
+                                        No requirements have been set yet.
                                     </p>
                                 </div>
                             )}
@@ -239,14 +275,15 @@ export default function ReviewedCollapsible({
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+
             <ActionDialog
                 open={actionDialogOpen}
                 onOpenChange={setActionDialogOpen}
-                onConfirm={actionConfig?.onConfirm || (async () => {})}
+                onConfirm={actionConfig?.onConfirm || (async () => {
+                })}
                 onContinue={() => {
-                    triggerAdoptionRefresh();
-                    setSelectedReq(null);
-                    setActionConfig(null);
+                    actionConfig?.onContinue?.();
+                    setActionDialogOpen(false);
                 }}
                 title={actionConfig?.title || ""}
                 description={actionConfig?.description || ""}

@@ -6,6 +6,7 @@ export const CreateRequirementSchema = z.object({
         z.object({
             name: z.string().min(1, "Name is required"),
             notes: z.string().optional().or(z.literal("")),
+            tag_id: z.uuid(),
         })
     ).min(1, "At least one requirement is required"),
 });
@@ -15,6 +16,7 @@ export type CreateRequirementInput = z.infer<typeof CreateRequirementSchema>;
 export const UpdateRequirementSchema = z.object({
     name: z.string().min(1, "Name is required"),
     notes: z.string().optional().or(z.literal("")),
+    tag_id: z.uuid(),
 });
 
 export type UpdateRequirementInput = z.infer<typeof UpdateRequirementSchema>;
@@ -32,13 +34,30 @@ export const CreateMeetNGreetSchema = z.object({
         return !isNaN(date.getTime()) && date > new Date();
     }),
     address: z.object({
-        street: z.string().min(10, "Please provide a street"),
-        city: z.string().min(2, "Please provide a city"),
-        state: z.string().min(2, "Please provide a state"),
-        country: z.string().min(2, "Please provide a country"),
-        zip_code: z.string().min(4, "Please provide a zip code").max(10, "Zip code is too long"),
-        notes: z.string().max(500, "Note is too long").optional(),
-        link: z.url("Invalid URL").optional().or(z.literal("")),
+        street: z.string().min(10, "Street address must be at least 10 characters"),
+        province_id: z.string().min(1, "Please select a province"),
+        regency_id:  z.string().min(1, "Please select a regency / city"),
+        district_id: z.string().min(1, "Please select a district"),
+        zip_code: z.string()
+            .min(4, "Zip code must be at least 4 digits")
+            .max(20, "Zip code is too long")
+            .optional()
+            .or(z.literal("")),
+        notes: z.string().max(1000, "Notes must be under 1000 characters").optional(),
+        link: z.url("Please enter a valid URL").optional().or(z.literal("")),
+    }).superRefine((address, ctx) => {
+        const isOnline =
+            address.province_id === "1" &&
+            address.regency_id  === "1" &&
+            address.district_id === "1"
+
+        if (isOnline && (!address.link || address.link.trim() === "")) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["link"],
+                message: "Meeting link is required for online meetings",
+            })
+        }
     }),
 });
 

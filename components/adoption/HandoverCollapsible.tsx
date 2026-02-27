@@ -28,9 +28,10 @@ export default function HandoverCollapsible({
     const [loading, setLoading] = useState(true);
 
     const currentUserId = currentUser?.id ?? "";
-    const role = currentUser?.role?.name === "adopter" ? "adopter" : "provider";
+    const role = currentUser?.role?.name;
 
-    const refreshTicket = useAdoptionStore((s) => s.refreshTicket);
+    const handoverTicket = useAdoptionStore((s) => s.handoverTicket);
+    const triggerHandoverRefresh = useAdoptionStore((s) => s.triggerHandoverRefresh);
     const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
 
     const stageState = getStageState(adoption, "Handover");
@@ -40,7 +41,6 @@ export default function HandoverCollapsible({
 
     const meetNGreet = handover?.meet_n_greet;
     const hasSchedule = !!meetNGreet?.schedule;
-    // const scheduleApproved = meetNGreet?.adopter_confirmed && meetNGreet?.provider_confirmed;
 
     useEffect(() => {
         if (!adoption?.id) return;
@@ -64,7 +64,7 @@ export default function HandoverCollapsible({
             cancelled = true;
             controller.abort();
         };
-    }, [adoption?.id, refreshTicket]);
+    }, [adoption?.id, handoverTicket]);
 
     const [dialogConfig, setDialogConfig] = useState<{
         open: boolean;
@@ -81,12 +81,13 @@ export default function HandoverCollapsible({
         confirmText: "",
         successTitle: "",
         successDescription: "",
-        onConfirm: async () => {
-        },
-    })
+        onConfirm: async () => {},
+    });
+
     const openDialog = (config: Omit<typeof dialogConfig, "open">) => {
-        setDialogConfig({open: true, ...config})
-    }
+        setDialogConfig({open: true, ...config});
+    };
+
     const handleAcceptSchedule = () => {
         openDialog({
             title: "Accept Handover Schedule?",
@@ -95,12 +96,12 @@ export default function HandoverCollapsible({
             successTitle: "Schedule Accepted!",
             successDescription: "The other party will be notified.",
             onConfirm: async () => {
-                if (!adoption?.id || !handover?.id) return
-                await handoverServices.approveHandover(adoption.id, handover.id)
-                triggerAdoptionRefresh()
-            }
-        })
-    }
+                if (!adoption?.id || !handover?.id) return;
+                await handoverServices.approveHandover(adoption.id, handover.id);
+                triggerHandoverRefresh();
+            },
+        });
+    };
 
     if (!adoption) {
         return (
@@ -145,7 +146,7 @@ export default function HandoverCollapsible({
                             <div className="mb-4">
                                 <CreateHandoverDialog
                                     adoptionId={adoption.id}
-                                    onSuccessAction={triggerAdoptionRefresh}
+                                    onSuccessAction={triggerHandoverRefresh}
                                 />
                             </div>
                         )}
@@ -160,7 +161,7 @@ export default function HandoverCollapsible({
                             </div>
                         ) : (
                             <div className="flex flex-col gap-4">
-                                {hasSchedule  && meetNGreet && (
+                                {hasSchedule && meetNGreet && (
                                     <ScheduleCard
                                         meetNGreet={meetNGreet}
                                         currentUserId={currentUserId}
@@ -170,7 +171,7 @@ export default function HandoverCollapsible({
                                                 <CreateHandoverDialog
                                                     adoptionId={adoption.id}
                                                     handoverId={handover?.id}
-                                                    onSuccessAction={triggerAdoptionRefresh}
+                                                    onSuccessAction={triggerHandoverRefresh}
                                                     trigger={
                                                         <Button variant="outline"
                                                                 className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-100">
@@ -191,7 +192,10 @@ export default function HandoverCollapsible({
                                             adoptionId={adoption.id}
                                             handover={handover}
                                             role={role}
-                                            onConfirmChange={isReadOnly ? undefined : triggerAdoptionRefresh}
+                                            onConfirmChange={isReadOnly ? undefined : () => {
+                                                triggerHandoverRefresh();
+                                                triggerAdoptionRefresh();
+                                            }}
                                         />
                                     ) : (
                                         <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">

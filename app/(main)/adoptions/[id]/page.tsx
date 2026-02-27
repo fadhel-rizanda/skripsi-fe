@@ -33,12 +33,18 @@ export default function AdoptionDetailPage() {
     }, [adoptionId]);
 
     useEffect(() => {
-        if(adoptionId) {
-            fetchAdoptionDetail();
-        } else {
+        if (!adoptionId) {
             router.push("/adoptions");
+            return;
         }
-    }, [adoptionId, fetchAdoptionDetail, router, refreshTicket]);
+        fetchAdoptionDetail();
+    }, [adoptionId]);
+
+    useEffect(() => {
+        if (refreshTicket > 0 && adoptionId) {
+            fetchAdoptionDetail();
+        }
+    }, [refreshTicket]);
 
     return (
         <>
@@ -46,8 +52,8 @@ export default function AdoptionDetailPage() {
                 <AdoptionHeader stage={adoption?.stage_tag.name} petName={adoption?.pet.name}/>
                 <SubmittedCollapsible currentUser={session?.user} adoption={adoption} />
 
-                <ReviewedCollapsible currentUser={session?.user} adoption={adoption}/>
                 <MeetNGreetCollapsible currentUser={session?.user} adoption={adoption}/>
+                <ReviewedCollapsible currentUser={session?.user} adoption={adoption}/>
                 <HandoverCollapsible currentUser={session?.user} adoption={adoption}/>
             </div>
         </>

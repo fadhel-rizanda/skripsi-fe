@@ -7,7 +7,7 @@ import Image from "next/image";
 
 import { petService } from "@/services/petServices";
 import { Pet } from "@/types/pet";
-import { generalService, Tag as AnimalTag } from "@/services/generalServices";
+import { Tag as AnimalTag } from "@/types/general";
 import { isValidUrl } from "@/lib/utils";
 import { downloadAttachment } from "@/lib/attachment-helpers";
 import { Attachment } from "@/types/attachment";
@@ -30,6 +30,8 @@ import {
   FileText,
   Download,
 } from "lucide-react";
+import {generalService} from "@/services/generalServices";
+import {userService} from "@/services/userServices";
 // Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
@@ -44,7 +46,7 @@ export default function DetailPetPage() {
   // dialog state removed; navigation to edit page is used instead
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   // Support both shapes: `session.user.role` can be a string or an object { name }
   const _role = session?.user?.role;
   const roleName = _role?.name;
@@ -128,8 +130,10 @@ export default function DetailPetPage() {
     try {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
+      const { channels } = await userService.userChannels();
+      await update({channels});
       toast.success("Adoption request sent successfully!");
-      router.push(`/adoption/${response.id}`);
+      router.push(`/adoption/${response.data.id}`);
     } catch (error: unknown) {
       type ErrorWithResponse = {
         response?: { data?: { message?: string } };

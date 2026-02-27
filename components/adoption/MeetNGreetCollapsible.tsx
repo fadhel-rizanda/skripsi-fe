@@ -29,7 +29,8 @@ export default function MeetNGreetCollapsible({
     const currentUserId = currentUser?.id ?? "";
     const role = currentUser?.role?.name === "adopter" ? "adopter" : "provider";
 
-    const refreshTicket = useAdoptionStore((s) => s.refreshTicket);
+    const meetNGreetTicket = useAdoptionStore((s) => s.meetNGreetTicket);
+    const triggerMeetNGreetRefresh = useAdoptionStore((s) => s.triggerMeetNGreetRefresh);
     const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
 
     const stageState = getStageState(adoption, "Meet & Greet");
@@ -60,7 +61,7 @@ export default function MeetNGreetCollapsible({
             cancelled = true;
             controller.abort();
         };
-    }, [adoption?.id, refreshTicket]);
+    }, [adoption?.id, meetNGreetTicket]);
 
     const [dialogConfig, setDialogConfig] = useState<{
         open: boolean;
@@ -95,7 +96,7 @@ export default function MeetNGreetCollapsible({
             onConfirm: async () => {
                 if (!adoption?.id || !meetNGreet?.id) return
                 await meetNGreetServices.approveMeetNGreet(adoption.id, meetNGreet.id)
-                triggerAdoptionRefresh()
+                triggerMeetNGreetRefresh()
             }
         })
     }
@@ -110,6 +111,7 @@ export default function MeetNGreetCollapsible({
             onConfirm: async () => {
                 if (!adoption?.id || !meetNGreet?.id) return
                 await meetNGreetServices.finalizeMeetNGreet(adoption.id, meetNGreet.id)
+                triggerMeetNGreetRefresh()
                 triggerAdoptionRefresh()
             }
         })
@@ -130,8 +132,6 @@ export default function MeetNGreetCollapsible({
             </div>
         );
     }
-
-    console.log("Meetngreet meetNGreet: ", meetNGreet)
 
     return (
         <>
@@ -184,7 +184,7 @@ export default function MeetNGreetCollapsible({
                                                 <CreateMeetNGreetDialog
                                                     adoptionId={adoption.id}
                                                     existing={meetNGreet}
-                                                    onSuccessAction={triggerAdoptionRefresh}
+                                                    onSuccessAction={triggerMeetNGreetRefresh}
                                                     trigger={
                                                         <Button variant="outline"
                                                                 className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-100">

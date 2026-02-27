@@ -11,6 +11,8 @@ import { UpdateRequirementInput, UpdateRequirementSchema } from "@/schemas/adopt
 import { ActionDialog } from "@/components/dialog/ActionDialog";
 import { requirementServices } from "@/services/adoptionServices";
 import { Requirement } from "@/types/adoption";
+import { useTagsOptions } from "@/hooks/useFilterOptions";
+import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 
 interface Props {
     adoptionId: string;
@@ -22,15 +24,26 @@ interface Props {
 export default function UpdateRequirementForm({ adoptionId, requirement, onSuccess, onCancel }: Props) {
     const [dialogOpen, setDialogOpen] = useState(false);
 
+    const {
+        options: requirementTags,
+        isLoading: isLoadingRequirementTags,
+        setSearch: setRequirementSearch,
+        loadMore: loadMoreRequirement,
+        hasMore: hasMoreRequirement,
+    } = useTagsOptions("requirement");
+
     const form = useForm<UpdateRequirementInput>({
         resolver: zodResolver(UpdateRequirementSchema),
         defaultValues: {
             name: requirement.name,
             notes: requirement.notes ?? "",
+            tag_id: requirement.tag_id ?? "",
         },
     });
 
-    const { register, handleSubmit, formState: { errors } } = form;
+    const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
+
+    const tagId = watch("tag_id");
 
     const onSubmit = () => setDialogOpen(true);
 
@@ -43,6 +56,31 @@ export default function UpdateRequirementForm({ adoptionId, requirement, onSucce
         <>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex flex-col gap-3">
+
+                    {/* Tag */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Type <span className="text-red-500">*</span>
+                        </label>
+                        <SearchableCombobox
+                            options={requirementTags}
+                            selectedValues={tagId ? [tagId] : []}
+                            onSelect={(value) => setValue("tag_id", value, { shouldValidate: true })}
+                            onSearch={setRequirementSearch}
+                            onLoadMore={loadMoreRequirement}
+                            isLoading={isLoadingRequirementTags}
+                            hasMore={hasMoreRequirement}
+                            placeholder="Select requirement type..."
+                            emptyMessage="No types found."
+                            mode="single"
+                            className="w-full rounded-lg text-xs h-8"
+                        />
+                        {errors.tag_id && (
+                            <p className="text-red-500 text-xs">{errors.tag_id.message}</p>
+                        )}
+                    </div>
+
+                    {/* Name */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-700">
                             Name <span className="text-red-500">*</span>
@@ -57,6 +95,7 @@ export default function UpdateRequirementForm({ adoptionId, requirement, onSucce
                         )}
                     </div>
 
+                    {/* Notes */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-700">Notes</label>
                         <Textarea

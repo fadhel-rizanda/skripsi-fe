@@ -10,6 +10,8 @@ import { PlusCircle, X, Save, XCircle } from "lucide-react";
 import { CreateRequirementInput, CreateRequirementSchema } from "@/schemas/adoption.schema";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
 import { requirementServices } from "@/services/adoptionServices";
+import { useTagsOptions } from "@/hooks/useFilterOptions";
+import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 
 interface Props {
     adoptionId: string;
@@ -20,14 +22,22 @@ interface Props {
 export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: Props) {
     const [dialogOpen, setDialogOpen] = useState(false);
 
+    const {
+        options: requirementTags,
+        isLoading: isLoadingRequirementTags,
+        setSearch: setRequirementSearch,
+        loadMore: loadMoreRequirement,
+        hasMore: hasMoreRequirement,
+    } = useTagsOptions("requirement");
+
     const form = useForm<CreateRequirementInput>({
         resolver: zodResolver(CreateRequirementSchema),
         defaultValues: {
-            requirements: [{ name: "", notes: "" }],
+            requirements: [{ name: "", notes: "", tag_id: "" }],
         },
     });
 
-    const { control, register, handleSubmit, formState } = form;
+    const { control, register, handleSubmit, formState, setValue, watch } = form;
     const { errors } = formState;
 
     const { fields, append, remove } = useFieldArray({
@@ -45,55 +55,85 @@ export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: 
     return (
         <>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                {/* Requirement List */}
                 <div className="flex flex-col gap-3 max-h-105 overflow-y-auto pr-1">
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex flex-col gap-3 relative"
-                        >
-                            {/* Remove button */}
-                            {fields.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 transition-colors"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
-
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-slate-700">
-                                    Name <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                    placeholder="e.g. Proof of Address"
-                                    className="h-8 text-xs rounded-lg bg-white"
-                                    {...register(`requirements.${index}.name`)}
-                                />
-                                {errors.requirements?.[index]?.name && (
-                                    <p className="text-red-500 text-xs">
-                                        {errors.requirements[index]?.name?.message}
-                                    </p>
+                    {fields.map((field, index) => {
+                        const tagId = watch(`requirements.${index}.tag_id`);
+                        return (
+                            <div
+                                key={field.id}
+                                className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex flex-col gap-3 relative"
+                            >
+                                {fields.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => remove(index)}
+                                        className="absolute top-3 right-3 text-red-400 hover:text-red-600 transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
                                 )}
-                            </div>
 
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-slate-700">Notes</label>
-                                <Textarea
-                                    placeholder="Describe the requirement in detail"
-                                    className="text-xs rounded-lg bg-white resize-none min-h-18 max-w-205"
-                                    {...register(`requirements.${index}.notes`)}
-                                />
-                                {errors.requirements?.[index]?.notes && (
-                                    <p className="text-red-500 text-xs">
-                                        {errors.requirements[index]?.notes?.message}
-                                    </p>
-                                )}
+                                {/* Tag */}
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-slate-700">
+                                        Type <span className="text-red-500">*</span>
+                                    </label>
+                                    <SearchableCombobox
+                                        options={requirementTags}
+                                        selectedValues={tagId ? [tagId] : []}
+                                        onSelect={(value) =>
+                                            setValue(`requirements.${index}.tag_id`, value, { shouldValidate: true })
+                                        }
+                                        onSearch={setRequirementSearch}
+                                        onLoadMore={loadMoreRequirement}
+                                        isLoading={isLoadingRequirementTags}
+                                        hasMore={hasMoreRequirement}
+                                        placeholder="Select requirement type..."
+                                        emptyMessage="No types found."
+                                        mode="single"
+                                        className="w-full rounded-lg text-xs h-8"
+                                    />
+                                    {errors.requirements?.[index]?.tag_id && (
+                                        <p className="text-red-500 text-xs">
+                                            {errors.requirements[index]?.tag_id?.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Name */}
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-slate-700">
+                                        Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        placeholder="e.g. Proof of Address"
+                                        className="h-8 text-xs rounded-lg bg-white"
+                                        {...register(`requirements.${index}.name`)}
+                                    />
+                                    {errors.requirements?.[index]?.name && (
+                                        <p className="text-red-500 text-xs">
+                                            {errors.requirements[index]?.name?.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Notes */}
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-xs font-semibold text-slate-700">Notes</label>
+                                    <Textarea
+                                        placeholder="Describe the requirement in detail"
+                                        className="text-xs rounded-lg bg-white resize-none min-h-18 max-w-205"
+                                        {...register(`requirements.${index}.notes`)}
+                                    />
+                                    {errors.requirements?.[index]?.notes && (
+                                        <p className="text-red-500 text-xs">
+                                            {errors.requirements[index]?.notes?.message}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {errors.requirements?.message && (
@@ -103,7 +143,7 @@ export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: 
                 <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => append({ name: "", notes: "" })}
+                    onClick={() => append({ name: "", notes: "", tag_id: "" })}
                     className="w-full bg-[#19E619] hover:bg-green-500 text-black text-xs font-semibold rounded-xl h-9 gap-2"
                 >
                     <PlusCircle className="w-4 h-4" />

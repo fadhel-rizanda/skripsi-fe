@@ -70,7 +70,7 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
 
     return (
         <Card
-            className="group w-3xl hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0">
+            className="group max-w-4xl w-full hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0">
             {/* Header */}
             <div
                 onClick={() => router.push(`/adoptions/${adoption.id}`)}

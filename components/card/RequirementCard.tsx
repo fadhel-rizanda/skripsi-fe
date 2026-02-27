@@ -20,8 +20,7 @@ import UpdateRequirementDialog from "@/components/dialog/UpdateRequirementDialog
 function getStatusIcon(name: string): ReactNode {
     const lower = name.toLowerCase();
     if (lower.includes("completed") || lower.includes("accepted")) return <CheckCircle2 className="h-3 w-3"/>;
-    if (lower.includes("rejected") || lower.includes("declined") || lower.includes("cancelled")) return <XCircle
-        className="h-3 w-3"/>;
+    if (lower.includes("rejected") || lower.includes("declined") || lower.includes("cancelled")) return <XCircle className="h-3 w-3"/>;
     if (lower.includes("progress")) return <Clock className="h-3 w-3"/>;
     return <AlertCircle className="h-3 w-3"/>;
 }
@@ -45,14 +44,14 @@ function getFileTextColor(name: string): string {
 export default function RequirementCard({
                                             requirement,
                                             adoptionId,
-                                            role,
+                                            currentUserId,
                                             onApproveAction,
                                             onRejectAction,
                                             onDeleteAction,
                                         }: {
     requirement: Requirement;
     adoptionId: string;
-    role: "adopter" | "provider";
+    currentUserId: string;
     onApproveAction?: (req: Requirement) => void;
     onRejectAction?: (req: Requirement) => void;
     onDeleteAction?: (req: Requirement) => void;
@@ -66,16 +65,17 @@ export default function RequirementCard({
     const lower = statusName.toLowerCase();
     const hasFile = !!requirement.attachment?.filename;
 
-    const isCompleted = lower.includes("completed");
+    const isCompleted = lower.includes("completed") || lower.includes("rejected");
     const isRejected = lower.includes("rejected");
     const isInProgress = lower.includes("progress");
+
+    const isMine = requirement.created_by?.id === currentUserId;
+    const isFiller = !isMine;
 
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         e.target.value = "";
-
         setUploading(true);
         try {
             const attachmentId = await uploadAttachment(file);
@@ -84,7 +84,7 @@ export default function RequirementCard({
             triggerAdoptionRefresh();
         } catch (e) {
             toast.error("Failed to upload file. Please try again.");
-            console.error(e)
+            console.error(e);
         } finally {
             setUploading(false);
         }
@@ -95,10 +95,10 @@ export default function RequirementCard({
     const handleDownload = async (attachment: Attachment) => {
         try {
             toast.info("Preparing download...");
-            await openAttachment(attachment)
+            await openAttachment(attachment);
         } catch (error: unknown) {
             console.error("Download failed:", error);
-            type ErrorWithResponse = { response?: { status?: number } };
+            type ErrorWithResponse = {response?: {status?: number}};
             if (
                 typeof error === "object" &&
                 error !== null &&
@@ -113,15 +113,8 @@ export default function RequirementCard({
     };
 
     return (
-        <div
-            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-            {/* Hidden file input */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-            />
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
+            <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange}/>
 
             {/* Left: info */}
             <div className="flex flex-col gap-1 min-w-0">
@@ -134,6 +127,10 @@ export default function RequirementCard({
                         {getStatusIcon(statusName)}
                         {statusName}
                     </Badge>
+                    {/* Show who set this requirement */}
+                    <span className="text-xs text-slate-400">
+                        {isMine ? "Set by you" : `Set by ${requirement.created_by?.name ?? "other party"}`}
+                    </span>
                 </div>
 
                 {requirement.notes && (
@@ -141,8 +138,11 @@ export default function RequirementCard({
                 )}
 
                 {hasFile && (
-                    <button type="button" className="flex items-center gap-1 mt-0.5 cursor-pointer hover:underline"
-                            onClick={() => handleDownload(requirement.attachment!)}>
+                    <button
+                        type="button"
+                        className="flex items-center gap-1 mt-0.5 cursor-pointer hover:underline"
+                        onClick={() => handleDownload(requirement.attachment!)}
+                    >
                         {getFileIcon(statusName)}
                         <span className={`text-xs truncate ${getFileTextColor(statusName)}`}>
                             {requirement.attachment?.filename}
@@ -152,8 +152,10 @@ export default function RequirementCard({
             </div>
 
             {/* Right: actions */}
-            <div className="shrink-0">
-                {role === "adopter" && (
+            <div className="shrink-0 flex items-center gap-1">
+
+                {/* ── Upload actions: shown to the filler (the other party) ── */}
+                {isFiller && (
                     <>
                         {isCompleted ? (
                             <Button
@@ -170,14 +172,10 @@ export default function RequirementCard({
                                 onClick={triggerFileInput}
                                 disabled={uploading}
                             >
-                                {uploading
-                                    ? <Loader2 className="h-3.5 w-3.5 animate-spin"/>
-                                    : <Upload className="h-3.5 w-3.5"/>
-                                }
+                                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Reupload"}
                             </Button>
                         ) : isInProgress ? (
-                            // File uploaded, waiting provider review
                             <Button
                                 variant="secondary"
                                 className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 bg-slate-200 text-slate-500 cursor-default"
@@ -192,17 +190,15 @@ export default function RequirementCard({
                                 onClick={triggerFileInput}
                                 disabled={uploading}
                             >
-                                {uploading
-                                    ? <Loader2 className="h-3.5 w-3.5 animate-spin"/>
-                                    : <Upload className="h-3.5 w-3.5"/>
-                                }
+                                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Upload"}
                             </Button>
                         )}
                     </>
                 )}
 
-                {role === "provider" && (
+                {/* ── Review actions: shown to the creator (isMine) ── */}
+                {isMine && (
                     <div className="flex items-center gap-1 border-l pl-2 ml-1 border-slate-200">
                         <button
                             onClick={() => onApproveAction?.(requirement)}
@@ -232,8 +228,7 @@ export default function RequirementCard({
                                 requirement={requirement}
                                 onSuccessAction={triggerAdoptionRefresh}
                                 trigger={
-                                    <button
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
+                                    <button className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors">
                                         <Edit3 className="h-4 w-4"/>
                                     </button>
                                 }

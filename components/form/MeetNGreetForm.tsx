@@ -14,11 +14,15 @@ import {CreateMeetNGreetInput, CreateMeetNGreetSchema} from "@/schemas/adoption.
 import {ActionDialog} from "@/components/dialog/ActionDialog"
 import {meetNGreetServices} from "@/services/adoptionServices"
 import {toast} from "sonner"
-import {CalendarClock, MapPin, CalendarIcon} from "lucide-react"
+import {CalendarClock, MapPin, CalendarIcon, Video, MapPinned} from "lucide-react"
 import {format} from "date-fns"
 import {id} from "date-fns/locale"
 import {cn} from "@/lib/utils"
-import {useAdoptionStore} from "@/store/useAdoptionStore";
+import {useAdoptionStore} from "@/store/useAdoptionStore"
+import {useDistrictsOptions, useProvincesOptions, useRegenciesOptions} from "@/hooks/useFilterOptions"
+import {SearchableCombobox} from "@/components/combobox/SearchableCombobox"
+
+const ONLINE_IDS = {province_id: "1", regency_id: "1", district_id: "1"} as const
 
 interface Props {
     adoptionId: string;
@@ -34,7 +38,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
     const [calendarOpen, setCalendarOpen] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
     const [selectedTime, setSelectedTime] = useState("09:00")
-    const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
+    const [isOnline, setIsOnline] = useState(false)
+    const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh)
+
+    const isMeetNGreet = context === "meet-n-greet"
 
     const form = useForm<CreateMeetNGreetInput>({
         resolver: zodResolver(CreateMeetNGreetSchema),
@@ -42,11 +49,58 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
         defaultValues: {
             scheduled_time: "",
             address: {
-                street: "", city: "", state: "",
-                country: "", zip_code: "", notes: "", link: ""
+                street: "",
+                province_id: "",
+                regency_id: "",
+                district_id: "",
+                zip_code: "",
+                notes: "",
+                link: "",
             }
         }
     })
+
+    const selectedProvinceId = form.watch("address.province_id")
+    const selectedRegencyId = form.watch("address.regency_id")
+
+    const {
+        options: provinces,
+        isLoading: isLoadingProvinces,
+        setSearch: setProvincesSearch,
+        loadMore: loadMoreProvinces,
+        hasMore: hasMoreProvinces,
+    } = useProvincesOptions()
+
+    const {
+        options: regencies,
+        isLoading: isLoadingRegencies,
+        setSearch: setRegenciesSearch,
+        loadMore: loadMoreRegencies,
+        hasMore: hasMoreRegencies,
+    } = useRegenciesOptions(selectedProvinceId)
+
+    const {
+        options: districts,
+        isLoading: isLoadingDistricts,
+        setSearch: setDistrictsSearch,
+        loadMore: loadMoreDistricts,
+        hasMore: hasMoreDistricts,
+    } = useDistrictsOptions(selectedRegencyId)
+
+    const handleToggleOnline = (online: boolean) => {
+        setIsOnline(online)
+        if (online) {
+            form.setValue("address.province_id", ONLINE_IDS.province_id, {shouldValidate: true})
+            form.setValue("address.regency_id", ONLINE_IDS.regency_id, {shouldValidate: true})
+            form.setValue("address.district_id", ONLINE_IDS.district_id, {shouldValidate: true})
+            form.setValue("address.zip_code", "00000", {shouldValidate: true})
+        } else {
+            form.setValue("address.province_id", "", {shouldValidate: false})
+            form.setValue("address.regency_id", "", {shouldValidate: false})
+            form.setValue("address.district_id", "", {shouldValidate: false})
+            form.setValue("address.zip_code", "", {shouldValidate: false})
+        }
+    }
 
     const handleDateSelect = (date: Date | undefined) => {
         setSelectedDate(date)
@@ -76,7 +130,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
         try {
             const data = form.getValues()
             if (overrideSubmit) {
-                await overrideSubmit(data)                                    // pakai override kalau ada
+                await overrideSubmit(data)
             } else if (existing?.id) {
                 await meetNGreetServices.updateMeetNGreet(adoptionId, existing.id, data)
             } else {
@@ -86,6 +140,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
             toast.error(error.response?.data?.message || "Failed to schedule")
             throw error
         } finally {
+            triggerAdoptionRefresh()
             setIsSubmitting(false)
         }
     }
@@ -104,12 +159,12 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
     const dialogSuccess = isHandover
         ? (isUpdate ? "New Handover Schedule Proposed!" : "Handover Day Scheduled!")
         : (isUpdate ? "New Schedule Proposed!" : "Meeting Scheduled!")
+
     return (
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
-                    {/* Section: Schedule Time */}
                     <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                         <CalendarClock className="h-4 w-4"/>
                         Schedule Time
@@ -161,103 +216,215 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
 
                     <hr/>
 
-                    {/* Section: Location */}
-                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                        <MapPin className="h-4 w-4"/>
-                        Location
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                            <MapPin className="h-4 w-4"/>
+                            Location
+                        </div>
+
+                        {isMeetNGreet && (
+                            <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+                                <button
+                                    type="button"
+                                    onClick={() => handleToggleOnline(false)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                        !isOnline
+                                            ? "bg-white shadow-sm text-slate-800"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    )}
+                                >
+                                    <MapPinned className="h-3.5 w-3.5"/>
+                                    In-Person
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleToggleOnline(true)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                        isOnline
+                                            ? "bg-white shadow-sm text-slate-800"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    )}
+                                >
+                                    <Video className="h-3.5 w-3.5"/>
+                                    Online
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
+
                         <FormField
                             control={form.control}
                             name="address.street"
                             render={({field}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>Street Address</FormLabel>
+                                    <FormLabel>
+                                        {isOnline ? "Meeting Title / Platform" : "Street Address"}
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Jl. Pawsitive No. 123" {...field} className="rounded-xl"/>
+                                        <Input
+                                            placeholder={isOnline
+                                                ? "e.g. Google Meet — Puppy Introduction"
+                                                : "Jl. Pawsitive No. 123"
+                                            }
+                                            {...field}
+                                            className="rounded-xl"
+                                        />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="address.city"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>City</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Bekasi" {...field} className="rounded-xl"/>
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address.zip_code"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Zip Code</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="17148" {...field} className="rounded-xl"/>
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address.state"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>State / Province</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Jawa Barat" {...field} className="rounded-xl"/>
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address.country"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Country</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Indonesia" {...field} className="rounded-xl"/>
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
+
+                        {!isOnline && (
+                            <>
+                                <FormField
+                                    control={form.control}
+                                    name="address.province_id"
+                                    render={({field}) => (
+                                        <FormItem className="col-span-2">
+                                            <FormLabel>Province</FormLabel>
+                                            <FormControl>
+                                                <SearchableCombobox
+                                                    options={provinces}
+                                                    selectedValues={field.value ? [field.value] : []}
+                                                    onSelect={(value) => {
+                                                        field.onChange(value)
+                                                        form.setValue("address.regency_id", "")
+                                                        form.setValue("address.district_id", "")
+                                                    }}
+                                                    onSearch={setProvincesSearch}
+                                                    onLoadMore={loadMoreProvinces}
+                                                    isLoading={isLoadingProvinces}
+                                                    hasMore={hasMoreProvinces}
+                                                    placeholder="Select province..."
+                                                    emptyMessage="No provinces found."
+                                                    mode="single"
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.regency_id"
+                                    render={({field}) => (
+                                        <FormItem className="col-span-2">
+                                            <FormLabel>Regency / City</FormLabel>
+                                            <FormControl>
+                                                <SearchableCombobox
+                                                    options={regencies}
+                                                    selectedValues={field.value ? [field.value] : []}
+                                                    onSelect={(value) => {
+                                                        field.onChange(value)
+                                                        form.setValue("address.district_id", "")
+                                                    }}
+                                                    onSearch={setRegenciesSearch}
+                                                    onLoadMore={loadMoreRegencies}
+                                                    isLoading={isLoadingRegencies}
+                                                    hasMore={hasMoreRegencies}
+                                                    placeholder={selectedProvinceId ? "Select regency/city..." : "Select a province first"}
+                                                    emptyMessage="No regencies found."
+                                                    mode="single"
+                                                    disabled={!selectedProvinceId}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.district_id"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>District</FormLabel>
+                                            <FormControl>
+                                                <SearchableCombobox
+                                                    options={districts}
+                                                    selectedValues={field.value ? [field.value] : []}
+                                                    onSelect={(value) => field.onChange(value)}
+                                                    onSearch={setDistrictsSearch}
+                                                    onLoadMore={loadMoreDistricts}
+                                                    isLoading={isLoadingDistricts}
+                                                    hasMore={hasMoreDistricts}
+                                                    placeholder={selectedRegencyId ? "Select district..." : "Select a regency first"}
+                                                    emptyMessage="No districts found."
+                                                    mode="single"
+                                                    disabled={!selectedRegencyId}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="address.zip_code"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Zip Code{" "}
+                                                <span className="text-muted-foreground font-normal">(optional)</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="17148" {...field} className="rounded-xl"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            </>
+                        )}
+
                         <FormField
                             control={form.control}
                             name="address.link"
                             render={({field}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>Maps Link <span
-                                        className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                                    <FormLabel>
+                                        {isOnline ? "Meeting Link" : "Maps Link"}{" "}
+                                        {!isOnline && (
+                                            <span className="text-muted-foreground font-normal">(optional)</span>
+                                        )}
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://maps.google.com/..." {...field}
-                                               className="rounded-xl"/>
+                                        <Input
+                                            placeholder={isOnline
+                                                ? "https://meet.google.com/..."
+                                                : "https://maps.google.com/..."
+                                            }
+                                            {...field}
+                                            className="rounded-xl"
+                                        />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="address.notes"
                             render={({field}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>Notes <span
-                                        className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                                    <FormLabel>
+                                        Notes{" "}
+                                        <span className="text-muted-foreground font-normal">(optional)</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="e.g. Near the orange gate, ring the bell twice"
+                                            placeholder={isOnline
+                                                ? "e.g. We'll use Google Meet, link will be sent 10 minutes before"
+                                                : "e.g. Near the orange gate, ring the bell twice"
+                                            }
                                             className="rounded-xl resize-none"
                                             rows={3}
                                             {...field}

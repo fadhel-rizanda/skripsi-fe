@@ -144,7 +144,7 @@ export default function AdminUsersPage() {
                             <thead className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 border-b border-gray-100">
                                 <tr>
                                     <th className="px-4 py-3">USER ID</th>
-                                    <th className="px-4 py-3">USER</th>
+                                    <th className="px-4 py-3">NAME</th>
                                     <th className="px-4 py-3">ROLE</th>
                                     <th className="px-4 py-3">EMAIL</th>
                                     <th className="px-4 py-3">PHONE</th>

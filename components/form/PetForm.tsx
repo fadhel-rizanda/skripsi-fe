@@ -30,13 +30,15 @@ import {TagBadge} from "@/components/badge/TagBadge";
 import {openAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 import {CreatePetSchema} from "@/schemas/pet.schema";
 import {CreatePetPayload, petService} from "@/services/petServices";
-import {useTagsOptions} from "@/hooks/useFilterOptions";
+import {useTagsOptions, useProvincesOptions, useRegenciesOptions, useDistrictsOptions} from "@/hooks/useFilterOptions";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {useRouter} from "next/navigation";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {ActionDialog} from "@/components/dialog/ActionDialog";
 import {genderOptions, PetGender, PetSize, sizeOptions} from "@/types/pet";
 import {Attachment} from "@/types/attachment";
+import {cn} from "@/lib/utils";
+import {Home, MapPin} from "lucide-react";
 
 type PetFormProps = {
     mode: "create" | "edit"
@@ -52,6 +54,8 @@ export default function PetForm({mode, petId}: PetFormProps) {
     const [isLoadingDetail, setIsLoadingDetail] = useState(false)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
+    const [useOwnerAddress, setUseOwnerAddress] = useState(false)
+
     const {
         options: physiqueTags,
         isLoading: isLoadingPhysiqueTags,
@@ -91,10 +95,66 @@ export default function PetForm({mode, petId}: PetFormProps) {
             physique_ids: [],
             personality_ids: [],
             additional_record_ids: [],
+            use_owner_address: false,
+            address: {
+                street: "",
+                province_id: "",
+                regency_id: "",
+                district_id: "",
+                zip_code: "",
+                notes: "",
+                link: "",
+            },
         },
     })
 
+    const selectedProvinceId = form.watch("address.province_id")
+    const selectedRegencyId = form.watch("address.regency_id")
+
+    const {
+        options: provinces,
+        isLoading: isLoadingProvinces,
+        setSearch: setProvincesSearch,
+        loadMore: loadMoreProvinces,
+        hasMore: hasMoreProvinces,
+    } = useProvincesOptions()
+
+    const {
+        options: regencies,
+        isLoading: isLoadingRegencies,
+        setSearch: setRegenciesSearch,
+        loadMore: loadMoreRegencies,
+        hasMore: hasMoreRegencies,
+    } = useRegenciesOptions(selectedProvinceId ?? "")
+
+    const {
+        options: districts,
+        isLoading: isLoadingDistricts,
+        setSearch: setDistrictsSearch,
+        loadMore: loadMoreDistricts,
+        hasMore: hasMoreDistricts,
+    } = useDistrictsOptions(selectedRegencyId ?? "")
+
+    const [initialProvince, setInitialProvince] = useState<{id: string, name: string} | null>(null)
+    const [initialRegency, setInitialRegency] = useState<{id: string, name: string} | null>(null)
+    const [initialDistrict, setInitialDistrict] = useState<{id: string, name: string} | null>(null)
+
     const [currentPetId, setCurrentPetId] = useState<string | undefined>(petId);
+
+    const handleToggleOwnerAddress = (useOwner: boolean) => {
+        setUseOwnerAddress(useOwner)
+        form.setValue("use_owner_address", useOwner, { shouldValidate: true })
+        if (useOwner) {
+            form.setValue("address.street", "")
+            form.setValue("address.province_id", "")
+            form.setValue("address.regency_id", "")
+            form.setValue("address.district_id", "")
+            form.setValue("address.zip_code", "")
+            form.setValue("address.notes", "")
+            form.setValue("address.link", "")
+            form.clearErrors("address")
+        }
+    }
 
     async function handleFinalSubmit() {
         const values = form.getValues();
@@ -121,21 +181,27 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 ...(values.additional_record_ids ?? []),
                 ...uploadedAdditionalIds,
             ],
+            ...(!isEditMode
+                    ? {
+                        use_owner_address: useOwnerAddress,
+                        ...(useOwnerAddress ? {} : {address: values.address}),
+                    }
+                    : {
+                        use_owner_address: false,
+                        address: values.address,
+                    }
+            ),
         };
 
         let response;
 
         if (!isEditMode) {
             response = await petService.createPet(payload);
-
             if (response?.data?.id) {
                 setCurrentPetId(response.data.id);
             }
         } else {
-            if (!currentPetId) {
-                throw new Error("Pet ID is missing in edit mode.");
-            }
-
+            if (!currentPetId) throw new Error("Pet ID is missing in edit mode.");
             response = await petService.updatePet(currentPetId, payload);
         }
 
@@ -144,19 +210,31 @@ export default function PetForm({mode, petId}: PetFormProps) {
 
     function onSubmit() {
         setIsSubmitted(true)
-
-        const totalProfilePictures =
-            profileFiles.length + existingProfilePictures.length
-
+        const totalProfilePictures = profileFiles.length + existingProfilePictures.length
         if (totalProfilePictures === 0) return
-
         setDialogOpen(true)
     }
 
     const handleProfileUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files) return
-        setProfileFiles([...profileFiles, ...Array.from(files)])
+
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+        const maxSize = 5 * 1024 * 1024
+        const maxFiles = 10
+
+        const validFiles = Array.from(files).filter(file => {
+            if (!allowedTypes.includes(file.type)) return false
+            return file.size <= maxSize;
+
+        })
+
+        if (profileFiles.length + validFiles.length > maxFiles) {
+            alert("Maximum 10 profile pictures allowed")
+            return
+        }
+
+        setProfileFiles([...profileFiles, ...validFiles])
         setIsSubmitted(true)
         e.target.value = ""
     }
@@ -164,23 +242,30 @@ export default function PetForm({mode, petId}: PetFormProps) {
     const handleAdditionalUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files) return
-        setAdditionalFiles([...additionalFiles, ...Array.from(files)])
+
+        const allowedTypes = [
+            "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
+            "application/pdf",
+            "video/mp4", "video/quicktime",
+        ]
+        const maxSize = 10 * 1024 * 1024
+
+        const validFiles = Array.from(files).filter(file =>
+            allowedTypes.includes(file.type) && file.size <= maxSize
+        )
+
+        setAdditionalFiles([...additionalFiles, ...validFiles])
+        e.target.value = ""
     }
 
     const removeProfileFile = (index: number) => {
         setProfileFiles(prev => prev.filter((_, i) => i !== index))
-
-        if (profileInputRef.current) {
-            profileInputRef.current.value = ""
-        }
+        if (profileInputRef.current) profileInputRef.current.value = ""
     }
 
     const removeAdditionalFile = (index: number) => {
         setAdditionalFiles(prev => prev.filter((_, i) => i !== index))
-
-        if (additionalInputRef.current) {
-            additionalInputRef.current.value = ""
-        }
+        if (additionalInputRef.current) additionalInputRef.current.value = ""
     }
 
     const physiqueTagsMap = useMemo(
@@ -202,22 +287,14 @@ export default function PetForm({mode, petId}: PetFormProps) {
     >([])
 
     const removeExistingProfileFile = (id: string) => {
-        setExistingProfilePictures(prev =>
-            prev.filter(file => file.id !== id)
-        )
-
+        setExistingProfilePictures(prev => prev.filter(file => file.id !== id))
         const updatedIds = form.getValues().profile_picture_ids?.filter(existingId => existingId !== id)
-
         form.setValue("profile_picture_ids", updatedIds)
     }
 
     const removeExistingAdditionalFile = (id: string) => {
-        setExistingAdditionalRecords(prev =>
-            prev.filter(file => file.id !== id)
-        )
-
+        setExistingAdditionalRecords(prev => prev.filter(file => file.id !== id))
         const updatedIds = form.getValues().additional_record_ids?.filter(existingId => existingId !== id)
-
         form.setValue("additional_record_ids", updatedIds)
     }
 
@@ -235,7 +312,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
     const handleOpenNewFile = (file: File) => {
         const fileUrl = URL.createObjectURL(file)
         window.open(fileUrl, "_blank")
-
         setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
     }
 
@@ -248,35 +324,46 @@ export default function PetForm({mode, petId}: PetFormProps) {
         const fetchDetail = async () => {
             setIsLoadingDetail(true)
             try {
-                const res = await petService.getPetById(petId||"")
+                const res = await petService.getPetById(petId || "")
 
                 const safeSize: PetSize =
-                    sizeOptions.includes(res.size as PetSize)
-                        ? (res.size as PetSize)
-                        : "small"
+                    sizeOptions.includes(res.size as PetSize) ? (res.size as PetSize) : "small"
                 const safeGender: PetGender =
-                    genderOptions.includes(res.gender as PetGender)
-                        ? (res.gender as PetGender)
-                        : "male"
+                    genderOptions.includes(res.gender as PetGender) ? (res.gender as PetGender) : "male"
 
                 form.reset({
                     name: res.name ?? "",
                     breed: res.breed ?? "",
                     size: safeSize,
-                    date_of_birth: res.date_of_birth
-                        ? new Date(res.date_of_birth)
-                        : undefined,
+                    date_of_birth: res.date_of_birth ? new Date(res.date_of_birth) : undefined,
                     gender: safeGender,
                     about: res.about ?? "",
                     special_needs: res.special_needs ?? false,
                     type_of_animal_id: res.type_of_animal_id ?? "",
                     physique_ids: res.physique_tags?.map(p => String(p.id)) ?? [],
                     personality_ids: res.personality_tags?.map(p => String(p.id)) ?? [],
-                    profile_picture_ids:
-                        res.profile_pictures?.map(p => String(p.id)) ?? [],
-                    additional_record_ids:
-                        res.additional_records?.map(p => String(p.id)) ?? [],
+                    profile_picture_ids: res.profile_pictures?.map(p => String(p.id)) ?? [],
+                    additional_record_ids: res.additional_records?.map(p => String(p.id)) ?? [],
+                    address: {
+                        street: res.address?.street ?? "",
+                        province_id: res.address?.province_id ?? res.address?.province?.id ?? "",
+                        regency_id: res.address?.regency_id ?? res.address?.regency?.id ?? "",
+                        district_id: res.address?.district_id ?? res.address?.district?.id ?? "",
+                        zip_code: res.address?.zip_code ?? "",
+                        notes: res.address?.notes ?? "",
+                        link: res.address?.link ?? "",
+                    },
                 })
+
+                if (res.address?.province) {
+                    setInitialProvince({ id: String(res.address.province.id), name: res.address.province.name })
+                }
+                if (res.address?.regency) {
+                    setInitialRegency({ id: String(res.address.regency.id), name: res.address.regency.name })
+                }
+                if (res.address?.district) {
+                    setInitialDistrict({ id: String(res.address.district.id), name: res.address.district.name })
+                }
 
                 setExistingProfilePictures(
                     res.profile_pictures?.map(p => ({
@@ -309,6 +396,213 @@ export default function PetForm({mode, petId}: PetFormProps) {
         )
     }
 
+    const renderAddressFields = () => (
+        <>
+            <FormField
+                control={form.control}
+                name="address.street"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Street *</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. Jl. Pawsitive No. 123" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.province_id"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Province *</FormLabel>
+                        <FormControl>
+                            <SearchableCombobox
+                                options={[
+                                    ...(initialProvince && !provinces.find(p => p.id === initialProvince.id) ? [initialProvince] : []),
+                                    ...provinces,
+                                ]}
+                                selectedValues={field.value ? [field.value] : []}
+                                onSelect={(value) => {
+                                    field.onChange(value)
+                                    form.setValue("address.regency_id", "")
+                                    form.setValue("address.district_id", "")
+                                    setInitialRegency(null)
+                                    setInitialDistrict(null)
+                                }}
+                                onSearch={setProvincesSearch}
+                                onLoadMore={loadMoreProvinces}
+                                isLoading={isLoadingProvinces}
+                                hasMore={hasMoreProvinces}
+                                placeholder="Select province..."
+                                emptyMessage="No provinces found."
+                                mode="single"
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.regency_id"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Regency / City *</FormLabel>
+                        <FormControl>
+                            <SearchableCombobox
+                                options={[
+                                    ...(initialRegency && !regencies.find(r => r.id === initialRegency.id) ? [initialRegency] : []),
+                                    ...regencies,
+                                ]}
+                                selectedValues={field.value ? [field.value] : []}
+                                onSelect={(value) => {
+                                    field.onChange(value)
+                                    form.setValue("address.district_id", "")
+                                    setInitialDistrict(null)
+                                }}
+                                onSearch={setRegenciesSearch}
+                                onLoadMore={loadMoreRegencies}
+                                isLoading={isLoadingRegencies}
+                                hasMore={hasMoreRegencies}
+                                placeholder={selectedProvinceId ? "Select regency/city..." : "Select a province first"}
+                                emptyMessage="No regencies found."
+                                mode="single"
+                                disabled={!selectedProvinceId}
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="address.district_id"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>District *</FormLabel>
+                            <FormControl>
+                                <SearchableCombobox
+                                    options={[
+                                        ...(initialDistrict && !districts.find(d => d.id === initialDistrict.id) ? [initialDistrict] : []),
+                                        ...districts,
+                                    ]}
+                                    selectedValues={field.value ? [field.value] : []}
+                                    onSelect={(value) => field.onChange(value)}
+                                    onSearch={setDistrictsSearch}
+                                    onLoadMore={loadMoreDistricts}
+                                    isLoading={isLoadingDistricts}
+                                    hasMore={hasMoreDistricts}
+                                    placeholder={selectedRegencyId ? "Select district..." : "Select a regency first"}
+                                    emptyMessage="No districts found."
+                                    mode="single"
+                                    disabled={!selectedRegencyId}
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="address.zip_code"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Zip Code <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g. 62704" {...field} />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+            </div>
+            <FormField
+                control={form.control}
+                name="address.link"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Maps Link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. https://maps.google.com/..." {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.notes"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Notes <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="Describe the address in more detail..." className="min-h-30" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+        </>
+    )
+
+    const renderAddressSection = () => {
+        // Edit mode: pet has its own independent address (duplicated from user on create)
+        // Just show the fields pre-filled, no toggle needed
+        if (isEditMode) {
+            return (
+                <>
+                    <h3 className="text-xl font-semibold border-b pb-2">Address *</h3>
+                    {renderAddressFields()}
+                </>
+            )
+        }
+
+        // Create mode: toggle between "same as mine" (BE duplicates user address) or custom
+        return (
+            <>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <h3 className="text-xl font-semibold">Address *</h3>
+                    <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+                        <button
+                            type="button"
+                            onClick={() => handleToggleOwnerAddress(true)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
+                            )}
+                        >
+                            <Home className="h-3.5 w-3.5"/>
+                            Same as mine
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleToggleOwnerAddress(false)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                !useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
+                            )}
+                        >
+                            <MapPin className="h-3.5 w-3.5"/>
+                            Custom
+                        </button>
+                    </div>
+                </div>
+
+                {useOwnerAddress ? (
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+                        <Home className="h-4 w-4 shrink-0 text-slate-400"/>
+                        <p>Pet location will use your registered address.</p>
+                    </div>
+                ) : (
+                    renderAddressFields()
+                )}
+            </>
+        )
+    }
+
     return (
         <>
             <div className="min-h-screen bg-green-50 py-12 px-4">
@@ -316,24 +610,28 @@ export default function PetForm({mode, petId}: PetFormProps) {
                     <Card className="rounded-2xl shadow-xl">
                         <CardContent className="p-10">
                             <Form {...form}>
-                                <form
-                                    onSubmit={form.handleSubmit(onSubmit)}
-                                >
+                                <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                                    if (useOwnerAddress) {
+                                        const nonAddressErrors = Object.keys(errors).filter(k => k !== "address")
+                                        if (nonAddressErrors.length === 0) {
+                                            onSubmit()
+                                        }
+                                    }
+                                })}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         {/* LEFT COLUMN */}
                                         <div className="space-y-6">
                                             <h3 className="text-xl font-semibold mb-6 border-b pb-2">
                                                 {isEditMode ? "Edit Pet Information" : "Pet Information"}
                                             </h3>
+
                                             <FormField
                                                 control={form.control}
                                                 name="name"
                                                 render={({field}) => (
                                                     <FormItem>
                                                         <FormLabel>Name *</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. Buddy" {...field} />
-                                                        </FormControl>
+                                                        <FormControl><Input placeholder="e.g. Buddy" {...field} /></FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
                                                 )}
@@ -345,9 +643,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 render={({field}) => (
                                                     <FormItem>
                                                         <FormLabel>Breed *</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. Golden Retriever" {...field} />
-                                                        </FormControl>
+                                                        <FormControl><Input placeholder="e.g. Golden Retriever" {...field} /></FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
                                                 )}
@@ -364,9 +660,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                 <SearchableCombobox
                                                                     options={typeTags}
                                                                     selectedValues={[field.value]}
-                                                                    onSelect={(value) => {
-                                                                        field.onChange(value)
-                                                                    }}
+                                                                    onSelect={(value) => field.onChange(value)}
                                                                     onSearch={setTypeSearch}
                                                                     onLoadMore={loadMoreType}
                                                                     isLoading={isLoadingTypeTags}
@@ -380,28 +674,21 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                         </FormItem>
                                                     )}
                                                 />
-
                                                 <FormField
                                                     control={form.control}
                                                     name="size"
                                                     render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Size *</FormLabel>
-                                                            <Select
-                                                                onValueChange={field.onChange}
-                                                                defaultValue={field.value}
-                                                            >
+                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                                 <FormControl className="w-full">
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Select"/>
-                                                                    </SelectTrigger>
+                                                                    <SelectTrigger><SelectValue placeholder="Select"/></SelectTrigger>
                                                                 </FormControl>
                                                                 <SelectContent>
                                                                     <SelectItem value="small">Small</SelectItem>
                                                                     <SelectItem value="medium">Medium</SelectItem>
                                                                     <SelectItem value="large">Large</SelectItem>
-                                                                    <SelectItem value="extra large">Extra
-                                                                        Large</SelectItem>
+                                                                    <SelectItem value="extra large">Extra Large</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
                                                             <FormMessage/>
@@ -420,18 +707,9 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                             <Popover>
                                                                 <PopoverTrigger asChild>
                                                                     <FormControl>
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            className={`pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
-                                                                            }`}
-                                                                        >
-                                                                            {field.value ? (
-                                                                                format(field.value, "PPP")
-                                                                            ) : (
-                                                                                <span>Pick a date</span>
-                                                                            )}
-                                                                            <Icon icon="ph:calendar-blank"
-                                                                                  className="ml-auto h-4 w-4 opacity-50"/>
+                                                                        <Button variant="outline" className={`pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}>
+                                                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                                            <Icon icon="ph:calendar-blank" className="ml-auto h-4 w-4 opacity-50"/>
                                                                         </Button>
                                                                     </FormControl>
                                                                 </PopoverTrigger>
@@ -440,9 +718,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                         mode="single"
                                                                         selected={field.value}
                                                                         onSelect={field.onChange}
-                                                                        disabled={(date) =>
-                                                                            date > new Date() || date < new Date("1900-01-01")
-                                                                        }
+                                                                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                                                     />
                                                                 </PopoverContent>
                                                             </Popover>
@@ -450,21 +726,15 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                         </FormItem>
                                                     )}
                                                 />
-
                                                 <FormField
                                                     control={form.control}
                                                     name="gender"
                                                     render={({field}) => (
                                                         <FormItem>
                                                             <FormLabel>Gender *</FormLabel>
-                                                            <Select
-                                                                onValueChange={field.onChange}
-                                                                defaultValue={field.value}
-                                                            >
+                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                                 <FormControl className="w-full">
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Select"/>
-                                                                    </SelectTrigger>
+                                                                    <SelectTrigger><SelectValue placeholder="Select"/></SelectTrigger>
                                                                 </FormControl>
                                                                 <SelectContent>
                                                                     <SelectItem value="male">Male</SelectItem>
@@ -484,185 +754,118 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                     <FormItem>
                                                         <FormLabel>About *</FormLabel>
                                                         <FormControl>
-                                                            <Textarea
-                                                                placeholder="Describe the pet's health, behaviour, and personality"
-                                                                className="min-h-30"
-                                                                {...field}
-                                                            />
+                                                            <Textarea placeholder="Describe the pet's health, behaviour, and personality" className="min-h-30" {...field} />
                                                         </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
                                                 )}
                                             />
 
-                                            <div className="flex flex-col gap-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="physique_ids"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>Physique *</FormLabel>
-                                                            <FormControl>
-                                                                <SearchableCombobox
-                                                                    options={physiqueTags}
-                                                                    selectedValues={field.value}
-                                                                    onSelect={(tagId) => {
-                                                                        if (!field.value.includes(tagId)) {
-                                                                            field.onChange([...field.value, tagId]);
-                                                                        }
-                                                                    }}
-                                                                    onSearch={setPhysiqueSearch}
-                                                                    onLoadMore={loadMorePhysique}
-                                                                    isLoading={isLoadingPhysiqueTags}
-                                                                    hasMore={hasMorePhysique}
-                                                                    placeholder="Select physique tags..."
-                                                                    emptyMessage="No physique tags found."
-                                                                    mode={"multiple"}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                                {field.value.map(tagId => (
-                                                                    <TagBadge
-                                                                        key={tagId}
-                                                                        label={physiqueTagsMap.get(tagId) || tagId}
-                                                                        onRemove={() => {
-                                                                            const updated = field.value.filter(id => id !== tagId);
-                                                                            field.onChange(updated);
-                                                                        }}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
+                                            <FormField
+                                                control={form.control}
+                                                name="physique_ids"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>Physique *</FormLabel>
+                                                        <FormControl>
+                                                            <SearchableCombobox
+                                                                options={physiqueTags}
+                                                                selectedValues={field.value}
+                                                                onSelect={(tagId) => {
+                                                                    if (!field.value.includes(tagId)) field.onChange([...field.value, tagId]);
+                                                                }}
+                                                                onSearch={setPhysiqueSearch}
+                                                                onLoadMore={loadMorePhysique}
+                                                                isLoading={isLoadingPhysiqueTags}
+                                                                hasMore={hasMorePhysique}
+                                                                placeholder="Select physique tags..."
+                                                                emptyMessage="No physique tags found."
+                                                                mode={"multiple"}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage/>
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                            {field.value.map(tagId => (
+                                                                <TagBadge key={tagId} label={physiqueTagsMap.get(tagId) || tagId} onRemove={() => field.onChange(field.value.filter(id => id !== tagId))}/>
+                                                            ))}
+                                                        </div>
+                                                    </FormItem>
+                                                )}
+                                            />
 
-                                            <div className="flex flex-col gap-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="personality_ids"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>Personality *</FormLabel>
-                                                            <FormControl>
-                                                                <SearchableCombobox
-                                                                    options={personalityTags}
-                                                                    selectedValues={field.value}
-                                                                    onSelect={(tagId) => {
-                                                                        if (!field.value.includes(tagId)) {
-                                                                            field.onChange([...field.value, tagId]);
-                                                                        }
-                                                                    }}
-                                                                    onSearch={setPersonalitySearch}
-                                                                    onLoadMore={loadMorePersonality}
-                                                                    isLoading={isLoadingPersonalityTags}
-                                                                    hasMore={hasMorePersonality}
-                                                                    placeholder="Select personality tags..."
-                                                                    emptyMessage="No personality tags found."
-                                                                    mode={"multiple"}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                                {field.value.map(tagId => (
-                                                                    <TagBadge
-                                                                        key={tagId}
-                                                                        label={personalityTagsMap.get(tagId) || tagId}
-                                                                        onRemove={() => {
-                                                                            const updated = field.value.filter(id => id !== tagId);
-                                                                            field.onChange(updated);
-                                                                        }}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
+                                            <FormField
+                                                control={form.control}
+                                                name="personality_ids"
+                                                render={({field}) => (
+                                                    <FormItem>
+                                                        <FormLabel>Personality *</FormLabel>
+                                                        <FormControl>
+                                                            <SearchableCombobox
+                                                                options={personalityTags}
+                                                                selectedValues={field.value}
+                                                                onSelect={(tagId) => {
+                                                                    if (!field.value.includes(tagId)) field.onChange([...field.value, tagId]);
+                                                                }}
+                                                                onSearch={setPersonalitySearch}
+                                                                onLoadMore={loadMorePersonality}
+                                                                isLoading={isLoadingPersonalityTags}
+                                                                hasMore={hasMorePersonality}
+                                                                placeholder="Select personality tags..."
+                                                                emptyMessage="No personality tags found."
+                                                                mode={"multiple"}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage/>
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                            {field.value.map(tagId => (
+                                                                <TagBadge key={tagId} label={personalityTagsMap.get(tagId) || tagId} onRemove={() => field.onChange(field.value.filter(id => id !== tagId))}/>
+                                                            ))}
+                                                        </div>
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            {renderAddressSection()}
                                         </div>
 
                                         {/* RIGHT COLUMN */}
                                         <div className="space-y-8">
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Profile
-                                                    Picture*</h3>
-                                                <div
-                                                    className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
+                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Profile Picture*</h3>
+                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
                                                     <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
-                                                    <p className="font-medium text-[#424242] text-sm">Upload Profile
-                                                        Picture</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX.
-                                                        800x800px)</p>
+                                                    <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px)</p>
                                                     <label htmlFor="profile-upload">
-                                                        <Button type="button" variant="outline"
-                                                                className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
-                                                                asChild>
+                                                        <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Select File</span>
                                                         </Button>
                                                     </label>
-                                                    <input
-                                                        ref={profileInputRef}
-                                                        id="profile-upload"
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        multiple
-                                                        onChange={handleProfileUpload}
-                                                    />
+                                                    <input ref={profileInputRef} id="profile-upload" type="file" className="hidden" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleProfileUpload}/>
                                                 </div>
-                                                {isSubmitted &&
-                                                    profileFiles.length + existingProfilePictures.length === 0 && (
-                                                        <p className="text-sm font-medium text-destructive mt-2">
-                                                            At least one profile picture is required
-                                                        </p>
-                                                    )}
+                                                {isSubmitted && profileFiles.length + existingProfilePictures.length === 0 && (
+                                                    <p className="text-sm font-medium text-destructive mt-2">At least one profile picture is required</p>
+                                                )}
+                                                <p className="text-xs text-[#757575] mt-3">A great profile picture is key to finding a new home.</p>
 
-                                                <p className="text-xs text-[#757575] mt-3">A great profile picture is
-                                                    key to
-                                                    finding a new home.</p>
-
-                                                {/* EXISTING FILES */}
                                                 {existingProfilePictures.length > 0 && (
                                                     <div className="mt-3 space-y-2">
-                                                        {existingProfilePictures.map((file, index) => (
-                                                            <div
-                                                                key={file.id}
-                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
-                                                            >
-                                                                <span
-                                                                    onClick={() => handleOpenExistingFile(file as Attachment)}
-                                                                    className="truncate flex-1 cursor-pointer hover:underline"
-                                                                >{downloadingId === file.id ? "Opening..." : file.filename}</span>
-
-                                                                <Icon
-                                                                    icon="ph:trash"
-                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
-                                                                    onClick={() => removeExistingProfileFile(file.id)}
-                                                                />
+                                                        {existingProfilePictures.map((file) => (
+                                                            <div key={file.id} className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
+                                                                <span onClick={() => handleOpenExistingFile(file as Attachment)} className="truncate flex-1 cursor-pointer hover:underline">
+                                                                    {downloadingId === file.id ? "Opening..." : file.filename}
+                                                                </span>
+                                                                <Icon icon="ph:trash" className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0" onClick={() => removeExistingProfileFile(file.id)}/>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 )}
-
-                                                {/* NEW FILES */}
                                                 {profileFiles.length > 0 && (
                                                     <div className="mt-3 space-y-2">
                                                         {profileFiles.map((file, index) => (
-                                                            <div
-                                                                key={`${file.name}-${file.lastModified}`}
-                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
-                                                            >
-                                                                <span
-                                                                    onClick={() => handleOpenNewFile(file)}
-                                                                    className="truncate flex-1 cursor-pointer hover:underline"
-                                                                >{file.name}</span>
-
-                                                                <Icon
-                                                                    icon="ph:trash"
-                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
-                                                                    onClick={() => removeProfileFile(index)}
-                                                                />
+                                                            <div key={`${file.name}-${file.lastModified}`} className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
+                                                                <span onClick={() => handleOpenNewFile(file)} className="truncate flex-1 cursor-pointer hover:underline">{file.name}</span>
+                                                                <Icon icon="ph:trash" className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0" onClick={() => removeProfileFile(index)}/>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -670,79 +873,41 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                             </div>
 
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Additional
-                                                    Records</h3>
-                                                <div
-                                                    className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
-                                                    <Icon icon="ph:cloud-arrow-up"
-                                                          className="w-12 h-12 text-[#BDBDBD] mb-3"/>
-                                                    <p className="font-medium text-[#424242] text-sm">Click to upload or
-                                                        drag
-                                                        and drop</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or
-                                                        medical
-                                                        records</p>
+                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Additional Records</h3>
+                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
+                                                    <Icon icon="ph:cloud-arrow-up" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
+                                                    <p className="font-medium text-[#424242] text-sm">Click to upload or drag and drop</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records</p>
                                                     <label htmlFor="additional-upload">
-                                                        <Button type="button" variant="outline"
-                                                                className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
-                                                                asChild>
+                                                        <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Upload Files</span>
                                                         </Button>
                                                     </label>
-                                                    <input
-                                                        ref={additionalInputRef}
-                                                        id="additional-upload"
-                                                        type="file"
-                                                        className="hidden"
-                                                        multiple
-                                                        onChange={handleAdditionalUpload}
-                                                    />
+                                                    <input ref={additionalInputRef} id="additional-upload" type="file" className="hidden" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,video/mp4,video/quicktime" multiple onChange={handleAdditionalUpload}/>
                                                 </div>
                                                 <p className="text-xs text-[#757575] mt-3">
-                                                    Please upload multiple high-quality photos and any relevant
-                                                    documents.
+                                                    Please upload multiple high-quality photos and any relevant documents.
                                                     <span className="font-medium"> Make sure the filename is relevant and descriptive.</span>
                                                 </p>
 
-                                                {/* EXISTING FILES */}
                                                 {existingAdditionalRecords.length > 0 && (
                                                     <div className="mt-3 space-y-2">
-                                                        {existingAdditionalRecords.map((file, index) => (
-                                                            <div
-                                                                key={file.id}
-                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm"
-                                                            >
-                                                                <span
-                                                                    onClick={() => handleOpenExistingFile(file as Attachment)}
-                                                                    className="truncate flex-1 cursor-pointer hover:underline"
-                                                                >{downloadingId === file.id ? "Opening..." : file.filename}</span>
-
-                                                                <Icon
-                                                                    icon="ph:trash"
-                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
-                                                                    onClick={() => removeExistingAdditionalFile(file.id)}
-                                                                />
+                                                        {existingAdditionalRecords.map((file) => (
+                                                            <div key={file.id} className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
+                                                                <span onClick={() => handleOpenExistingFile(file as Attachment)} className="truncate flex-1 cursor-pointer hover:underline">
+                                                                    {downloadingId === file.id ? "Opening..." : file.filename}
+                                                                </span>
+                                                                <Icon icon="ph:trash" className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0" onClick={() => removeExistingAdditionalFile(file.id)}/>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 )}
-
-                                                {/* NEW FILES */}
                                                 {additionalFiles.length > 0 && (
                                                     <div className="mt-3 space-y-2">
                                                         {additionalFiles.map((file, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
-                                                                <span
-                                                                    onClick={() => handleOpenNewFile(file)}
-                                                                    className="truncate flex-1 cursor-pointer hover:underline"
-                                                                >{file.name}</span>
-                                                                <Icon
-                                                                    icon="ph:trash"
-                                                                    className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0"
-                                                                    onClick={() => removeAdditionalFile(index)}
-                                                                />
+                                                            <div key={index} className="flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
+                                                                <span onClick={() => handleOpenNewFile(file)} className="truncate flex-1 cursor-pointer hover:underline">{file.name}</span>
+                                                                <Icon icon="ph:trash" className="w-4 h-4 text-[#F44336] cursor-pointer ml-2 shrink-0" onClick={() => removeAdditionalFile(index)}/>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -758,19 +923,13 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                             render={({field}) => (
                                                 <FormItem className="flex items-center space-x-3 pt-4">
                                                     <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value}
-                                                            onCheckedChange={field.onChange}
-                                                        />
+                                                        <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
                                                     </FormControl>
-                                                    <FormLabel>
-                                                        Does this animal have any special needs?
-                                                    </FormLabel>
+                                                    <FormLabel>Does this animal have any special needs?</FormLabel>
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button type="submit"
-                                                className="mt-4 bg-green-600 hover:bg-green-700 text-white">
+                                        <Button type="submit" className="mt-4 bg-green-600 hover:bg-green-700 text-white">
                                             {isEditMode ? "Update Pet Profile" : "Submit new pet profile"}
                                         </Button>
                                     </div>
@@ -784,14 +943,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() =>
-                    router.push(currentPetId ? `/pets/${currentPetId}` : "/pets")
-                }
+                onContinue={() => router.push(currentPetId ? `/pets/${currentPetId}` : "/pets")}
                 title={isEditMode ? "Update Pet Profile?" : "Create Pet Profile?"}
                 description="Please review the pet's information before continuing."
-                successTitle={isEditMode
-                    ? "Pet Profile Updated Successfully"
-                    : "Pet Profile Created Successfully"}
+                successTitle={isEditMode ? "Pet Profile Updated Successfully" : "Pet Profile Created Successfully"}
                 successDescription="Your pet profile is now live."
                 confirmText={isEditMode ? "Update Profile" : "Create Profile"}
                 cancelText="Review Again"

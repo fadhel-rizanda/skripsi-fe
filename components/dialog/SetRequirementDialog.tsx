@@ -31,7 +31,7 @@ export default function SetRequirementDialog({
                 )}
             </DialogTrigger>
 
-            <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
+            <DialogContent className="max-w-lg! max-h-[90vh] overflow-y-auto rounded-2xl">
                 <DialogTitle className="text-xl font-semibold">Set Requirements</DialogTitle>
                 <SetRequirementForm
                     adoptionId={adoptionId}

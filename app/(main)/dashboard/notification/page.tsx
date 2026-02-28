@@ -54,9 +54,9 @@ export default function NotificationPage() {
                 <p className="text-gray-500">No notifications yet</p>
             ) : (
                 <ul className="space-y-2">
-                    {notifications.map((notif) => (
+                    {notifications.map((notif, index) => (
                         <li
-                            key={notif.id}
+                            key={`${notif.id}-${index}`}
                             className="border p-3 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
                         >
                             <p className="font-semibold text-lg">{notif.title || "Notification"}</p>

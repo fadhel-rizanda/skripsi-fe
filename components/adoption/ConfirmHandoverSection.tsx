@@ -3,7 +3,7 @@
 import {ChangeEvent, useRef, useState} from "react";
 import {Handover} from "@/types/adoption";
 import {Button} from "@/components/ui/button";
-import {CheckCircle2, FileText, Loader2, Upload} from "lucide-react";
+import {CheckCircle2, Clock, FileText, Loader2, Upload} from "lucide-react";
 import {uploadAttachment, openAttachment} from "@/lib/attachment-helpers";
 import {handoverServices} from "@/services/adoptionServices";
 import {useAdoptionStore} from "@/store/useAdoptionStore";
@@ -16,7 +16,7 @@ interface ConfirmHandoverSectionProps {
     currentUser?: UserProfile;
     adoptionId: string;
     handover: Handover;
-    role: "adopter" | "provider";
+    role?: string;
     onConfirmChange?: () => void;
 }
 
@@ -30,15 +30,17 @@ export default function ConfirmHandoverSection({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const triggerAdoptionRefresh = useAdoptionStore((s) => s.triggerAdoptionRefresh);
+    const triggerHandoverRefresh = useAdoptionStore((s) => s.triggerHandoverRefresh);
 
     const adopterFinalized = handover.adopter_finalized;
     const providerFinalized = handover.provider_finalized;
     const attachments: Attachment[] = handover.attachments ?? [];
     const hasEvidence = attachments.length > 0;
 
-    // Status apakah user saat ini sudah menekan checkbox/finalized
     const isChecked = role === "adopter" ? adopterFinalized : providerFinalized;
+
+    const scheduledTime = handover.meet_n_greet?.schedule?.scheduled_time;
+    const isScheduleTimePassed = scheduledTime ? new Date(scheduledTime) <= new Date() : false;
 
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files ?? []);
@@ -50,7 +52,7 @@ export default function ConfirmHandoverSection({
             const attachmentIds = await Promise.all(files.map((file) => uploadAttachment(file)));
             await handoverServices.setHandoverEvidence(adoptionId, handover.id, attachmentIds);
             toast.success("Evidence uploaded successfully.");
-            triggerAdoptionRefresh();
+            triggerHandoverRefresh();
         } catch {
             toast.error("Failed to upload evidence. Please try again.");
         } finally {
@@ -59,11 +61,16 @@ export default function ConfirmHandoverSection({
     };
 
     const handleFinalize = async () => {
+        if (!hasMyEvidence && role !== "admin") {
+            toast.error("You must upload at least one evidence file before confirming.");
+            return;
+        }
+
         try {
             await handoverServices.finalizeHandover(adoptionId, handover.id);
             toast.success("Handover confirmed.");
             onConfirmChange?.();
-            triggerAdoptionRefresh();
+            triggerHandoverRefresh();
         } catch {
             toast.error("Failed to confirm handover. Please try again.");
         }
@@ -77,6 +84,42 @@ export default function ConfirmHandoverSection({
         }
     };
 
+    const myAttachments = attachments.filter(
+        (att) => att.uploaded_by === currentUser?.id
+    );
+
+    const hasMyEvidence = myAttachments.length > 0;
+
+    if (!isScheduleTimePassed) {
+        return (
+            <div className="flex flex-col gap-3 mt-2">
+                <div>
+                    <h3 className="font-bold text-sm text-slate-900">Confirm Handover</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        Upload proof of handover and confirm. Both the adopter and the provider need to confirm.
+                    </p>
+                </div>
+                <div className="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center gap-2 py-8 px-4 bg-slate-50">
+                    <Clock className="h-7 w-7 text-slate-400"/>
+                    <p className="text-xs text-slate-500 text-center font-medium">
+                        Handover confirmation will be available after the scheduled meeting time.
+                    </p>
+                    {scheduledTime && (
+                        <p className="text-xs text-slate-400">
+                            {new Date(scheduledTime).toLocaleDateString("en-US", {
+                                month: "long", day: "numeric", year: "numeric",
+                            })}{" "}
+                            at{" "}
+                            {new Date(scheduledTime).toLocaleTimeString("en-US", {
+                                hour: "2-digit", minute: "2-digit",
+                            })}
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-3 mt-2">
             <div>
@@ -86,22 +129,17 @@ export default function ConfirmHandoverSection({
                 </p>
             </div>
 
-            <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-            />
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange}/>
 
-            <div
-                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 py-6 px-4 transition-colors ${
-                    hasEvidence ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"
-                }`}>
+            <div className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 py-6 px-4 transition-colors ${
+                hasEvidence ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"
+            }`}>
                 {hasEvidence ? (
                     <>
                         <CheckCircle2 className="h-7 w-7 text-green-500"/>
-                        <p className="text-xs text-green-700 font-medium">{attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded</p>
+                        <p className="text-xs text-green-700 font-medium">
+                            {attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded
+                        </p>
 
                         <div className="flex flex-wrap gap-1.5 mt-1 justify-center">
                             {attachments.map((att) => (
@@ -115,10 +153,7 @@ export default function ConfirmHandoverSection({
                                         <span className="text-xs text-green-700 font-medium max-w-30 truncate">{att.filename}</span>
                                     </button>
                                 ) : (
-                                    <div
-                                        key={att.id}
-                                        className="flex items-center gap-2 rounded-xl h-8 px-3 text-xs font-bold text-slate-500 bg-slate-100"
-                                    >
+                                    <div key={att.id} className="flex items-center gap-2 rounded-xl h-8 px-3 text-xs font-bold text-slate-500 bg-slate-100">
                                         <FileText className="h-3.5 w-3.5 text-slate-400"/>
                                         {att.filename}
                                     </div>
@@ -126,7 +161,6 @@ export default function ConfirmHandoverSection({
                             ))}
                         </div>
 
-                        {/* Jika user belum konfirmasi final, mereka masih boleh tambah/ganti file */}
                         {!isChecked && (
                             <Button
                                 variant="outline"
@@ -159,14 +193,13 @@ export default function ConfirmHandoverSection({
 
             {/* Confirmation cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Card Adopter */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Adopter Confirmation</span>
                     <label className={`flex items-start gap-2 ${role === "adopter" && hasEvidence && !adopterFinalized ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={adopterFinalized}
-                            disabled={role !== "adopter" || !hasEvidence || adopterFinalized}
+                            disabled={role !== "adopter" || !hasMyEvidence || adopterFinalized}
                             onChange={role === "adopter" && !adopterFinalized ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
@@ -174,14 +207,13 @@ export default function ConfirmHandoverSection({
                     </label>
                 </div>
 
-                {/* Card Provider */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Provider Confirmation</span>
                     <label className={`flex items-start gap-2 ${role === "provider" && hasEvidence && !providerFinalized ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={providerFinalized}
-                            disabled={role !== "provider" || !hasEvidence || providerFinalized}
+                            disabled={role !== "provider" || !hasMyEvidence || providerFinalized}
                             onChange={role === "provider" && !providerFinalized ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
@@ -189,7 +221,6 @@ export default function ConfirmHandoverSection({
                     </label>
                 </div>
 
-                {/* Card Admin */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Admin Confirmation</span>
                     <label className={`flex items-start gap-2 ${currentUser?.role?.name === "admin" && hasEvidence && !handover.admin_finalized ? "cursor-pointer" : "cursor-default"}`}>

@@ -43,6 +43,10 @@ export default function SubmittedCollapsible({
         ? adoption?.provider.id
         : adoption?.adopter?.id;
 
+    const isActive =
+        adoption?.stage_tag.name.toLowerCase() !== "completed" &&
+        adoption?.stage_tag.name.toLowerCase() !== "rejected";
+
     if (!adoption) {
         return (
             <div className="w-full max-w-4xl border rounded-2xl px-4 py-4 bg-white animate-pulse">
@@ -107,11 +111,16 @@ export default function SubmittedCollapsible({
                     </div>
 
                     <div className="flex flex-wrap gap-2 mt-4">
-                        <AdoptionTerminateButton
-                            adoption={adoption}
-                            currentUser={currentUser}
-                            onSuccess={() => router.push("/adoptions")}
-                        />
+                        {
+                            isActive &&
+                            (
+                                <AdoptionTerminateButton
+                                    adoption={adoption}
+                                    currentUser={currentUser}
+                                    onSuccess={() => router.push("/adoptions")}
+                                />
+                            )
+                        }
 
                         {otherUserId && (
                             <ChatButton
@@ -123,7 +132,8 @@ export default function SubmittedCollapsible({
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
-    );
+    )
+        ;
 }
 
 function DetailItem({label, value}: { label: string; value: string }) {

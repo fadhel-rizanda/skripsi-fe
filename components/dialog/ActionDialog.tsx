@@ -67,9 +67,9 @@ export function ActionDialog({
                 await onConfirm()
                 setInternalStatus("success")
             } catch (error: any) {
-                console.error(error)
+                const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
                 if (error.response?.status === 422) {
-                    toast.error("Validation Errors:", error.response.data.errors)
+                    toast.error(errorMessage);
                 }
                 setInternalStatus("error")
             }
@@ -90,7 +90,7 @@ export function ActionDialog({
 
     return (
         <AlertDialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
-            <AlertDialogContent className="sm:max-w-md w-fit p-10">
+            <AlertDialogContent className="sm:max-w-md w-fit!">
                 <AlertDialogHeader>
                     <div className="items-center flex flex-col gap-4">
                         {/* Icon */}

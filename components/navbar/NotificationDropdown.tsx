@@ -27,17 +27,11 @@ export function NotificationDropdown() {
     const {hasUnread, clear} = useNotificationStore()
 
     useEffect(() => {
-        fetchInitial()
-    }, [])
-
-    useEffect(() => {
-        if (hasUnread) {
-            fetchInitial()
-        }
+        fetchInitial();
     }, [hasUnread]);
 
-
     const fetchInitial = async () => {
+        if (loading) return;
         try {
             setLoading(true)
 
@@ -71,7 +65,11 @@ export function NotificationDropdown() {
                 per_page: 10,
             })
 
-            setNotifications(prev => [...prev, ...response.data])
+            setNotifications(prev => {
+                const existingIds = new Set(prev.map(n => n.id));
+                const unique = response.data.filter(n => !existingIds.has(n.id));
+                return [...prev, ...unique];
+            })
             setHasMore(response.has_more_pages)
             setPage(nextPage)
         } catch (error) {
@@ -116,7 +114,8 @@ export function NotificationDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative focus-visible:ring-0 focus-visible:ring-offset-0">
+                <Button variant="ghost" size="icon"
+                        className="relative focus-visible:ring-0 focus-visible:ring-offset-0">
                     <Icon icon="mdi:bell" className="h-5 w-5"/>
 
                     {unreadCount > 0 && (
@@ -164,9 +163,9 @@ export function NotificationDropdown() {
                             }
                         }}
                     >
-                        {notifications.map((notif) => (
+                        {notifications.map((notif, index) => (
                             <DropdownMenuItem
-                                key={notif.id}
+                                key={`${notif.id}-${index}`}
                                 onSelect={(e) => e.preventDefault()}
                                 onClick={() => {
                                     if (!notif.read_at) {
@@ -177,11 +176,19 @@ export function NotificationDropdown() {
                                     notif.read_at ? "bg-gray-100 cursor-default" : ""
                                 }`}
                             >
-                                {CHANNEL_ICON_MAP[notif.reference_type] ? (
-                                    <Icon icon={CHANNEL_ICON_MAP[notif.reference_type]}
-                                          className="h-6 w-6 mb-1 opacity-50"/>
-                                ) : <Icon icon="ph:bell"
-                                          className="h-6 w-6 mb-1 opacity-50"/>}
+                                <div className="relative inline-flex items-center shrink-0">
+                                    <Icon
+                                        icon={CHANNEL_ICON_MAP[notif.reference_type] || "ph:bell"}
+                                        className="h-6 w-6 opacity-50"
+                                    />
+
+                                    {!notif.read_at && (
+                                        <span
+                                            className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white"
+                                            title="Unread"
+                                        />
+                                    )}
+                                </div>
 
                                 <div className="flex-1">
                                     <div className="flex items-start justify-between">

@@ -1,3 +1,5 @@
+import {UserProfile} from "@/types/user";
+
 export interface Status {
     id: string;
     name: string;
@@ -22,6 +24,23 @@ export interface Schedule {
     scheduled_time: string;
     address_id: string;
     address: Address;
-    created_by: string;
-    updated_by: string;
+    created_by: string | UserProfile;
+    updated_by: string | UserProfile;
+}
+
+export interface Province {
+    id: string;
+    name: string;
+}
+
+export interface Regency {
+    id: string;
+    name: string;
+    province_id: string;
+}
+
+export interface District {
+    id: string;
+    name: string;
+    regency_id: string;
 }

@@ -33,6 +33,8 @@ export interface Requirement {
     created_by: UserProfile;
     updated_by: UserProfile;
     is_active: boolean;
+    tag_id: string;
+    tag: Tag;
 }
 
 export interface MeetNGreet {

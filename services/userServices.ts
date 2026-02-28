@@ -20,4 +20,9 @@ export const userService = {
     activateUser: async (userId: string, notes: string): Promise<void> => {
         await api.post(`/v1/users/${userId}/activate`, { notes });
     },
+
+    userChannels: async (): Promise<{ channels: string[] }> => {
+        const response = await api.get<{ channels: string[] }>(`/v1/users/channels`);
+        return response.data.data;
+    }
 };

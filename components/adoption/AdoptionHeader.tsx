@@ -10,8 +10,8 @@ export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) 
 
     const progressMap: Record<string, number> = {
         "Submitted": 15,
-        "Requirement": 35,
-        "Meet & Greet": 55,
+        "Meet & Greet": 35,
+        "Requirement": 55,
         "Handover": 75,
         "Completed": 100,
         "Rejected": 100,
@@ -20,8 +20,8 @@ export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) 
 
     const steps = [
         { label: "Submitted", pos: "left-[15%]" },
-        { label: "Requirement", pos: "left-[35%]" },
-        { label: "Meet & Greet", pos: "left-[55%]" },
+        { label: "Meet & Greet", pos: "left-[35%]" },
+        { label: "Requirement", pos: "left-[55%]" },
         { label: "Handover", pos: "left-[75%]" },
         { label: "Completed", pos: "left-[90%]" },
     ];

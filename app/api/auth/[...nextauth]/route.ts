@@ -96,6 +96,11 @@ export const authOptions: AuthOptions = {
                         expiresAt: Date.now() + data.data.expires_in * 1000,
                         refreshExpiresAt: Date.now() + data.data.refresh_expires_in * 1000,
                         channels: user.channels,
+                        phone: user.phone,
+                        created_at: user.created_at,
+                        updated_at: user.updated_at,
+                        is_active: user.is_active,
+                        role_name: role?.name,
                     }
                 } catch (error: unknown) {
                     console.error("Login error:", error)
@@ -173,7 +178,7 @@ export const authOptions: AuthOptions = {
             return true
         },
 
-        async jwt({ token, user }): Promise<JWT> {
+        async jwt({ token, user, trigger, session }): Promise<JWT> {
             if (user) {
                 token.accessToken = user.accessToken
                 token.refreshToken = user.refreshToken
@@ -186,7 +191,20 @@ export const authOptions: AuthOptions = {
                     role: user.role,
                     avatar: user.avatar,
                     channels: user.channels ?? [],
+                    created_at: user.created_at ?? "",
+                    is_active: user.is_active ?? true,
+                    phone: user.phone ?? "",
+                    role_name: user.role_name ?? "",
+                    updated_at: user.updated_at ?? "",
                 }
+            }
+
+            if (trigger === "update" && session?.channels) {
+                token.user = {
+                    ...token.user,
+                    channels: session.channels,
+                }
+                return token;
             }
 
             if (token.error === "RefreshAccessTokenError") {

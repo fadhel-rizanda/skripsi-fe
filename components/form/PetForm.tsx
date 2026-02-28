@@ -218,7 +218,23 @@ export default function PetForm({mode, petId}: PetFormProps) {
     const handleProfileUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files) return
-        setProfileFiles([...profileFiles, ...Array.from(files)])
+
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+        const maxSize = 5 * 1024 * 1024
+        const maxFiles = 10
+
+        const validFiles = Array.from(files).filter(file => {
+            if (!allowedTypes.includes(file.type)) return false
+            return file.size <= maxSize;
+
+        })
+
+        if (profileFiles.length + validFiles.length > maxFiles) {
+            alert("Maximum 10 profile pictures allowed")
+            return
+        }
+
+        setProfileFiles([...profileFiles, ...validFiles])
         setIsSubmitted(true)
         e.target.value = ""
     }
@@ -226,7 +242,20 @@ export default function PetForm({mode, petId}: PetFormProps) {
     const handleAdditionalUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files) return
-        setAdditionalFiles([...additionalFiles, ...Array.from(files)])
+
+        const allowedTypes = [
+            "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
+            "application/pdf",
+            "video/mp4", "video/quicktime",
+        ]
+        const maxSize = 10 * 1024 * 1024
+
+        const validFiles = Array.from(files).filter(file =>
+            allowedTypes.includes(file.type) && file.size <= maxSize
+        )
+
+        setAdditionalFiles([...additionalFiles, ...validFiles])
+        e.target.value = ""
     }
 
     const removeProfileFile = (index: number) => {
@@ -812,7 +841,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                             <span>Select File</span>
                                                         </Button>
                                                     </label>
-                                                    <input ref={profileInputRef} id="profile-upload" type="file" className="hidden" accept="image/*" multiple onChange={handleProfileUpload}/>
+                                                    <input ref={profileInputRef} id="profile-upload" type="file" className="hidden" accept="image/jpeg,image/png,image/gif,image/webp" multiple onChange={handleProfileUpload}/>
                                                 </div>
                                                 {isSubmitted && profileFiles.length + existingProfilePictures.length === 0 && (
                                                     <p className="text-sm font-medium text-destructive mt-2">At least one profile picture is required</p>
@@ -854,7 +883,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                             <span>Upload Files</span>
                                                         </Button>
                                                     </label>
-                                                    <input ref={additionalInputRef} id="additional-upload" type="file" className="hidden" multiple onChange={handleAdditionalUpload}/>
+                                                    <input ref={additionalInputRef} id="additional-upload" type="file" className="hidden" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,video/mp4,video/quicktime" multiple onChange={handleAdditionalUpload}/>
                                                 </div>
                                                 <p className="text-xs text-[#757575] mt-3">
                                                     Please upload multiple high-quality photos and any relevant documents.

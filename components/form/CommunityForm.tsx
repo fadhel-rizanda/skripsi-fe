@@ -176,18 +176,19 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
 
         const file = files[0]
 
-        if (file.size > 5 * 1024 * 1024) {
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+        if (!allowedTypes.includes(file.type)) {
             form.setError("attachment_id", {
                 type: "manual",
-                message: "File size must be less than 5MB"
+                message: "Only JPEG, PNG, GIF, or WebP images are allowed"
             })
             return
         }
 
-        if (!file.type.startsWith("image/")) {
+        if (file.size > 5 * 1024 * 1024) {
             form.setError("attachment_id", {
                 type: "manual",
-                message: "Only image files are allowed"
+                message: "File size must be less than 5MB"
             })
             return
         }
@@ -655,7 +656,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                         id="profile-upload"
                                                         type="file"
                                                         className="hidden"
-                                                        accept="image/*"
+                                                        accept="image/jpeg,image/png,image/gif,image/webp"
                                                         onChange={handleProfileUpload}
                                                     />
                                                 </div>

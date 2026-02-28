@@ -40,11 +40,7 @@ export function NotificationDropdown() {
                 per_page: 10,
             })
 
-            setNotifications(prev => {
-                const existingIds = new Set(prev.map(n => n.id));
-                const newUniqueNotifications = response.data.filter(n => !existingIds.has(n.id));
-                return [...prev, ...newUniqueNotifications];
-            });
+            setNotifications(response.data)
             setHasMore(response.has_more_pages)
             setPage(1)
             setUnreadCount(response.unread_count)
@@ -69,7 +65,11 @@ export function NotificationDropdown() {
                 per_page: 10,
             })
 
-            setNotifications(prev => [...prev, ...response.data])
+            setNotifications(prev => {
+                const existingIds = new Set(prev.map(n => n.id));
+                const unique = response.data.filter(n => !existingIds.has(n.id));
+                return [...prev, ...unique];
+            })
             setHasMore(response.has_more_pages)
             setPage(nextPage)
         } catch (error) {

@@ -2,6 +2,7 @@
 import api from "@/lib/axios";
 import { Pet, PetDetail, PetFilterState } from "@/types/pet";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
+import {Address} from "@/types/general";
 
 interface PetListParams extends PetFilterState {
   page?: number;
@@ -21,6 +22,16 @@ export type CreatePetPayload = {
   physique_ids: string[]
   personality_ids: string[]
   additional_record_ids?: string[]
+  use_owner_address?: boolean
+  address?: {
+    street: string
+    province_id: string
+    regency_id: string
+    district_id: string
+    zip_code?: string
+    notes?: string
+    link?: string
+  }
 }
 
 export const petService = {
@@ -66,7 +77,7 @@ export const petService = {
   },
 
   // Update existing pet
-  updatePet: async (id: string | number, data: Partial<Pet>) => {
+  updatePet: async (id: string | number, data: CreatePetPayload) => {
     const response = await api.put(`/v1/pets/${id}`, data);
     return response.data;
   },

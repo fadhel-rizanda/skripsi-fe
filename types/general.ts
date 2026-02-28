@@ -12,9 +12,12 @@ export interface Tag {
 }
 export interface Address {
     street: string;
-    city: string;
-    state: string;
-    country: string;
+    province_id: string
+    province?: Province
+    regency_id: string
+    regency?: Regency
+    district_id: string
+    district?: District
     zip_code: string;
     notes?: string;
     link?: string;

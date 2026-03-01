@@ -9,7 +9,7 @@ export const GreetingSchema = z.object({
         .max(500, "Description is too long (max 500 characters)")
         .optional(),
     pet_experience: z.enum(["none", "beginner", "intermediate", "experienced"], {
-        error: () => "Please select your pet experience level",
+        required_error: "Please select your pet experience level",
     }),
     pet_experience_description: z
         .string()

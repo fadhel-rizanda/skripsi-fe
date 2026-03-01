@@ -20,10 +20,7 @@ export const userService = {
             personality: data.personality_description,
             pet_experience: data.pet_experience,
             pet_experience_description: data.pet_experience_description,
-            pet_preferences_tags: [...data.physique_ids, ...data.type_of_animal_ids],
-            pet_preferences: [data.physique_description, data.type_of_animal_description]
-                .filter(Boolean)
-                .join(" | ") || undefined,
+            address: data.address,
             open_to_special_needs: data.open_to_special_needs,
         };
         const response = await api.put("/v1/profile", payload);

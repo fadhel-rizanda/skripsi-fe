@@ -15,20 +15,13 @@ export const GreetingSchema = z.object({
         .string()
         .max(500, "Description is too long (max 500 characters)")
         .optional(),
-    physique_ids: z
-        .array(z.string().uuid("Invalid physique tag"))
-        .min(1, "Select at least one physique trait"),
-    physique_description: z
-        .string()
-        .max(500, "Description is too long (max 500 characters)")
-        .optional(),
-    type_of_animal_ids: z
-        .array(z.string().uuid("Invalid animal type"))
-        .min(1, "Select at least one preferred animal type"),
-    type_of_animal_description: z
-        .string()
-        .max(500, "Description is too long (max 500 characters)")
-        .optional(),
+    address: z.object({
+        street: z.string().max(500, "Street is too long (max 500 characters)").optional(),
+        city: z.string().max(100, "City is too long (max 100 characters)").optional(),
+        state: z.string().max(100, "State is too long (max 100 characters)").optional(),
+        zip_code: z.string().max(20, "Zip code is too long (max 20 characters)").optional(),
+        country: z.string().max(100, "Country is too long (max 100 characters)").optional(),
+    }).optional(),
     open_to_special_needs: z.boolean(),
 });
 

@@ -31,6 +31,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
@@ -53,35 +54,9 @@ export default function UserGreetingForm() {
         hasMore: hasMorePersonality,
     } = useTagsOptions(TAG_TYPE.USER.PERSONALITY);
 
-    const {
-        options: physiqueTags,
-        isLoading: isLoadingPhysiqueTags,
-        setSearch: setPhysiqueSearch,
-        loadMore: loadMorePhysique,
-        hasMore: hasMorePhysique,
-    } = useTagsOptions(TAG_TYPE.PET.PHYSIQUE);
-
-    const {
-        options: animalTypeTags,
-        isLoading: isLoadingAnimalTypeTags,
-        setSearch: setAnimalTypeSearch,
-        loadMore: loadMoreAnimalType,
-        hasMore: hasMoreAnimalType,
-    } = useTagsOptions(TAG_TYPE.GENERAL.TYPE_OF_ANIMAL);
-
     const personalityTagsMap = useMemo(
         () => new Map(personalityTags.map((tag) => [tag.id, tag.name])),
         [personalityTags]
-    );
-
-    const physiqueTagsMap = useMemo(
-        () => new Map(physiqueTags.map((tag) => [tag.id, tag.name])),
-        [physiqueTags]
-    );
-
-    const animalTypeTagsMap = useMemo(
-        () => new Map(animalTypeTags.map((tag) => [tag.id, tag.name])),
-        [animalTypeTags]
     );
 
     const form = useForm<GreetingFormInput>({
@@ -91,10 +66,13 @@ export default function UserGreetingForm() {
             personality_description: "",
             pet_experience: undefined,
             pet_experience_description: "",
-            physique_ids: [],
-            physique_description: "",
-            type_of_animal_ids: [],
-            type_of_animal_description: "",
+            address: {
+                street: "",
+                city: "",
+                state: "",
+                zip_code: "",
+                country: "",
+            },
             open_to_special_needs: false,
         },
     });
@@ -249,151 +227,90 @@ export default function UserGreetingForm() {
                             </CardContent>
                         </Card>
 
-                        {/* Physique Card */}
+                        {/* Address Card */}
                         <Card className="rounded-2xl shadow-md text-left">
                             <CardHeader>
                                 <CardTitle className="text-xl font-semibold">
-                                    Preferred Physique
+                                    Address
                                 </CardTitle>
                                 <CardDescription>
-                                    What kind of physique do you prefer in a pet?
+                                    Let us know where you live, so we can personalize the search for you.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <FormField
                                     control={form.control}
-                                    name="physique_ids"
+                                    name="address.street"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Physique Traits *</FormLabel>
+                                            <FormLabel>Street</FormLabel>
                                             <FormControl>
-                                                <SearchableCombobox
-                                                    options={physiqueTags}
-                                                    selectedValues={field.value}
-                                                    onSelect={(tagId) => {
-                                                        if (!field.value.includes(tagId)) {
-                                                            field.onChange([...field.value, tagId]);
-                                                        }
-                                                    }}
-                                                    onSearch={setPhysiqueSearch}
-                                                    onLoadMore={loadMorePhysique}
-                                                    isLoading={isLoadingPhysiqueTags}
-                                                    hasMore={hasMorePhysique}
-                                                    placeholder="Search physique traits..."
-                                                    emptyMessage="No physique traits found."
-                                                    mode="multiple"
-                                                />
+                                                <Input placeholder="Enter your street address..." {...field} />
                                             </FormControl>
                                             <FormMessage />
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {field.value.map((tagId) => (
-                                                    <TagBadge
-                                                        key={tagId}
-                                                        label={physiqueTagsMap.get(tagId) || tagId}
-                                                        onRemove={() => {
-                                                            field.onChange(
-                                                                field.value.filter((id) => id !== tagId)
-                                                            );
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
                                         </FormItem>
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="physique_description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Additional Description</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Describe your physique preference..."
-                                                    className="resize-none"
-                                                    rows={3}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="address.city"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>City</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="City" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                        {/* Animal Type Card */}
-                        <Card className="rounded-2xl shadow-md text-left">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-semibold">
-                                    Preferred Animal Type
-                                </CardTitle>
-                                <CardDescription>
-                                    What type of animal are you looking to adopt?
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="type_of_animal_ids"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Animal Type *</FormLabel>
-                                            <FormControl>
-                                                <SearchableCombobox
-                                                    options={animalTypeTags}
-                                                    selectedValues={field.value}
-                                                    onSelect={(tagId) => {
-                                                        if (!field.value.includes(tagId)) {
-                                                            field.onChange([...field.value, tagId]);
-                                                        }
-                                                    }}
-                                                    onSearch={setAnimalTypeSearch}
-                                                    onLoadMore={loadMoreAnimalType}
-                                                    isLoading={isLoadingAnimalTypeTags}
-                                                    hasMore={hasMoreAnimalType}
-                                                    placeholder="Search animal types..."
-                                                    emptyMessage="No animal types found."
-                                                    mode="multiple"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {field.value.map((tagId) => (
-                                                    <TagBadge
-                                                        key={tagId}
-                                                        label={animalTypeTagsMap.get(tagId) || tagId}
-                                                        onRemove={() => {
-                                                            field.onChange(
-                                                                field.value.filter((id) => id !== tagId)
-                                                            );
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </FormItem>
-                                    )}
-                                />
+                                    <FormField
+                                        control={form.control}
+                                        name="address.state"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>State / Province</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="State" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="type_of_animal_description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Additional Description</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Tell us more about your preferred animal..."
-                                                    className="resize-none"
-                                                    rows={3}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="address.zip_code"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Zip Code</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Zip code" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="address.country"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Country</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Country" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
 

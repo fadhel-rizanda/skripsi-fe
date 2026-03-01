@@ -45,12 +45,10 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
       if (error instanceof AxiosError) {
-        if(error.message !== 'canceled') {
-          toast.error(error.response?.data?.message || "An error occurred. Please try again.");
-        }
         if (error.response?.status === 401) {
           cachedSession = null;
           sessionPromise = null;
+          toast.error("Your session has expired. Please log in again.");
           if (typeof window !== "undefined") {
             await signOut({ redirect: false });
             window.location.href = "/login";

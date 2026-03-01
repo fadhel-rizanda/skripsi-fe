@@ -30,7 +30,7 @@ export function Navbar() {
     if (!session?.user) {
       return [
         { href: "/pets", label: "Find a Pet" },
-        { href: "/adoption-process", label: "Adoption Process" },
+        { href: "/adoptions", label: "Adoption Process" },
         { href: "/community/all-post", label: "Community" },
         { href: "/chat", label: "Chat" },
       ]
@@ -42,7 +42,7 @@ export function Navbar() {
       case "adopter":
         return [
           { href: "/pets", label: "Find a Pet" },
-          { href: "/adoption-process", label: "Adoption Process" },
+          { href: "/adoptions", label: "Adoption Process" },
           { href: "/community/all-post", label: "Community" },
           { href: "/chat", label: "Chat" },
         ]
@@ -50,7 +50,7 @@ export function Navbar() {
       case "provider":
         return [
           { href: "/pets", label: "Find a Pet" },
-          { href: "/adoption-process", label: "Adoption Process" },
+          { href: "/adoptions", label: "Adoption Process" },
           { href: "/community/all-post", label: "Community" },
           { href: "/pets/create", label: "Submit Animal" },
           { href: "/chat", label: "Chat" },
@@ -59,7 +59,7 @@ export function Navbar() {
       case "admin":
         return [
           { href: "/admin/users", label: "User" },
-          { href: "/admin/adoption-process", label: "Adoption Process" },
+          { href: "/admin/adoptions", label: "Adoption Process" },
           { href: "/admin/community", label: "Community" },
           { href: "/admin/pets", label: "Pet" },
           { href: "/admin/posts", label: "Post" },

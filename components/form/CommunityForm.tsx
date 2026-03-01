@@ -17,7 +17,13 @@ import {Textarea} from "@/components/ui/textarea"
 import {Icon} from "@iconify/react";
 import {TagBadge} from "@/components/badge/TagBadge";
 import {openAttachment, uploadAttachment} from "@/lib/attachment-helpers";
-import {useTagsOptions, useUsersOptions} from "@/hooks/useFilterOptions";
+import {
+    useTagsOptions,
+    useUsersOptions,
+    useProvincesOptions,
+    useRegenciesOptions,
+    useDistrictsOptions,
+} from "@/hooks/useFilterOptions";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {useRouter} from "next/navigation";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -26,6 +32,8 @@ import {Attachment} from "@/types/attachment";
 import {CreateCommunityInput, CreateCommunitySchema} from "@/schemas/community.schema";
 import {communityService} from "@/services/communityService";
 import {useSession} from "next-auth/react";
+import {cn} from "@/lib/utils";
+import {Home, MapPin} from "lucide-react";
 
 type CommunityFormProps = {
     mode: "create" | "edit"
@@ -34,12 +42,14 @@ type CommunityFormProps = {
 
 export default function CommunityForm({mode, communityId}: CommunityFormProps) {
     const isEditMode = mode === "edit"
-    const { data: session } = useSession()
+    const {data: session} = useSession()
 
     const router = useRouter()
     const [profileFile, setProfileFile] = useState<File | undefined>()
     const [isLoadingDetail, setIsLoadingDetail] = useState(false)
     const [dialogOpen, setDialogOpen] = useState(false)
+    const [useOwnerAddress, setUseOwnerAddress] = useState(false)
+
     const {
         options: communityTags,
         isLoading: isLoadingCommunityTags,
@@ -65,19 +75,59 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
             description: "",
             tag_ids: [],
             admin_ids: [],
+            use_owner_address: false,
             address: {
                 street: "",
-                city: "",
-                state: "",
+                province_id: "",
+                regency_id: "",
+                district_id: "",
                 zip_code: "",
-                country: "",
                 notes: "",
                 link: "",
             },
         },
     })
 
+    const selectedProvinceId = form.watch("address.province_id")
+    const selectedRegencyId = form.watch("address.regency_id")
+
+    const {
+        options: provinces,
+        isLoading: isLoadingProvinces,
+        setSearch: setProvincesSearch,
+        loadMore: loadMoreProvinces,
+        hasMore: hasMoreProvinces,
+    } = useProvincesOptions()
+
+    const {
+        options: regencies,
+        isLoading: isLoadingRegencies,
+        setSearch: setRegenciesSearch,
+        loadMore: loadMoreRegencies,
+        hasMore: hasMoreRegencies,
+    } = useRegenciesOptions(selectedProvinceId ?? "")
+
+    const {
+        options: districts,
+        isLoading: isLoadingDistricts,
+        setSearch: setDistrictsSearch,
+        loadMore: loadMoreDistricts,
+        hasMore: hasMoreDistricts,
+    } = useDistrictsOptions(selectedRegencyId ?? "")
+
+    const [initialProvince, setInitialProvince] = useState<{id: string, name: string} | null>(null)
+    const [initialRegency, setInitialRegency] = useState<{id: string, name: string} | null>(null)
+    const [initialDistrict, setInitialDistrict] = useState<{id: string, name: string} | null>(null)
+
     const [currentCommunityId, setCurrentCommunityId] = useState<string | undefined>(communityId);
+
+    const handleToggleOwnerAddress = (useOwner: boolean) => {
+        setUseOwnerAddress(useOwner)
+        form.setValue("use_owner_address", useOwner, {shouldValidate: true})
+        if (useOwner) {
+            form.clearErrors("address")
+        }
+    }
 
     async function handleFinalSubmit() {
         const values = form.getValues()
@@ -87,13 +137,22 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         const payload: CreateCommunityInput = {
             ...values,
             attachment_id: uploadedProfileId ?? values.attachment_id,
+            ...(!isEditMode
+                    ? {
+                        use_owner_address: useOwnerAddress,
+                        ...(useOwnerAddress ? {} : {address: values.address}),
+                    }
+                    : {
+                        use_owner_address: false,
+                        address: values.address,
+                    }
+            ),
         }
 
         let response
 
         if (!isEditMode) {
             response = await communityService.createCommunity(payload)
-
             if (response?.data?.id) {
                 setCurrentCommunityId(response.data.id);
             }
@@ -101,7 +160,6 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
             if (!currentCommunityId) {
                 throw new Error("Community ID is missing in edit mode.");
             }
-
             response = await communityService.updateCommunity(currentCommunityId, payload);
         }
 
@@ -109,7 +167,6 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
     }
 
     function onSubmit() {
-        console.log("submit triggered")
         setDialogOpen(true)
     }
 
@@ -119,18 +176,19 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
 
         const file = files[0]
 
-        if (file.size > 5 * 1024 * 1024) {
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+        if (!allowedTypes.includes(file.type)) {
             form.setError("attachment_id", {
                 type: "manual",
-                message: "File size must be less than 5MB"
+                message: "Only JPEG, PNG, GIF, or WebP images are allowed"
             })
             return
         }
 
-        if (!file.type.startsWith("image/")) {
+        if (file.size > 5 * 1024 * 1024) {
             form.setError("attachment_id", {
                 type: "manual",
-                message: "Only image files are allowed"
+                message: "File size must be less than 5MB"
             })
             return
         }
@@ -141,10 +199,8 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         form.clearErrors("attachment_id")
     }
 
-
     const removeProfileFile = () => {
         setProfileFile(undefined)
-
         if (fileInputRef.current) {
             fileInputRef.current.value = ""
         }
@@ -153,7 +209,6 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
     const removeExistingProfilePicture = () => {
         setExistingProfilePicture(undefined)
         form.setValue("attachment_id", undefined)
-
         if (fileInputRef.current) {
             fileInputRef.current.value = ""
         }
@@ -191,16 +246,23 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
     const handleOpenNewFile = (file: File) => {
         const fileUrl = URL.createObjectURL(file)
         window.open(fileUrl, "_blank")
-
         setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
     }
+
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl)
+        }
+    }, [previewUrl])
 
     useEffect(() => {
         if (!isEditMode || !communityId) return
 
         const fetchDetail = async () => {
             setIsLoadingDetail(true)
-
             try {
                 const res = await communityService.getCommunityById(communityId || "")
 
@@ -211,16 +273,27 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                     tag_ids: res.tags?.map(t => t.id) ?? [],
                     attachment_id: res.attachment?.id ?? undefined,
                     admin_ids: res.admins.map(t => t.id) ?? [],
+                    use_owner_address: false,
                     address: {
                         street: res.address?.street ?? "",
-                        city: res.address?.city ?? "",
-                        state: res.address?.state ?? "",
+                        province_id: res.address?.province_id ?? res.address?.province?.id ?? "",
+                        regency_id: res.address?.regency_id ?? res.address?.regency?.id ?? "",
+                        district_id: res.address?.district_id ?? res.address?.district?.id ?? "",
                         zip_code: res.address?.zip_code ?? "",
-                        country: res.address?.country ?? "",
-                        notes: res.address?.notes || undefined,
-                        link: res.address?.link || undefined,
+                        notes: res.address?.notes ?? "",
+                        link: res.address?.link ?? "",
                     },
                 })
+
+                if (res.address?.province) {
+                    setInitialProvince({id: String(res.address.province.id), name: res.address.province.name})
+                }
+                if (res.address?.regency) {
+                    setInitialRegency({id: String(res.address.regency.id), name: res.address.regency.name})
+                }
+                if (res.address?.district) {
+                    setInitialDistrict({id: String(res.address.district.id), name: res.address.district.name})
+                }
 
                 if (res.attachment) {
                     setExistingProfilePicture({
@@ -241,23 +314,216 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         fetchDetail()
     }, [form, isEditMode, communityId])
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-    const fileInputRef = useRef<HTMLInputElement | null>(null)
-
-    useEffect(() => {
-        return () => {
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl)
-            }
-        }
-    }, [previewUrl])
-
     if (isEditMode && isLoadingDetail) {
         return (
             <div className="p-10 text-center bg-green-50 py-12 px-4">
                 <Icon icon="ph:circle-notch" className="w-8 h-8 animate-spin mx-auto mb-4"/>
                 <p>Loading community data...</p>
             </div>
+        )
+    }
+
+    const renderAddressFields = () => (
+        <>
+            <FormField
+                control={form.control}
+                name="address.street"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Street *</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. Jl. Pawsitive No. 123" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.province_id"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Province *</FormLabel>
+                        <FormControl>
+                            <SearchableCombobox
+                                options={[
+                                    ...(initialProvince && !provinces.find(p => p.id === initialProvince.id) ? [initialProvince] : []),
+                                    ...provinces,
+                                ]}
+                                selectedValues={field.value ? [field.value] : []}
+                                onSelect={(value) => {
+                                    field.onChange(value)
+                                    form.setValue("address.regency_id", "")
+                                    form.setValue("address.district_id", "")
+                                    setInitialRegency(null)
+                                    setInitialDistrict(null)
+                                }}
+                                onSearch={setProvincesSearch}
+                                onLoadMore={loadMoreProvinces}
+                                isLoading={isLoadingProvinces}
+                                hasMore={hasMoreProvinces}
+                                placeholder="Select province..."
+                                emptyMessage="No provinces found."
+                                mode="single"
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.regency_id"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Regency / City *</FormLabel>
+                        <FormControl>
+                            <SearchableCombobox
+                                options={[
+                                    ...(initialRegency && !regencies.find(r => r.id === initialRegency.id) ? [initialRegency] : []),
+                                    ...regencies,
+                                ]}
+                                selectedValues={field.value ? [field.value] : []}
+                                onSelect={(value) => {
+                                    field.onChange(value)
+                                    form.setValue("address.district_id", "")
+                                    setInitialDistrict(null)
+                                }}
+                                onSearch={setRegenciesSearch}
+                                onLoadMore={loadMoreRegencies}
+                                isLoading={isLoadingRegencies}
+                                hasMore={hasMoreRegencies}
+                                placeholder={selectedProvinceId ? "Select regency/city..." : "Select a province first"}
+                                emptyMessage="No regencies found."
+                                mode="single"
+                                disabled={!selectedProvinceId}
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="address.district_id"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>District *</FormLabel>
+                            <FormControl>
+                                <SearchableCombobox
+                                    options={[
+                                        ...(initialDistrict && !districts.find(d => d.id === initialDistrict.id) ? [initialDistrict] : []),
+                                        ...districts,
+                                    ]}
+                                    selectedValues={field.value ? [field.value] : []}
+                                    onSelect={(value) => field.onChange(value)}
+                                    onSearch={setDistrictsSearch}
+                                    onLoadMore={loadMoreDistricts}
+                                    isLoading={isLoadingDistricts}
+                                    hasMore={hasMoreDistricts}
+                                    placeholder={selectedRegencyId ? "Select district..." : "Select a regency first"}
+                                    emptyMessage="No districts found."
+                                    mode="single"
+                                    disabled={!selectedRegencyId}
+                                />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="address.zip_code"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Zip Code <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g. 62704" {...field} />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+            </div>
+            <FormField
+                control={form.control}
+                name="address.link"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Maps Link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. https://maps.google.com/..." {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="address.notes"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Notes <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="Describe the address in more detail..." className="min-h-30" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+        </>
+    )
+
+    const renderAddressSection = () => {
+        if (isEditMode) {
+            return (
+                <>
+                    <h3 className="text-xl font-semibold border-b pb-2">Address *</h3>
+                    {renderAddressFields()}
+                </>
+            )
+        }
+
+        return (
+            <>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <h3 className="text-xl font-semibold">Address *</h3>
+                    <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+                        <button
+                            type="button"
+                            onClick={() => handleToggleOwnerAddress(true)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
+                            )}
+                        >
+                            <Home className="h-3.5 w-3.5"/>
+                            Same as mine
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleToggleOwnerAddress(false)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                !useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
+                            )}
+                        >
+                            <MapPin className="h-3.5 w-3.5"/>
+                            Custom
+                        </button>
+                    </div>
+                </div>
+
+                {useOwnerAddress ? (
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+                        <Home className="h-4 w-4 shrink-0 text-slate-400"/>
+                        <p>Community location will use your registered address.</p>
+                    </div>
+                ) : (
+                    renderAddressFields()
+                )}
+            </>
         )
     }
 
@@ -268,19 +534,21 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                     <Card className="rounded-2xl shadow-xl p-0 m-0">
                         <CardContent className="p-10">
                             <Form {...form}>
-                                <form
-                                    onSubmit={form.handleSubmit(
-                                        onSubmit,
-                                        (errors) => {
-                                            console.log("Validation errors:", errors)
-                                        })}
-                                >
+                                <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                                    if (useOwnerAddress) {
+                                        const nonAddressErrors = Object.keys(errors).filter(k => k !== "address")
+                                        if (nonAddressErrors.length === 0) {
+                                            onSubmit()
+                                        }
+                                    }
+                                })}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         {/* LEFT COLUMN */}
                                         <div className="space-y-6">
                                             <h3 className="text-xl font-semibold mb-6 border-b pb-2">
                                                 {isEditMode ? "Edit Community Information" : "Community Information"}
                                             </h3>
+
                                             <FormField
                                                 control={form.control}
                                                 name="name"
@@ -288,7 +556,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                     <FormItem>
                                                         <FormLabel>Name *</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g. Buddy" {...field} />
+                                                            <Input placeholder="e.g. Pawsitive Community" {...field} />
                                                         </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
@@ -332,7 +600,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 name="tag_ids"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Tags</FormLabel>
+                                                        <FormLabel>Tags *</FormLabel>
                                                         <FormControl>
                                                             <SearchableCombobox
                                                                 options={communityTags}
@@ -357,10 +625,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                                 <TagBadge
                                                                     key={tagId}
                                                                     label={communityTagsMap.get(tagId) || tagId}
-                                                                    onRemove={() => {
-                                                                        const updated = field.value.filter(id => id !== tagId);
-                                                                        field.onChange(updated);
-                                                                    }}
+                                                                    onRemove={() => field.onChange(field.value.filter(id => id !== tagId))}
                                                                 />
                                                             ))}
                                                         </div>
@@ -368,122 +633,17 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 )}
                                             />
 
-                                            <h3 className="text-xl font-semibold mb-6 border-b pb-2">Address
-                                                *</h3>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.street"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Street *</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. 123 Main St" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="address.city"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>City *</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. Springfield" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="address.state"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>State *</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. Illinois" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="address.zip_code"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>Zip Code *</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. 62704" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="address.country"
-                                                    render={({field}) => (
-                                                        <FormItem>
-                                                            <FormLabel>Country *</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. USA" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage/>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.link"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Link</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. https://pawsite.com" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="address.notes"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Notes</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea
-                                                                placeholder="Describe the address in more detail..."
-                                                                className="min-h-30"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            {renderAddressSection()}
                                         </div>
 
                                         {/* RIGHT COLUMN */}
                                         <div className="space-y-8">
                                             <div>
                                                 <h3 className="text-xl font-semibold mb-6 border-b pb-2">Profile Picture</h3>
-                                                <div
-                                                    className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
+                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
                                                     <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
-                                                    <p className="font-medium text-[#424242] text-sm">Upload Profile
-                                                        Picture</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX.
-                                                        800x800px)</p>
+                                                    <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px)</p>
                                                     <label htmlFor="profile-upload">
                                                         <Button type="button" variant="outline"
                                                                 className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
@@ -496,26 +656,20 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                         id="profile-upload"
                                                         type="file"
                                                         className="hidden"
-                                                        accept="image/*"
+                                                        accept="image/jpeg,image/png,image/gif,image/webp"
                                                         onChange={handleProfileUpload}
                                                     />
                                                 </div>
+                                                <p className="text-xs text-[#757575] mt-3">A great profile picture helps your community stand out.</p>
 
-                                                <p className="text-xs text-[#757575] mt-3">A great profile picture is
-                                                    key to
-                                                    finding a new home.</p>
-
-                                                {/* EXISTING FILE */}
                                                 {existingProfilePicture && !profileFile && (
-                                                    <div
-                                                        className="mt-3 flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
+                                                    <div className="mt-3 flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
                                                         <span
                                                             onClick={() => handleOpenExistingFile(existingProfilePicture as Attachment)}
                                                             className="truncate flex-1 cursor-pointer hover:underline flex items-center gap-2"
                                                         >
                                                             {downloadingId === existingProfilePicture.id && (
-                                                                <Icon icon="ph:spinner"
-                                                                      className="w-4 h-4 animate-spin shrink-0"/>
+                                                                <Icon icon="ph:spinner" className="w-4 h-4 animate-spin shrink-0"/>
                                                             )}
                                                             {existingProfilePicture.filename}
                                                         </span>
@@ -527,10 +681,8 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                     </div>
                                                 )}
 
-                                                {/* NEW FILE */}
                                                 {profileFile && (
-                                                    <div
-                                                        className="mt-3 flex items-center justify-between p-3 border border-green-300 bg-green-50 rounded-md text-sm">
+                                                    <div className="mt-3 flex items-center justify-between p-3 border border-green-300 bg-green-50 rounded-md text-sm">
                                                         <span
                                                             onClick={() => handleOpenNewFile(profileFile)}
                                                             className="truncate flex-1 cursor-pointer hover:underline text-green-700"
@@ -580,10 +732,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                                             key={userId}
                                                                             label={userAdminMap.get(userId) || userId}
                                                                             disabled={isSelf}
-                                                                            onRemove={() => {
-                                                                                const updated = field.value?.filter(id => id !== userId)
-                                                                                field.onChange(updated)
-                                                                            }}
+                                                                            onRemove={() => field.onChange(field.value?.filter(id => id !== userId))}
                                                                         />
                                                                     )
                                                                 })}
@@ -596,8 +745,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                     </div>
 
                                     <div className="mt-10 space-y-4 flex flex-wrap justify-end border-t pt-6">
-                                        <Button type="submit"
-                                                className="mt-4 bg-green-600 hover:bg-green-700 text-white">
+                                        <Button type="submit" className="mt-4 bg-green-600 hover:bg-green-700 text-white">
                                             {isEditMode ? "Update Community Profile" : "Submit new community profile"}
                                         </Button>
                                     </div>
@@ -611,14 +759,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() =>
-                    router.push(currentCommunityId ? `/communities/${currentCommunityId}` : "/communities")
-                }
+                onContinue={() => router.push(currentCommunityId ? `/communities/${currentCommunityId}` : "/communities")}
                 title={isEditMode ? "Update Community Profile?" : "Create Community Profile?"}
                 description="Please review the community's information before continuing."
-                successTitle={isEditMode
-                    ? "Community Profile Updated Successfully"
-                    : "Community Profile Created Successfully"}
+                successTitle={isEditMode ? "Community Profile Updated Successfully" : "Community Profile Created Successfully"}
                 successDescription="Your community profile is now live."
                 confirmText={isEditMode ? "Update Profile" : "Create Profile"}
                 cancelText="Review Again"

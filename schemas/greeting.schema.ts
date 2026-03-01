@@ -1,20 +1,11 @@
 import { z } from "zod";
-
-const AddressSchema = z.object({
-    street: z.string().min(1, "Street is required").max(500, "Street is too long (max 500 characters)"),
-    province_id: z.string().min(1, "Province is required"),
-    regency_id: z.string().min(1, "Regency / City is required"),
-    district_id: z.string().min(1, "District is required"),
-    zip_code: z.string().max(20, "Zip code is too long (max 20 characters)").optional(),
-    notes: z.string().max(1000, "Notes is too long (max 1000 characters)").optional(),
-    link: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
-});
+import { AddressSchema } from "@/schemas/address.schemas";
 
 export const AdopterGreetingSchema = z.object({
-    personality_ids: z
+    personality_tags: z
         .array(z.string().uuid("Invalid personality tag"))
         .min(1, "Select at least one personality trait"),
-    personality_description: z
+    personality: z
         .string()
         .max(500, "Description is too long (max 500 characters)")
         .optional(),

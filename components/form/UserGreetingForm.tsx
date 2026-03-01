@@ -79,8 +79,8 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
     defaultValues: {
       ...(isAdopter
         ? {
-            personality_ids: [],
-            personality_description: "",
+            personality_tags: [],
+            personality: "",
             pet_experience: undefined,
             pet_experience_description: "",
             open_to_special_needs: false,
@@ -161,7 +161,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="personality_ids"
+                  name="personality_tags"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Personality Traits *</FormLabel>
@@ -203,7 +203,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="personality_description"
+                  name="personality"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Additional Description</FormLabel>

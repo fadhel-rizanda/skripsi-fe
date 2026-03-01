@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 import { PaginatedResponse, GetAllParams } from "@/types/api";
 import { UserProfile } from "@/types/user";
-import { GreetingFormInput } from "@/schemas/greeting.schema";
+import { GreetingFormInput, AdopterGreetingFormInput } from "@/schemas/greeting.schema";
 
 export interface GetUsersParams extends GetAllParams {
     role_id?: string;
@@ -15,11 +15,13 @@ export const userService = {
     },
 
     putUsers: async (data: GreetingFormInput): Promise<void> => {
+        const adopterData = data as AdopterGreetingFormInput;
         const payload = {
-            personality_tags: data.personality_ids,
-            personality: data.personality_description,
-            pet_experience: data.pet_experience,
-            pet_experience_description: data.pet_experience_description,
+            ...(adopterData.personality_ids ? { personality_tags: adopterData.personality_ids } : {}),
+            ...(adopterData.personality_description !== undefined ? { personality: adopterData.personality_description } : {}),
+            ...(adopterData.pet_experience ? { pet_experience: adopterData.pet_experience } : {}),
+            ...(adopterData.pet_experience_description !== undefined ? { pet_experience_description: adopterData.pet_experience_description } : {}),
+            ...(adopterData.open_to_special_needs !== undefined ? { open_to_special_needs: adopterData.open_to_special_needs } : {}),
             address: data.address ? {
                 street: data.address.street,
                 province_id: data.address.province_id,
@@ -29,7 +31,6 @@ export const userService = {
                 notes: data.address.notes,
                 link: data.address.link,
             } : undefined,
-            open_to_special_needs: data.open_to_special_needs,
         };
         const response = await api.put("/v1/profile", payload);
         return response.data;

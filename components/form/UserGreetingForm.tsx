@@ -45,9 +45,19 @@ import {
 } from "@/hooks/useFilterOptions";
 import { TAG_TYPE } from "@/constant/tag-type";
 import { PET_EXPERIENCE_OPTIONS } from "@/constant/pet-experience";
-import { GreetingSchema, GreetingFormInput } from "@/schemas/greeting.schema";
+import {
+  AdopterGreetingSchema,
+  ProviderGreetingSchema,
+  GreetingFormInput,
+  AdopterGreetingFormInput,
+} from "@/schemas/greeting.schema";
 
-export default function UserGreetingForm() {
+type UserGreetingFormProps = {
+  role: "adopter" | "provider";
+};
+
+export default function UserGreetingForm({ role }: UserGreetingFormProps) {
+  const isAdopter = role === "adopter";
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -65,12 +75,17 @@ export default function UserGreetingForm() {
   );
 
   const form = useForm<GreetingFormInput>({
-    resolver: zodResolver(GreetingSchema),
+    resolver: zodResolver(isAdopter ? AdopterGreetingSchema : ProviderGreetingSchema),
     defaultValues: {
-      personality_ids: [],
-      personality_description: "",
-      pet_experience: undefined,
-      pet_experience_description: "",
+      ...(isAdopter
+        ? {
+            personality_ids: [],
+            personality_description: "",
+            pet_experience: undefined,
+            pet_experience_description: "",
+            open_to_special_needs: false,
+          }
+        : {}),
       address: {
         street: "",
         province_id: "",
@@ -80,7 +95,6 @@ export default function UserGreetingForm() {
         notes: "",
         link: "",
       },
-      open_to_special_needs: false,
     },
   });
 
@@ -118,7 +132,11 @@ export default function UserGreetingForm() {
     }
     try {
       await userService.putUsers(values);
-      toast.success("Preferences saved! Let's find your perfect pet.");
+      toast.success(
+        isAdopter
+          ? "Preferences saved! Let's find your perfect pet."
+          : "Address saved successfully!",
+      );
       router.push("/dashboard");
     } catch (error) {
       toast.error("Failed to save preferences. Please try again.");
@@ -128,7 +146,9 @@ export default function UserGreetingForm() {
   return (
     <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Personality Card */}
+            {/* Personality & Pet Experience Cards - Adopter only */}
+            {isAdopter && (
+            <>
             <Card className="rounded-2xl shadow-md text-left">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">
@@ -261,6 +281,8 @@ export default function UserGreetingForm() {
                 />
               </CardContent>
             </Card>
+            </>
+            )}
 
             {/* Address Card */}
             <Card className="rounded-2xl shadow-md text-left">
@@ -450,7 +472,8 @@ export default function UserGreetingForm() {
               </CardContent>
             </Card>
 
-            {/* Special Needs Checkbox */}
+            {/* Special Needs Checkbox - Adopter only */}
+            {isAdopter && (
             <FormField
               control={form.control}
               name="open_to_special_needs"
@@ -474,16 +497,10 @@ export default function UserGreetingForm() {
                 </FormItem>
               )}
             />
+            )}
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => router.push("/dashboard")}
-              >
-                Skip for now
-              </Button>
+            <div className="flex items-center justify-end pt-2">
               <Button
                 type="submit"
                 className="bg-green-500 hover:bg-green-600 font-bold"

@@ -5,24 +5,27 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import UserGreetingForm from '@/components/form/UserGreetingForm';
 
+const ALLOWED_ROLES = ['adopter', 'provider'];
+
 export default function GreetingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const roleName = session?.user?.role?.name;
 
-  // Redirect if not authenticated or not an adopter
+  // Redirect if not authenticated or not an allowed role
   useEffect(() => {
     if (status === 'loading') {
       return;
     }
     if (!session) {
       router.push('/login');
-    } else if (session.user?.role?.name !== 'adopter') {
+    } else if (!roleName || !ALLOWED_ROLES.includes(roleName)) {
       router.push('/dashboard');
     }
-  }, [session, status, router]);
+  }, [session, status, router, roleName]);
 
   // Render loading state until authentication and authorization are confirmed.
-  if (status !== 'authenticated' || session.user?.role?.name !== 'adopter') {
+  if (status !== 'authenticated' || !roleName || !ALLOWED_ROLES.includes(roleName)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg text-gray-600">Loading...</div>
@@ -41,12 +44,14 @@ export default function GreetingPage() {
           </h1>
 
           <p className="text-xl text-gray-600">
-            This will help us find the perfect companion for you.
+            {roleName === 'provider'
+              ? 'Let us know where your shelter is located.'
+              : 'This will help us find the perfect companion for you.'}
           </p>
         </div>
 
         <section className="flex flex-col gap-10 justify-center">
-          <UserGreetingForm />
+          <UserGreetingForm role={roleName as 'adopter' | 'provider'} />
         </section>
       </div>
     </div>

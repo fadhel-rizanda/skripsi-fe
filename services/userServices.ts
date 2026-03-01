@@ -14,7 +14,7 @@ export const userService = {
         return response.data;
     },
 
-    putUsers: async (_userId: string, data: GreetingFormInput): Promise<void> => {
+    putUsers: async (data: GreetingFormInput): Promise<void> => {
         const payload = {
             personality_tags: data.personality_ids,
             personality: data.personality_description,

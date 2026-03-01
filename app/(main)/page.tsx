@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/footer/Footer";
 import { Icon } from "@iconify/react";
 
 export default function Home() {
@@ -248,7 +247,6 @@ export default function Home() {
                 </section>
 
             </main>
-            <Footer />
         </>
     );
 }

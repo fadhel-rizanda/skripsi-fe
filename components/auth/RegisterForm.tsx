@@ -83,11 +83,12 @@ export function RegisterForm() {
                 }
 
                 if (signInResult?.ok) {
-                    // Redirect to dashboard after successful login
-                    router.push("/dashboard")
-
-                    // Redirect to verify-otp page with email parameter
-                    // router.push(`/verify-otp?email=${encodeURIComponent(result.credentials.email)}`)
+                    // Redirect to greeting page for adopters, dashboard for others
+                    if (selectedRole === "adopter") {
+                        router.push("/greeting")
+                    } else {
+                        router.push("/dashboard")
+                    }
 
                     router.refresh()
                 }

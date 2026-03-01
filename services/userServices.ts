@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { PaginatedResponse, GetAllParams } from "@/types/api";
 import { UserProfile } from "@/types/user";
+import { GreetingFormInput } from "@/schemas/greeting.schema";
 
 export interface GetUsersParams extends GetAllParams {
     role_id?: string;
@@ -13,6 +14,10 @@ export const userService = {
         return response.data;
     },
 
+    putUsers: async (data: GreetingFormInput): Promise<void> => {
+        const response = await api.put("/v1/profile", data);
+        return response.data;
+    },
     deactivateUser: async (userId: string, notes: string): Promise<void> => {
         await api.post(`/v1/users/${userId}/deactivate`, { notes });
     },
@@ -23,6 +28,7 @@ export const userService = {
 
     userChannels: async (): Promise<{ channels: string[] }> => {
         const response = await api.get<{ channels: string[] }>(`/v1/users/channels`);
-        return response.data.data;
-    }
+        return response.data;
+    },
+
 };

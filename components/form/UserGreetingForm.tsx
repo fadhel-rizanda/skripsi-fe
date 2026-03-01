@@ -49,7 +49,6 @@ import {
   AdopterGreetingSchema,
   ProviderGreetingSchema,
   GreetingFormInput,
-  AdopterGreetingFormInput,
 } from "@/schemas/greeting.schema";
 
 type UserGreetingFormProps = {

@@ -42,19 +42,4 @@ export const userService = {
         return response.data;
     },
 
-    putUsers: async (_userId: string, data: GreetingFormInput): Promise<void> => {
-        const payload = {
-            personality_tags: data.personality_ids,
-            personality: data.personality_description,
-            pet_experience: data.pet_experience,
-            pet_experience_description: data.pet_experience_description,
-            pet_preferences_tags: [...data.physique_ids, ...data.type_of_animal_ids],
-            pet_preferences: [data.physique_description, data.type_of_animal_description]
-                .filter(Boolean)
-                .join(" | ") || undefined,
-            open_to_special_needs: data.open_to_special_needs,
-        };
-        const response = await api.put("/v1/profile", payload);
-        return response.data;
-    },
 };

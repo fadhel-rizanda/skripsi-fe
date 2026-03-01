@@ -20,7 +20,15 @@ export const userService = {
             personality: data.personality_description,
             pet_experience: data.pet_experience,
             pet_experience_description: data.pet_experience_description,
-            address: data.address,
+            address: data.address ? {
+                street: data.address.street,
+                province_id: data.address.province_id,
+                regency_id: data.address.regency_id,
+                district_id: data.address.district_id,
+                zip_code: data.address.zip_code,
+                notes: data.address.notes,
+                link: data.address.link,
+            } : undefined,
             open_to_special_needs: data.open_to_special_needs,
         };
         const response = await api.put("/v1/profile", payload);

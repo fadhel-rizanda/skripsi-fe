@@ -37,7 +37,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 import { TagBadge } from "@/components/badge/TagBadge";
 
-import { useTagsOptions } from "@/hooks/useFilterOptions";
+import {
+  useTagsOptions,
+  useProvincesOptions,
+  useRegenciesOptions,
+  useDistrictsOptions,
+} from "@/hooks/useFilterOptions";
 import { TAG_TYPE } from "@/constant/tag-type";
 import { PET_EXPERIENCE_OPTIONS } from "@/constant/pet-experience";
 import { GreetingSchema, GreetingFormInput } from "@/schemas/greeting.schema";
@@ -68,14 +73,43 @@ export default function UserGreetingForm() {
       pet_experience_description: "",
       address: {
         street: "",
-        city: "",
-        state: "",
+        province_id: "",
+        regency_id: "",
+        district_id: "",
         zip_code: "",
-        country: "",
+        notes: "",
+        link: "",
       },
       open_to_special_needs: false,
     },
   });
+
+  const selectedProvinceId = form.watch("address.province_id");
+  const selectedRegencyId = form.watch("address.regency_id");
+
+  const {
+    options: provinces,
+    isLoading: isLoadingProvinces,
+    setSearch: setProvincesSearch,
+    loadMore: loadMoreProvinces,
+    hasMore: hasMoreProvinces,
+  } = useProvincesOptions();
+
+  const {
+    options: regencies,
+    isLoading: isLoadingRegencies,
+    setSearch: setRegenciesSearch,
+    loadMore: loadMoreRegencies,
+    hasMore: hasMoreRegencies,
+  } = useRegenciesOptions(selectedProvinceId ?? "");
+
+  const {
+    options: districts,
+    isLoading: isLoadingDistricts,
+    setSearch: setDistrictsSearch,
+    loadMore: loadMoreDistricts,
+    hasMore: hasMoreDistricts,
+  } = useDistrictsOptions(selectedRegencyId ?? "");
 
   async function onSubmit(values: GreetingFormInput) {
     if (!session?.user?.id) {
@@ -83,7 +117,7 @@ export default function UserGreetingForm() {
       return;
     }
     try {
-      await userService.putUsers(session.user.id, values);
+      await userService.putUsers(values);
       toast.success("Preferences saved! Let's find your perfect pet.");
       router.push("/dashboard");
     } catch (error) {
@@ -246,7 +280,7 @@ export default function UserGreetingForm() {
                       <FormLabel>Street</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your street address..."
+                          placeholder="e.g. Jl. Pawsitive No. 123"
                           {...field}
                         />
                       </FormControl>
@@ -255,65 +289,164 @@ export default function UserGreetingForm() {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="address.province_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Province</FormLabel>
+                      <FormControl>
+                        <SearchableCombobox
+                          options={provinces}
+                          selectedValues={field.value ? [field.value] : []}
+                          onSelect={(value) => {
+                            field.onChange(value);
+                            form.setValue("address.regency_id", "");
+                            form.setValue("address.district_id", "");
+                          }}
+                          onSearch={setProvincesSearch}
+                          onLoadMore={loadMoreProvinces}
+                          isLoading={isLoadingProvinces}
+                          hasMore={hasMoreProvinces}
+                          placeholder="Select province..."
+                          emptyMessage="No provinces found."
+                          mode="single"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address.regency_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Regency / City</FormLabel>
+                      <FormControl>
+                        <SearchableCombobox
+                          options={regencies}
+                          selectedValues={field.value ? [field.value] : []}
+                          onSelect={(value) => {
+                            field.onChange(value);
+                            form.setValue("address.district_id", "");
+                          }}
+                          onSearch={setRegenciesSearch}
+                          onLoadMore={loadMoreRegencies}
+                          isLoading={isLoadingRegencies}
+                          hasMore={hasMoreRegencies}
+                          placeholder={
+                            selectedProvinceId
+                              ? "Select regency/city..."
+                              : "Select a province first"
+                          }
+                          emptyMessage="No regencies found."
+                          mode="single"
+                          disabled={!selectedProvinceId}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="address.city"
+                    name="address.district_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
+                        <FormLabel>District</FormLabel>
                         <FormControl>
-                          <Input placeholder="City" {...field} />
+                          <SearchableCombobox
+                            options={districts}
+                            selectedValues={field.value ? [field.value] : []}
+                            onSelect={(value) => field.onChange(value)}
+                            onSearch={setDistrictsSearch}
+                            onLoadMore={loadMoreDistricts}
+                            isLoading={isLoadingDistricts}
+                            hasMore={hasMoreDistricts}
+                            placeholder={
+                              selectedRegencyId
+                                ? "Select district..."
+                                : "Select a regency first"
+                            }
+                            emptyMessage="No districts found."
+                            mode="single"
+                            disabled={!selectedRegencyId}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="address.state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>State / Province</FormLabel>
-                        <FormControl>
-                          <Input placeholder="State" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="address.zip_code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zip Code</FormLabel>
+                        <FormLabel>
+                          Zip Code{" "}
+                          <span className="text-muted-foreground font-normal">
+                            (optional)
+                          </span>
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Zip code" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="address.country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Country</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Country" {...field} />
+                          <Input placeholder="e.g. 62704" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="address.link"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Maps Link{" "}
+                        <span className="text-muted-foreground font-normal">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. https://maps.google.com/..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address.notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Notes{" "}
+                        <span className="text-muted-foreground font-normal">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe the address in more detail..."
+                          className="resize-none"
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
 

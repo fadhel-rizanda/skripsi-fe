@@ -9,7 +9,7 @@ export const GreetingSchema = z.object({
         .max(500, "Description is too long (max 500 characters)")
         .optional(),
     pet_experience: z.enum(["none", "beginner", "intermediate", "experienced"], {
-        required_error: "Please select your pet experience level",
+        message: "Please select your pet experience level",
     }),
     pet_experience_description: z
         .string()
@@ -17,10 +17,12 @@ export const GreetingSchema = z.object({
         .optional(),
     address: z.object({
         street: z.string().max(500, "Street is too long (max 500 characters)").optional(),
-        city: z.string().max(100, "City is too long (max 100 characters)").optional(),
-        state: z.string().max(100, "State is too long (max 100 characters)").optional(),
+        province_id: z.string().optional(),
+        regency_id: z.string().optional(),
+        district_id: z.string().optional(),
         zip_code: z.string().max(20, "Zip code is too long (max 20 characters)").optional(),
-        country: z.string().max(100, "Country is too long (max 100 characters)").optional(),
+        notes: z.string().max(1000, "Notes is too long (max 1000 characters)").optional(),
+        link: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
     }).optional(),
     open_to_special_needs: z.boolean(),
 });

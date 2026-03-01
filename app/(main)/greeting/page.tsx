@@ -1,11 +1,8 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, User } from 'lucide-react';
-import { toast } from 'sonner';
+import { useEffect } from 'react';
 import UserGreetingForm from '@/components/form/UserGreetingForm';
 
 export default function GreetingPage() {
@@ -14,42 +11,21 @@ export default function GreetingPage() {
 
   // Redirect if not authenticated or not an adopter
   useEffect(() => {
-    if (status === 'loading') return;
-
-    if (!session) {
-      router.push('/login');
+    if (status === 'loading') {
       return;
     }
-
-    // Check if user role is "adopter"
-    if (session.user?.role?.name !== 'adopter') {
+    if (!session) {
+      router.push('/login');
+    } else if (session.user?.role?.name !== 'adopter') {
       router.push('/dashboard');
-      return;
     }
   }, [session, status, router]);
 
-  if (status === 'loading') {
+  // Render loading state until authentication and authorization are confirmed.
+  if (status !== 'authenticated' || session.user?.role?.name !== 'adopter') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  // Show error if user is not an adopter
-  if (session?.user?.role?.name !== 'adopter') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6">This page is only for adopters.</p>
-          <Button onClick={() => router.push('/dashboard')}>
-            Go to Dashboard
-          </Button>
-        </div>
       </div>
     );
   }

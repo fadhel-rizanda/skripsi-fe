@@ -74,7 +74,6 @@ function ToggleGroupItem({
         // spacing logic
         "data-[spacing=0]:rounded-none data-[spacing=0]:shadow-none data-[spacing=0]:first:rounded-l-md data-[spacing=0]:last:rounded-r-md data-[spacing=0]:data-[variant=outline]:border-l-0 data-[spacing=0]:data-[variant=outline]:first:border-l",
 
-        // ✅ TAMBAHKAN STYLE STATE DI SINI
         "border shadow-xs hover:text-black data-[state=on]:bg-green-600 data-[state=on]:text-white transition-colors duration-200 ease-in-out p-6 rounded-lg",
 
         className

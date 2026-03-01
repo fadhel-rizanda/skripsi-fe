@@ -1,12 +1,7 @@
-declare module "*.css" {
-  const content: Record<string, string>;
-  export default content;
-}
-
-import Pusher from "pusher-js"
+declare module "*.css" {}
 
 declare global {
   interface Window {
-    Pusher: typeof Pusher
+    Pusher: typeof import("pusher-js").default
   }
 }

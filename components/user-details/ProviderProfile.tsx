@@ -67,9 +67,28 @@ export default function ProviderProfileDashboard() {
             try {
                 const data = await userService.getUserById(session.user.id)
                 setProfile(data)
+<<<<<<< HEAD
                 resetFormFromProfile(data)
             } catch {
                 // silently fail
+=======
+
+                const addr = data.address
+                form.reset({
+                    name: data.name ?? "",
+                    phone: data.phone ?? "",
+                    about_me: data.about_me ?? "",
+                    street: addr?.street ?? data.street ?? "",
+                    city: addr?.city ?? "",
+                    state: addr?.state ?? "",
+                    zip_code: addr?.zip_code ?? "",
+                    country: addr?.country ?? "",
+                })
+            } catch (error) {
+                toast.error("Failed to load profile. Please try again.")
+                console.error("Failed to fetch provider profile:", error)
+            
+>>>>>>> d08e6e9 (Update components/user-details/ProviderProfile.tsx)
             } finally {
                 setIsLoading(false)
             }

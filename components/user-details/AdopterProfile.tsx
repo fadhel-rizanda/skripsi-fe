@@ -100,9 +100,35 @@ export default function AdopterProfileDashboard() {
             try {
                 const data = await userService.getUserById(session.user.id)
                 setProfile(data)
+<<<<<<< HEAD
                 resetFormFromProfile(data)
             } catch {
                 // silently fail
+=======
+
+                const addr = data.address
+                form.reset({
+                    name: data.name ?? "",
+                    phone: data.phone ?? "",
+                    about_me: data.about_me ?? "",
+                    street: addr?.street ?? data.street ?? "",
+                    city: addr?.city ?? "",
+                    state: addr?.state ?? "",
+                    zip_code: addr?.zip_code ?? "",
+                    country: addr?.country ?? "",
+                    personality: data.personality ?? "",
+                    pet_experience: data.pet_experience ?? "",
+                    pet_preferences: data.pet_preferences ?? "",
+                    personality_tags: data.personality_tags?.map((t: { id: string }) => t.id) ?? [],
+                    pet_experience_tags: data.pet_experience_tags?.map((t: { id: string }) => t.id) ?? [],
+                    pet_preferences_tags: data.pet_preferences_tags?.map((t: { id: string }) => t.id) ?? [],
+                    open_to_special_needs: data.open_to_special_needs ?? false,
+                })
+            } catch (error) {
+                toast.error("Failed to load profile. Please try again.")
+                console.error("Failed to fetch adopter profile:", error)
+            
+>>>>>>> 9fe2dca (Update components/user-details/AdopterProfile.tsx)
             } finally {
                 setIsLoading(false)
             }

@@ -115,7 +115,7 @@ export function ReportDialog({
                         </Label>
                         <Textarea
                             id="report-notes"
-                            placeholder="Describe the pet's health, behaviour, and personality"
+                            placeholder="Please provide details about why you are reporting this post."
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             rows={4}

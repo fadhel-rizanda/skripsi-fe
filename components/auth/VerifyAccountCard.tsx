@@ -1,29 +1,37 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react" // Add this import
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Form, FormControl, FormField, FormItem, FormMessage,
+} from "@/components/ui/form"
 import { Loader2, AlertCircle } from "lucide-react"
 import { verifyOtp, resendOtp } from "@/actions/auth"
+import { otpSchema, OtpFormInput } from "@/schemas/auth.schema"
 
 export default function OtpVerificationCard() {
   const router = useRouter()
-  const { data: session } = useSession() // Get session
-  
-  const [otp, setOtp] = useState("")
-  const [loading, setLoading] = useState(false)
+  const { data: session } = useSession()
+
   const [error, setError] = useState("")
   const [resending, setResending] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
 
-  const handleVerify = async () => {
+  const form = useForm<OtpFormInput>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { token: "" },
+  })
+
+  async function onSubmit(values: OtpFormInput) {
     setError("")
     setSuccessMessage("")
-    setLoading(true)
 
     try {
       const accessToken = session?.accessToken
@@ -32,19 +40,16 @@ export default function OtpVerificationCard() {
         return
       }
 
-      const result = await verifyOtp(otp, accessToken)
-      
+      const result = await verifyOtp(values.token, accessToken)
+
       if (!result.success) {
         setError(result.error || "Verification failed")
         return
       }
 
-      // Success - redirect to dashboard
-      router.push("/dashboard?verified=true")
+      router.push("/greeting?verified=true")
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -61,13 +66,12 @@ export default function OtpVerificationCard() {
       }
 
       const result = await resendOtp(accessToken)
-      
+
       if (!result.success) {
         setError(result.error || "Failed to resend OTP")
         return
       }
 
-      // Show success message
       setSuccessMessage("OTP has been resent to your email")
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
@@ -99,48 +103,65 @@ export default function OtpVerificationCard() {
             </Alert>
           )}
 
-          {/* OTP Input */}
-          <Input
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="XXXXXX"
-            maxLength={6}
-            className="h-12 text-center text-lg tracking-widest"
-            disabled={loading}
-          />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="token"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="XXXXXXXX"
+                        maxLength={8}
+                        className="h-12 text-center text-lg tracking-widest uppercase"
+                        disabled={form.formState.isSubmitting}
+                        onChange={(e) => {
+                          field.onChange(e.target.value.toUpperCase())
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Resend */}
-          <p className="text-sm text-muted-foreground">
-            Didn't receive code?{" "}
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              className="font-medium text-primary hover:underline disabled:opacity-50"
-            >
-              {resending ? "Sending..." : "Resend code"}
-            </button>
-          </p>
+              {/* Resend */}
+              <p className="text-sm text-muted-foreground">
+                Didn't receive code?{" "}
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="font-medium text-primary hover:underline disabled:opacity-50"
+                >
+                  {resending ? "Sending..." : "Resend code"}
+                </button>
+              </p>
 
-          {/* Actions */}
-          <div className="space-y-3">
-            <Button 
-              onClick={handleVerify}
-              className="w-full h-11"
-              disabled={loading || !otp}
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? "Verifying..." : "Verify"}
-            </Button>
+              {/* Actions */}
+              <div className="space-y-3">
+                <Button
+                  type="submit"
+                  className="w-full h-11"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {form.formState.isSubmitting ? "Verifying..." : "Verify"}
+                </Button>
 
-            <Button
-              variant="outline"
-              className="w-full h-11"
-              onClick={() => router.push("/dashboard")}
-            >
-              Verify Later
-            </Button>
-          </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => router.push("/profile")}
+                >
+                  Verify Later
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

@@ -3,8 +3,8 @@
 import { useSession } from "next-auth/react"
 import { redirect } from "next/navigation"
 import { Icon } from "@iconify/react"
-import AdopterProfileDashboard from "@/components/dashboard/AdopterProfile"
-import ProviderProfileDashboard from "@/components/dashboard/ProviderProfile"
+import AdopterProfileDashboard from "@/components/user-details/AdopterProfile"
+import ProviderProfileDashboard from "@/components/user-details/ProviderProfile"
 
 export default function ProfilePage() {
     const { data: session, status } = useSession()

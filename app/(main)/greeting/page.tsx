@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import UserGreetingForm from '@/components/form/UserGreetingForm';
 
 const ALLOWED_ROLES = ['adopter', 'provider'];
@@ -11,6 +12,15 @@ export default function GreetingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const roleName = session?.user?.role?.name;
+
+  // Show verified toast when coming from OTP verification
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('verified') === 'true') {
+      toast.success('Account verified successfully! Welcome aboard 🎉')
+      window.history.replaceState(null, '', '/greeting')
+    }
+  }, [])
 
   // Redirect if not authenticated or not an allowed role
   useEffect(() => {

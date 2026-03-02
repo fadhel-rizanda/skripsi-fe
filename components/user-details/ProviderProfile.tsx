@@ -93,9 +93,14 @@ export default function ProviderProfileDashboard() {
     }, [fetchPets])
 
     async function onSubmit(values: ProviderProfileInput) {
+        if (!session?.user?.id) {
+            toast.error("User session not found. Please log in again.")
+            return
+        }
         try {
-            const updated = await userService.updateProfile(values)
-            setProfile(updated)
+            await userService.putUsers(values)
+            const refreshed = await userService.getUserById(session.user.id)
+            setProfile(refreshed)
             setIsEditing(false)
             toast.success("Profile updated successfully!")
         } catch {

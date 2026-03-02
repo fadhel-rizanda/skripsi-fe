@@ -92,9 +92,9 @@ export default function AdopterProfileDashboard() {
                     personality: data.personality ?? "",
                     pet_experience: data.pet_experience ?? "",
                     pet_preferences: data.pet_preferences ?? "",
-                    personality_tags: data.personality_tags?.map(t => t.id) ?? [],
-                    pet_experience_tags: data.pet_experience_tags?.map(t => t.id) ?? [],
-                    pet_preferences_tags: data.pet_preferences_tags?.map(t => t.id) ?? [],
+                    personality_tags: data.personality_tags?.map((t: { id: string }) => t.id) ?? [],
+                    pet_experience_tags: data.pet_experience_tags?.map((t: { id: string }) => t.id) ?? [],
+                    pet_preferences_tags: data.pet_preferences_tags?.map((t: { id: string }) => t.id) ?? [],
                     open_to_special_needs: data.open_to_special_needs ?? false,
                 })
             } catch {
@@ -108,9 +108,14 @@ export default function AdopterProfileDashboard() {
     }, [session?.user?.id])
 
     async function onSubmit(values: AdopterProfileInput) {
+        if (!session?.user?.id) {
+            toast.error("User session not found. Please log in again.")
+            return
+        }
         try {
-            const updated = await userService.updateProfile(values)
-            setProfile(updated)
+            await userService.putUsers(values)
+            const refreshed = await userService.getUserById(session.user.id)
+            setProfile(refreshed)
             setIsEditing(false)
             toast.success("Profile updated successfully!")
         } catch {
@@ -303,69 +308,6 @@ export default function AdopterProfileDashboard() {
                             />
                         </SectionCard>
 
-                        {/* Pet Experience */}
-                        <SectionCard title="Pet Experience" description="Tell us more about your experience.">
-                            <div className="space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="pet_experience"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>My Pet Experience</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Describe your experience with pets..."
-                                                    className="resize-none"
-                                                    rows={4}
-                                                    disabled={!isEditing}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="pet_experience_tags"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Experience Tags</FormLabel>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                {field.value?.map(tagId => (
-                                                    <TagBadge
-                                                        key={tagId}
-                                                        label={experienceTagsMap.get(tagId) || tagId}
-                                                        onRemove={isEditing ? () => field.onChange(field.value?.filter(id => id !== tagId)) : undefined}
-                                                    />
-                                                ))}
-                                                {isEditing && (
-                                                    <SearchableCombobox
-                                                        options={experienceTagOptions}
-                                                        selectedValues={field.value ?? []}
-                                                        onSelect={(tagId) => {
-                                                            if (!field.value?.includes(tagId)) {
-                                                                field.onChange([...(field.value ?? []), tagId])
-                                                            }
-                                                        }}
-                                                        onSearch={setExperienceSearch}
-                                                        onLoadMore={loadMoreExperience}
-                                                        isLoading={isLoadingExperience}
-                                                        hasMore={hasMoreExperience}
-                                                        placeholder="Search tags..."
-                                                        emptyMessage="No tags found."
-                                                        mode="multiple"
-                                                    />
-                                                )}
-                                            </div>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </SectionCard>
-
                         {/* Personality */}
                         <SectionCard title="Personality" description="Tell us more about yourself. This is optional.">
                             <div className="space-y-4">
@@ -429,18 +371,18 @@ export default function AdopterProfileDashboard() {
                             </div>
                         </SectionCard>
 
-                        {/* Pet Preferences */}
-                        <SectionCard title="Pet Preferences" description="Help us find the perfect match for you.">
+                        {/* Pet Experience */}
+                        <SectionCard title="Pet Experience" description="Tell us more about your experience.">
                             <div className="space-y-4">
                                 <FormField
                                     control={form.control}
-                                    name="pet_preferences"
+                                    name="pet_experience"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>My Preferences</FormLabel>
+                                            <FormLabel>My Pet Experience</FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    placeholder="Describe your ideal pet..."
+                                                    placeholder="Describe your experience with pets..."
                                                     className="resize-none"
                                                     rows={4}
                                                     disabled={!isEditing}
@@ -454,31 +396,31 @@ export default function AdopterProfileDashboard() {
 
                                 <FormField
                                     control={form.control}
-                                    name="pet_preferences_tags"
+                                    name="pet_experience_tags"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Preference Tags</FormLabel>
+                                            <FormLabel>Experience Tags</FormLabel>
                                             <div className="flex flex-wrap items-center gap-2">
                                                 {field.value?.map(tagId => (
                                                     <TagBadge
                                                         key={tagId}
-                                                        label={preferencesTagsMap.get(tagId) || tagId}
+                                                        label={experienceTagsMap.get(tagId) || tagId}
                                                         onRemove={isEditing ? () => field.onChange(field.value?.filter(id => id !== tagId)) : undefined}
                                                     />
                                                 ))}
                                                 {isEditing && (
                                                     <SearchableCombobox
-                                                        options={preferencesTagOptions}
+                                                        options={experienceTagOptions}
                                                         selectedValues={field.value ?? []}
                                                         onSelect={(tagId) => {
                                                             if (!field.value?.includes(tagId)) {
                                                                 field.onChange([...(field.value ?? []), tagId])
                                                             }
                                                         }}
-                                                        onSearch={setPreferencesSearch}
-                                                        onLoadMore={loadMorePreferences}
-                                                        isLoading={isLoadingPreferences}
-                                                        hasMore={hasMorePreferences}
+                                                        onSearch={setExperienceSearch}
+                                                        onLoadMore={loadMoreExperience}
+                                                        isLoading={isLoadingExperience}
+                                                        hasMore={hasMoreExperience}
                                                         placeholder="Search tags..."
                                                         emptyMessage="No tags found."
                                                         mode="multiple"

@@ -15,8 +15,8 @@ export interface UserProfile {
 export interface Tag {
     id: string
     name: string
-    type: string
-    color_code?: string
+    type?: string
+    color_code?: string | null
 }
 
 export interface UserAddress {

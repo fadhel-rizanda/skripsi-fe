@@ -3,8 +3,7 @@
 import { useSession } from "next-auth/react"
 import { redirect } from "next/navigation"
 import { Icon } from "@iconify/react"
-import AdopterProfileDashboard from "@/components/user-details/AdopterProfile"
-import ProviderProfileDashboard from "@/components/user-details/ProviderProfile"
+import UserProfileDashboard from "@/components/user-details/UserProfileDashboard"
 
 export default function ProfilePage() {
     const { data: session, status } = useSession()
@@ -22,11 +21,5 @@ export default function ProfilePage() {
         redirect("/login")
     }
 
-    const roleName = session.user?.role?.name
-
-    if (roleName === "provider") {
-        return <ProviderProfileDashboard />
-    }
-
-    return <AdopterProfileDashboard />
+    return <UserProfileDashboard userId={session.user.id} />
 }

@@ -17,8 +17,7 @@ export default async function DashboardPage() {
 
     const user = session.user
 
-    // ROBIN
-    
+
 
     return (
         <div className="p-8">

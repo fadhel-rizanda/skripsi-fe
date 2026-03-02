@@ -33,7 +33,7 @@ export function ReportDialog({
     onSuccess,
 }: ReportDialogProps) {
     const [notes, setNotes] = useState("");
-    const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+    const [selectedTagId, setSelectedTagId] = useState<string>("");
     const [tags, setTags] = useState<Tag[]>([]);
     const [loadingTags, setLoadingTags] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +62,7 @@ export function ReportDialog({
     const handleClose = () => {
         if (isSubmitting) return;
         setNotes("");
-        setSelectedTagIds([]);
+        setSelectedTagId("");
         onOpenChange(false);
     };
 
@@ -78,12 +78,12 @@ export function ReportDialog({
                 reference_type: referenceType,
                 reference_id: referenceId,
                 notes: notes.trim(),
-                tag_ids: selectedTagIds.length > 0 ? selectedTagIds : undefined,
+                tag_ids: selectedTagId ? [selectedTagId] : undefined,
             });
 
             toast.success("Report submitted successfully.");
             setNotes("");
-            setSelectedTagIds([]);
+            setSelectedTagId("");
             onOpenChange(false);
             onSuccess?.();
         } catch (error: unknown) {
@@ -131,13 +131,9 @@ export function ReportDialog({
                         </Label>
                         <SearchableCombobox
                             options={tags}
-                            selectedValues={selectedTagIds}
+                            selectedValues={selectedTagId ? [selectedTagId] : []}
                             onSelect={(id) => {
-                                setSelectedTagIds((prev) =>
-                                    prev.includes(id)
-                                        ? prev.filter((t) => t !== id)
-                                        : [...prev, id]
-                                );
+                                setSelectedTagId((prev) => prev === id ? "" : id);
                             }}
                             isLoading={loadingTags}
                             placeholder="Select tag..."

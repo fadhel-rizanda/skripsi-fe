@@ -2,7 +2,6 @@
 import api from "@/lib/axios";
 import { Pet, PetDetail, PetFilterState } from "@/types/pet";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
-import {Address} from "@/types/general";
 
 interface PetListParams extends PetFilterState {
   page?: number;
@@ -110,5 +109,14 @@ export const petService = {
   cancel: async (petId: string, adoptionId: string, signal?: AbortSignal) => {
     const response = await api.post(`/v1/pets/${petId}/adopt/${adoptionId}/cancel`, {signal});
     return response.data;
+  },
+
+  takedownPet: async (id: string, notes: string): Promise<void> => {
+    const encodedId = encodeURIComponent(id);
+    await api.post(`/v1/pets/${encodedId}/takedown`, { notes });
+  },
+  restorePet: async (id: string, notes: string): Promise<void> => {
+    const encodedId = encodeURIComponent(id);
+    await api.post(`/v1/pets/${encodedId}/restore`, { notes });
   },
 };

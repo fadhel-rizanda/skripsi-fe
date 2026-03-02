@@ -47,3 +47,19 @@ export interface District {
     name: string;
     regency_id: string;
 }
+
+export interface Report {
+    id: string;
+    reference_type: string;
+    reference_id: string;
+    notes: string;
+    status_id: string;
+    created_by: string | UserProfile;
+    created_at: string;
+    updated_by: string | UserProfile;
+    updated_at: string;
+
+    status: Status;
+    is_target_active: boolean;
+    tags: Tag[];
+}

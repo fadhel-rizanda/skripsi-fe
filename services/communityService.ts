@@ -26,4 +26,14 @@ export const communityService = {
         const response = await api.put(`/v1/communities/${id}`, data);
         return response.data;
     },
+
+    takedownCommunity: async (id: string, notes: string): Promise<void> => {
+        const encodedId = encodeURIComponent(id);
+        await api.post(`/v1/communities/${encodedId}/takedown`, { notes });
+    },
+
+    restoreCommunity: async (id: string, notes: string): Promise<void> => {
+        const encodedId = encodeURIComponent(id);
+        await api.post(`/v1/communities/${encodedId}/restore`, { notes });
+    },
 }

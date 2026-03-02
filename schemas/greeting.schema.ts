@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AddressSchema } from "@/schemas/address.schemas";
+import {AddressSchema} from "@/schemas/address.schema";
 
 export const AdopterGreetingSchema = z.object({
     personality_tags: z

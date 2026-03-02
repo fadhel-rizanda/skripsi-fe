@@ -27,12 +27,6 @@ import { isValidUrl } from "@/lib/utils";
 type DialogMode = "takedown" | "restore" | null;
 type ActionStatus = "idle" | "loading" | "success" | "error";
 
-// Truncate long strings for display
-function truncate(text: string, maxLen: number) {
-    if (!text) return "-";
-    return text.length > maxLen ? text.substring(0, maxLen) + "..." : text;
-}
-
 export default function AdminPostsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -147,138 +141,140 @@ export default function AdminPostsPage() {
                 />
 
                 <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white py-2 flex flex-col">
-                    <div className="overflow-x-auto min-h-[300px]">
+                    <div className="overflow-x-auto min-h-75">
                         <table className="w-full text-sm text-left">
                             <thead className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 border-b border-gray-100">
-                                <tr>
-                                    <th className="px-4 py-3">POST ID</th>
-                                    <th className="px-4 py-3">MESSAGE</th>
-                                    <th className="px-4 py-3">IMAGE</th>
-                                    <th className="px-4 py-3">TAGS</th>
-                                    <th className="px-4 py-3">USER ID</th>
-                                    <th className="px-4 py-3">CREATED AT</th>
-                                    <th className="px-4 py-3">ACTIONS</th>
-                                </tr>
+                            <tr>
+                                <th className="px-4 py-3">POST ID</th>
+                                <th className="px-4 py-3">MESSAGE</th>
+                                <th className="px-4 py-3">IMAGE</th>
+                                <th className="px-4 py-3">TAGS</th>
+                                <th className="px-4 py-3">USER ID</th>
+                                <th className="px-4 py-3">CREATED AT</th>
+                                <th className="px-4 py-3">ACTIONS</th>
+                            </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
-                                {isLoading ? (
-                                    <tr>
-                                        <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
-                                            Loading posts...
-                                        </td>
-                                    </tr>
-                                ) : posts.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
-                                            No posts found.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    posts.map((post) => {
-                                        const isActive = post.is_active !== false;
-                                        return (
-                                            <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
-                                                {/* POST ID */}
-                                                <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                    #{post.id.substring(0, 8)}...
-                                                </td>
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                                        Loading posts...
+                                    </td>
+                                </tr>
+                            ) : posts.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-6 text-center text-gray-500">
+                                        No posts found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                posts.map((post) => {
+                                    const isActive = post.is_active;
+                                    return (
+                                        <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
+                                            {/* POST ID */}
+                                            <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
+                                                <a href={`/posts/${post.id}`} className="text-blue-600 hover:underline">
+                                                    {post.id}
+                                                </a>
+                                            </td>
 
-                                                {/* MESSAGE / CONTENT */}
-                                                <td className="px-4 py-3 text-xs text-gray-500 max-w-[220px]">
+                                            {/* MESSAGE / CONTENT */}
+                                            <td className="px-4 py-3 text-xs text-gray-500 max-w-55">
                                                     <span className="line-clamp-2 leading-snug">
-                                                        {truncate(post.content || post.title, 80)}
+                                                        {post.content || post.title || "-"}
                                                     </span>
-                                                </td>
+                                            </td>
 
-                                                {/* IMAGE */}
-                                                <td className="px-4 py-3 whitespace-nowrap">
-                                                    {isValidUrl(post.attachment?.public_url ?? "") ? (
-                                                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
-                                                            <Image
-                                                                src={post.attachment!.public_url!}
-                                                                alt="post"
-                                                                fill
-                                                                sizes="48px"
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
-                                                    ) : isValidUrl(post.image_url ?? "") ? (
-                                                        <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
-                                                            <Image
-                                                                src={post.image_url!}
-                                                                alt="post"
-                                                                fill
-                                                                sizes="48px"
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
+                                            {/* IMAGE */}
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                {isValidUrl(post.attachment?.public_url ?? "") ? (
+                                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                                                        <Image
+                                                            src={post.attachment!.public_url!}
+                                                            alt="post"
+                                                            fill
+                                                            sizes="48px"
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                ) : isValidUrl(post.image_url ?? "") ? (
+                                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                                                        <Image
+                                                            src={post.image_url!}
+                                                            alt="post"
+                                                            fill
+                                                            sizes="48px"
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center">
+                                                        <ImageOff className="w-4 h-4 text-gray-300" />
+                                                    </div>
+                                                )}
+                                            </td>
+
+                                            {/* TAGS */}
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="flex flex-wrap gap-1 max-w-30">
+                                                    {post.tags && post.tags.length > 0 ? (
+                                                        post.tags.map((tag) => (
+                                                            <Badge
+                                                                key={tag.id}
+                                                                variant="secondary"
+                                                                className="bg-[#D1F2D6]/60 text-[#16A34A] hover:bg-[#D1F2D6]/80 border-none shadow-none font-medium px-2 py-0.5 text-[10px] capitalize"
+                                                            >
+                                                                {tag.name}
+                                                            </Badge>
+                                                        ))
                                                     ) : (
-                                                        <div className="w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center">
-                                                            <ImageOff className="w-4 h-4 text-gray-300" />
-                                                        </div>
+                                                        <span className="text-xs text-gray-400">-</span>
                                                     )}
-                                                </td>
+                                                </div>
+                                            </td>
 
-                                                {/* TAGS */}
-                                                <td className="px-4 py-3 whitespace-nowrap">
-                                                    <div className="flex flex-wrap gap-1 max-w-[120px]">
-                                                        {post.tags && post.tags.length > 0 ? (
-                                                            post.tags.map((tag) => (
-                                                                <Badge
-                                                                    key={tag.id}
-                                                                    variant="secondary"
-                                                                    className="bg-[#D1F2D6]/60 text-[#16A34A] hover:bg-[#D1F2D6]/80 border-none shadow-none font-medium px-2 py-0.5 text-[10px] capitalize"
-                                                                >
-                                                                    {tag.name}
-                                                                </Badge>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-xs text-gray-400">-</span>
-                                                        )}
-                                                    </div>
-                                                </td>
+                                            {/* USER ID */}
+                                            <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
+                                                {post.created_by?.id
+                                                    ? `${post.created_by.id}`
+                                                    : "-"}
+                                            </td>
 
-                                                {/* USER ID */}
-                                                <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                    {post.created_by?.id
-                                                        ? `#${post.created_by.id.substring(0, 8)}...`
-                                                        : "-"}
-                                                </td>
+                                            {/* CREATED AT */}
+                                            <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">
+                                                {new Date(post.created_at).toLocaleDateString("en-CA")}
+                                            </td>
 
-                                                {/* CREATED AT */}
-                                                <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">
-                                                    {new Date(post.created_at).toLocaleDateString("en-CA")}
-                                                </td>
-
-                                                {/* ACTIONS */}
-                                                <td className="px-4 py-3 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        {isActive && (
-                                                            <Button
-                                                                variant="destructive"
-                                                                size="sm"
-                                                                className="w-24 h-[28px] px-3 text-xs font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
-                                                                onClick={() => openConfirmDialog(post, "takedown")}
-                                                            >
-                                                                Take down
-                                                            </Button>
-                                                        )}
-                                                        {!isActive && (
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="w-24 h-[28px] px-3 text-xs font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-                                                                onClick={() => openConfirmDialog(post, "restore")}
-                                                            >
-                                                                Restore
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                )}
+                                            {/* ACTIONS */}
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    {isActive && (
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            className="w-24 h-7 px-3 text-xs font-semibold rounded-md shadow-none hover:bg-red-600/90 text-white"
+                                                            onClick={() => openConfirmDialog(post, "takedown")}
+                                                        >
+                                                            Take down
+                                                        </Button>
+                                                    )}
+                                                    {!isActive && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="w-24 h-7 px-3 text-xs font-semibold rounded-md shadow-none border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                                                            onClick={() => openConfirmDialog(post, "restore")}
+                                                        >
+                                                            Restore
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -312,7 +308,7 @@ export default function AdminPostsPage() {
                             <AlertDialogDescription asChild className="text-center text-sm text-gray-600 max-w-sm">
                                 <div>
                                     {selectedPost && (
-                                        <><strong>&ldquo;{truncate(selectedPost.title || selectedPost.content, 50)}&rdquo;</strong>{" "}</>
+                                        <><strong>&ldquo;{selectedPost.title || selectedPost.content}&rdquo;</strong>{" "}</>
                                     )}
                                     {isTakedown
                                         ? "This action can't be undone. Please make sure you really want to proceed."
@@ -372,8 +368,8 @@ export default function AdminPostsPage() {
                 successTitle={isTakedown ? "Post Taken Down" : "Post Restored"}
                 successDescription={
                     isTakedown
-                        ? `"${truncate(selectedPost?.title || selectedPost?.content || "Post", 50)}" has been successfully taken down.`
-                        : `"${truncate(selectedPost?.title || selectedPost?.content || "Post", 50)}" has been successfully restored.`
+                        ? `"${selectedPost?.title || selectedPost?.content || "Post"}" has been successfully taken down.`
+                        : `"${selectedPost?.title || selectedPost?.content || "Post"}" has been successfully restored.`
                 }
                 errorTitle="Action Failed"
                 errorDescription="An error occurred while processing the action. Please try again."

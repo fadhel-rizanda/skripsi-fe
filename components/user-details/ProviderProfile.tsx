@@ -104,8 +104,10 @@ export default function ProviderProfileDashboard() {
             const res = await petService.getPets({ page: petPage, per_page: petPerPage })
             setPets(res.data ?? [])
             setPetTotal(res.total ?? 0)
-        } catch {
-            // silently fail
+        } catch (error) {
+            toast.error("Failed to load pets.")
+            console.error("Failed to fetch provider pets:", error)
+        
         } finally {
             setIsPetsLoading(false)
         }

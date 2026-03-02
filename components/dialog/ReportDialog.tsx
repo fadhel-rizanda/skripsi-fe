@@ -46,7 +46,7 @@ export function ReportDialog({
         setLoadingTags(true);
 
         generalService
-            .getTags("type_of_animal", controller.signal)
+            .getTags("report_reason", controller.signal)
             .then((data) => setTags(data))
             .catch((err) => {
                 if (err.name !== "CanceledError") {

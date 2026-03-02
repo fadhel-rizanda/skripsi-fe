@@ -46,24 +46,28 @@ export default function ProviderProfileDashboard() {
     })
 
     // Fetch profile & populate form
+    function resetFormFromProfile(data: typeof profile) {
+        if (!data) return
+        const addr = data.address
+        form.reset({
+            name: data.name ?? "",
+            phone: data.phone ?? "",
+            about_me: data.about_me ?? "",
+            street: addr?.street ?? data.street ?? "",
+            city: addr?.city ?? "",
+            state: addr?.state ?? "",
+            zip_code: addr?.zip_code ?? "",
+            country: addr?.country ?? "",
+        })
+    }
+
     useEffect(() => {
         const fetchProfile = async () => {
             if (!session?.user?.id) return
             try {
                 const data = await userService.getUserById(session.user.id)
                 setProfile(data)
-
-                const addr = data.address
-                form.reset({
-                    name: data.name ?? "",
-                    phone: data.phone ?? "",
-                    about_me: data.about_me ?? "",
-                    street: addr?.street ?? data.street ?? "",
-                    city: addr?.city ?? "",
-                    state: addr?.state ?? "",
-                    zip_code: addr?.zip_code ?? "",
-                    country: addr?.country ?? "",
-                })
+                resetFormFromProfile(data)
             } catch {
                 // silently fail
             } finally {
@@ -101,6 +105,7 @@ export default function ProviderProfileDashboard() {
             await userService.putUsers(values)
             const refreshed = await userService.getUserById(session.user.id)
             setProfile(refreshed)
+            resetFormFromProfile(refreshed)
             setIsEditing(false)
             toast.success("Profile updated successfully!")
         } catch {
@@ -109,18 +114,7 @@ export default function ProviderProfileDashboard() {
     }
 
     function handleCancel() {
-        if (!profile) return
-        const addr = profile.address
-        form.reset({
-            name: profile.name ?? "",
-            phone: profile.phone ?? "",
-            about_me: profile.about_me ?? "",
-            street: addr?.street ?? profile.street ?? "",
-            city: addr?.city ?? "",
-            state: addr?.state ?? "",
-            zip_code: addr?.zip_code ?? "",
-            country: addr?.country ?? "",
-        })
+        resetFormFromProfile(profile)
         setIsEditing(false)
     }
 

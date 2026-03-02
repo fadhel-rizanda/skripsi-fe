@@ -72,31 +72,35 @@ export default function AdopterProfileDashboard() {
     })
 
     // Fetch profile & populate form
+    function resetFormFromProfile(data: typeof profile) {
+        if (!data) return
+        const addr = data.address
+        form.reset({
+            name: data.name ?? "",
+            phone: data.phone ?? "",
+            about_me: data.about_me ?? "",
+            street: addr?.street ?? data.street ?? "",
+            city: addr?.city ?? "",
+            state: addr?.state ?? "",
+            zip_code: addr?.zip_code ?? "",
+            country: addr?.country ?? "",
+            personality: data.personality ?? "",
+            pet_experience: data.pet_experience ?? "",
+            pet_preferences: data.pet_preferences ?? "",
+            personality_tags: data.personality_tags?.map((t: { id: string }) => t.id) ?? [],
+            pet_experience_tags: data.pet_experience_tags?.map((t: { id: string }) => t.id) ?? [],
+            pet_preferences_tags: data.pet_preferences_tags?.map((t: { id: string }) => t.id) ?? [],
+            open_to_special_needs: data.open_to_special_needs ?? false,
+        })
+    }
+
     useEffect(() => {
         const fetchProfile = async () => {
             if (!session?.user?.id) return
             try {
                 const data = await userService.getUserById(session.user.id)
                 setProfile(data)
-
-                const addr = data.address
-                form.reset({
-                    name: data.name ?? "",
-                    phone: data.phone ?? "",
-                    about_me: data.about_me ?? "",
-                    street: addr?.street ?? data.street ?? "",
-                    city: addr?.city ?? "",
-                    state: addr?.state ?? "",
-                    zip_code: addr?.zip_code ?? "",
-                    country: addr?.country ?? "",
-                    personality: data.personality ?? "",
-                    pet_experience: data.pet_experience ?? "",
-                    pet_preferences: data.pet_preferences ?? "",
-                    personality_tags: data.personality_tags?.map((t: { id: string }) => t.id) ?? [],
-                    pet_experience_tags: data.pet_experience_tags?.map((t: { id: string }) => t.id) ?? [],
-                    pet_preferences_tags: data.pet_preferences_tags?.map((t: { id: string }) => t.id) ?? [],
-                    open_to_special_needs: data.open_to_special_needs ?? false,
-                })
+                resetFormFromProfile(data)
             } catch {
                 // silently fail
             } finally {
@@ -116,6 +120,7 @@ export default function AdopterProfileDashboard() {
             await userService.putUsers(values)
             const refreshed = await userService.getUserById(session.user.id)
             setProfile(refreshed)
+            resetFormFromProfile(refreshed)
             setIsEditing(false)
             toast.success("Profile updated successfully!")
         } catch {
@@ -124,25 +129,7 @@ export default function AdopterProfileDashboard() {
     }
 
     function handleCancel() {
-        if (!profile) return
-        const addr = profile.address
-        form.reset({
-            name: profile.name ?? "",
-            phone: profile.phone ?? "",
-            about_me: profile.about_me ?? "",
-            street: addr?.street ?? profile.street ?? "",
-            city: addr?.city ?? "",
-            state: addr?.state ?? "",
-            zip_code: addr?.zip_code ?? "",
-            country: addr?.country ?? "",
-            personality: profile.personality ?? "",
-            pet_experience: profile.pet_experience ?? "",
-            pet_preferences: profile.pet_preferences ?? "",
-            personality_tags: profile.personality_tags?.map(t => t.id) ?? [],
-            pet_experience_tags: profile.pet_experience_tags?.map(t => t.id) ?? [],
-            pet_preferences_tags: profile.pet_preferences_tags?.map(t => t.id) ?? [],
-            open_to_special_needs: profile.open_to_special_needs ?? false,
-        })
+        resetFormFromProfile(profile)
         setIsEditing(false)
     }
 

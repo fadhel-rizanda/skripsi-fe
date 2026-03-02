@@ -35,18 +35,15 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
 
     useEffect(() => {
         onSearchChange(debouncedSearch);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedSearch]);
+    }, [debouncedSearch, onSearchChange]);
 
     useEffect(() => {
         onModelChange(model);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [model]);
+    }, [model, onModelChange]);
 
     useEffect(() => {
         onTagChange(tagId);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tagId]);
+    }, [tagId, onTagChange]);
 
     const handleReset = () => {
         setSearch("");

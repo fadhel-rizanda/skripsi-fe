@@ -28,10 +28,12 @@ export const communityService = {
     },
 
     takedownCommunity: async (id: string, notes: string): Promise<void> => {
-        await api.post(`/v1/communities/${id}/takedown`, { notes });
+        const encodedId = encodeURIComponent(id);
+        await api.post(`/v1/communities/${encodedId}/takedown`, { notes });
     },
 
     restoreCommunity: async (id: string, notes: string): Promise<void> => {
-        await api.post(`/v1/communities/${id}/restore`, { notes });
+        const encodedId = encodeURIComponent(id);
+        await api.post(`/v1/communities/${encodedId}/restore`, { notes });
     },
 }

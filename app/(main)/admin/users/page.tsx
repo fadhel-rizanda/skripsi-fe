@@ -99,8 +99,9 @@ export default function AdminUsersPage() {
             }
             setActionStatus("success");
             fetchUsers();
-        } catch (error) {
-            console.error("Action failed:", error);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
+            console.error("Action failed:", errorMessage);
             setActionStatus("error");
         }
     };

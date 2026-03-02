@@ -36,6 +36,8 @@ async function dispatchTakedown(referenceType: string, referenceId: string, note
         case "POST":      return postService.takedownPost(referenceId, notes);
         case "COMMUNITY": return communityService.takedownCommunity(referenceId, notes);
         case "PETS":      return petService.takedownPet(referenceId, notes);
+        default:
+            throw new Error(`Unsupported reference type for takedown: ${referenceType}`);
     }
 }
 
@@ -101,8 +103,9 @@ export default function AdminReportsPage() {
             });
             setReports(response.data);
             setTotalReports(response.total || response.data.length);
-        } catch (error) {
-            console.error("Failed to fetch reports:", error);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
+            console.error("Failed to fetch reports:", errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -137,8 +140,9 @@ export default function AdminReportsPage() {
             }
             setActionStatus("success");
             fetchReports();
-        } catch (error) {
-            console.error("Action failed:", error);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
+            console.error("Action failed:", errorMessage);
             setActionStatus("error");
         }
     };
@@ -175,7 +179,7 @@ export default function AdminReportsPage() {
             <div className="max-w-4xl mx-auto flex flex-col gap-6">
                 <div>
                     <h1 className="text-[2rem] font-bold text-gray-900 tracking-tight">Reports</h1>
-                    <p className="text-gray-500 mt-1">Manage and monitor all adoption applications.</p>
+                    <p className="text-gray-500 mt-1">Manage and take action on user-submitted reports.</p>
                 </div>
 
                 <ReportFilterBar

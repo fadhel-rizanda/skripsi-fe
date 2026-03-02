@@ -112,9 +112,11 @@ export const petService = {
   },
 
   takedownPet: async (id: string, notes: string): Promise<void> => {
-    await api.post(`/v1/pets/${id}/takedown`, { notes });
+    const encodedId = encodeURIComponent(id);
+    await api.post(`/v1/pets/${encodedId}/takedown`, { notes });
   },
   restorePet: async (id: string, notes: string): Promise<void> => {
-    await api.post(`/v1/pets/${id}/restore`, { notes });
+    const encodedId = encodeURIComponent(id);
+    await api.post(`/v1/pets/${encodedId}/restore`, { notes });
   },
 };

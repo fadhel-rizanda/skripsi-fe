@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { generalService } from "@/services/generalServices";
 import { userService } from "@/services/userServices";
+import ChatButton from "@/components/button/ChatButton";
 // Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
@@ -469,13 +470,13 @@ export default function DetailPetPage() {
                     Edit Information
                   </Button>
                 ) : (
-                  <Button
+                  <ChatButton
+                    targetUserId={pet.user_id}
+                    label="Chat with Provider"
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                  >
-                    <MessageCircle className="mr-2 h-5 w-5" />
-                    Chat with Provider
-                  </Button>
+                    iconClassName="mr-2 h-5 w-5 text-slate-800"
+                  />
                 )}
               </div>
             </CardContent>

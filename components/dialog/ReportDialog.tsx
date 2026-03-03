@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect, ReactNode} from "react";
 import { Flag, XCircle, Loader2 } from "lucide-react";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
-    DialogTitle,
+    DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,27 +16,28 @@ import { reportServices } from "@/services/reportServices";
 import { generalService } from "@/services/generalServices";
 import { Tag } from "@/types/general";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
+import { ActionDialog } from "@/components/dialog/ActionDialog";
 
 interface ReportDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
     referenceType: string;
     referenceId: string;
     onSuccess?: () => void;
+    trigger?: ReactNode;
 }
 
 export function ReportDialog({
-    open,
-    onOpenChange,
     referenceType,
     referenceId,
     onSuccess,
+    trigger,
 }: ReportDialogProps) {
+    const [open, setOpen] = useState(false);
     const [notes, setNotes] = useState("");
     const [selectedTagId, setSelectedTagId] = useState<string>("");
     const [tags, setTags] = useState<Tag[]>([]);
     const [loadingTags, setLoadingTags] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // Fetch report tags when dialog opens
     useEffect(() => {
@@ -63,15 +64,24 @@ export function ReportDialog({
         if (isSubmitting) return;
         setNotes("");
         setSelectedTagId("");
-        onOpenChange(false);
+        setIsConfirmOpen(false);
+        setOpen(false);
     };
 
-    const handleSubmit = async () => {
+    const onReportClick = () => {
         if (!notes.trim()) {
             toast.error("Notes are required.");
             return;
         }
 
+        if (!selectedTagId) {
+            toast.error("Please select a report tag.");
+            return;
+        }
+        setIsConfirmOpen(true);
+    };
+
+    const executeReport = async () => {
         setIsSubmitting(true);
         try {
             await reportServices.createReport({
@@ -80,98 +90,115 @@ export function ReportDialog({
                 notes: notes.trim(),
                 tag_ids: selectedTagId ? [selectedTagId] : undefined,
             });
-
-            toast.success("Report submitted successfully.");
-            setNotes("");
-            setSelectedTagId("");
-            onOpenChange(false);
             onSuccess?.();
-        } catch (error: unknown) {
-            const err = error as { response?: { data?: { message?: string } } };
-            const message =
-                err?.response?.data?.message ?? "Failed to submit report. Please try again.";
+        } catch (error: any) {
+            const message = error?.response?.data?.message ?? "Failed to submit report.";
             toast.error(message);
+            throw error;
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md rounded-2xl p-6" showCloseButton={false}>
-                {/* Header */}
-                <DialogHeader className="space-y-1 pb-4 mb-4 border-b border-gray-200">
-                    <DialogTitle className="text-lg font-semibold">
-                        Reports
-                    </DialogTitle>
-                </DialogHeader>
+        <>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                    {trigger ?? (
+                        <Button variant="ghost" size="sm" className="text-red-600 gap-1.5 px-2">
+                            <Flag className="h-6 w-6" />
+                            <span className="text-base font-medium">Report</span>
+                        </Button>
+                    )}
+                </DialogTrigger>
 
-                {/* Body */}
-                <div className="space-y-4">
-                    {/* Notes Field */}
-                    <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">
-                            Notes
-                        </Label>
-                        <Textarea
-                            id="report-notes"
-                            placeholder="Please provide details about why you are reporting this post."
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            rows={4}
-                            disabled={isSubmitting}
-                            className="resize-none rounded-lg bg-slate-50 w-full text-sm text-gray-700 placeholder:text-gray-400"
-                        />
+                <DialogContent className="sm:max-w-md rounded-2xl p-6" showCloseButton={false}>
+                    {/* Header */}
+                    <DialogHeader className="space-y-1 pb-2 border-b border-gray-200">
+                        <DialogTitle className="text-lg font-semibold">
+                            Reports
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {/* Body */}
+                    <div className="space-y-4">
+                        {/* Notes Field */}
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                Notes*
+                            </Label>
+                            <Textarea
+                                id="report-notes"
+                                placeholder="Please provide details about why you are reporting this post."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                rows={4}
+                                disabled={isSubmitting}
+                                className="resize-none rounded-lg bg-slate-50 w-full text-sm text-gray-700 placeholder:text-gray-400"
+                            />
+                        </div>
+
+                        {/* Tags Field */}
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                Tags*
+                            </Label>
+                            <SearchableCombobox
+                                options={tags}
+                                selectedValues={selectedTagId ? [selectedTagId] : []}
+                                onSelect={(id) => {
+                                    setSelectedTagId((prev) => prev === id ? "" : id);
+                                }}
+                                isLoading={loadingTags}
+                                placeholder="Select tag..."
+                                emptyMessage="No tags found."
+                                mode="single"
+                                disabled={isSubmitting}
+                                className="w-full h-10 rounded-lg"
+                            />
+                        </div>
                     </div>
 
-                    {/* Tags Field */}
-                    <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-gray-700">
-                            Tags
-                        </Label>
-                        <SearchableCombobox
-                            options={tags}
-                            selectedValues={selectedTagId ? [selectedTagId] : []}
-                            onSelect={(id) => {
-                                setSelectedTagId((prev) => prev === id ? "" : id);
-                            }}
-                            isLoading={loadingTags}
-                            placeholder="Select tag..."
-                            emptyMessage="No tags found."
-                            mode="single"
+                    {/* Footer */}
+                    <div className="flex gap-3 pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleClose}
                             disabled={isSubmitting}
-                            className="w-full h-10 rounded-lg"
-                        />
+                            className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-semibold gap-2"
+                        >
+                            <XCircle className="h-4 w-4"/>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={onReportClick}
+                            disabled={isSubmitting || !notes.trim() || !selectedTagId}
+                            className="flex-1 rounded-xl bg-[#19E619] hover:bg-green-500 text-black font-semibold gap-2 disabled:opacity-50"
+                        >
+                            {isSubmitting ? (
+                                <Loader2 className="h-4 w-4 animate-spin"/>
+                            ) : (
+                                <Flag className="h-4 w-4"/>
+                            )}
+                            Report
+                        </Button>
                     </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex gap-3 pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                        className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-semibold gap-2"
-                    >
-                        <XCircle className="h-4 w-4" />
-                        Cancel
-                    </Button>
-                    <Button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !notes.trim()}
-                        className="flex-1 rounded-xl bg-[#19E619] hover:bg-green-500 text-black font-semibold gap-2 disabled:opacity-50"
-                    >
-                        {isSubmitting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Flag className="h-4 w-4" />
-                        )}
-                        Report
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+            <ActionDialog
+                open={isConfirmOpen}
+                onOpenChange={setIsConfirmOpen}
+                onConfirm={executeReport}
+                onContinue={handleClose}
+                title="Submit Report?"
+                description="Are you sure you want to report this? This action will be reviewed by our moderators."
+                confirmText="Yes, Submit Report"
+                cancelText="Check Again"
+                successTitle="Report Submitted"
+                successDescription="Thank you for keeping our community safe. We will review your report shortly."
+            />
+        </>
     );
 }

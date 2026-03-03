@@ -1,15 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ThumbsUp, MessageSquare, Flag, Pencil } from "lucide-react";
+import { ThumbsUp, MessageSquare, Pencil } from "lucide-react";
 import { Post } from "@/types/post";
 import { useSession } from "next-auth/react";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 interface PostCardProps {
   post: Post;
@@ -19,21 +16,9 @@ interface PostCardProps {
 
 export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
   const { data: session } = useSession();
-  const router = useRouter();
-  const [reportOpen, setReportOpen] = useState(false);
-
-  const handleReportClick = () => {
-    if (!session) {
-      toast.error("You must be logged in to report a post.");
-      router.push("/login?callbackUrl=/community/all-post");
-      return;
-    }
-    setReportOpen(true);
-  };
 
   return (
-    <>
-      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow p-4 md:p-6 flex flex-col gap-1">
+      <Card className="rounded-2xl border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow p-4 flex flex-col gap-1">
         <div className="flex gap-4">
           {/* Avatar Section */}
           <div className="shrink-0">
@@ -83,8 +68,8 @@ export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
             )}
           </div>
         </div>
-        <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-          <div className="flex gap-4 md:gap-6">
+        <div className="flex flex-wrap justify-between items-center pt-3 border-t border-gray-300">
+          <div className="flex flex-wrap gap-4 md:gap-6">
             <Button
               variant="ghost"
               size="sm"
@@ -100,15 +85,10 @@ export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
               <MessageSquare className="h-6 w-6" />
               <span className="text-base font-medium">{post.comments_count} Comments</span>
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5 px-2"
-              onClick={handleReportClick}
-            >
-              <Flag className="h-6 w-6" />
-              <span className="text-base font-medium">Report</span>
-            </Button>
+            <ReportDialog
+                referenceType="post"
+                referenceId={post.id}
+            />
           </div>
           <Link href={`/community/all-post/${post.id}`}>
             <Button variant="ghost" size="sm" className="text-black hover:text-gray-900 font-medium text-base">
@@ -117,14 +97,5 @@ export function PostCard({ post, onLike, formatRelativeTime }: PostCardProps) {
           </Link>
         </div>
       </Card>
-
-      {/* Report Dialog */}
-      <ReportDialog
-        open={reportOpen}
-        onOpenChange={setReportOpen}
-        referenceType="post"
-        referenceId={post.id}
-      />
-    </>
   );
 }

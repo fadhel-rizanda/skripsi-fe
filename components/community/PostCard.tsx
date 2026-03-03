@@ -15,11 +15,11 @@ import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 interface PostCardProps {
     post: Post;
     onLike: (postId: string) => void;
-    onEditSuccess?: () => void;
+    onRefresh?: () => void;
     formatRelativeTime: (dateString: string) => string;
 }
 
-export function PostCard({post, onLike, onEditSuccess, formatRelativeTime}: PostCardProps) {
+export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCardProps) {
     const {data: session} = useSession();
     const [editOpen, setEditOpen] = useState(false);
 
@@ -60,7 +60,7 @@ export function PostCard({post, onLike, onEditSuccess, formatRelativeTime}: Post
                                     onOpenChangeAction={setEditOpen}
                                     onSuccessAction={() => {
                                         setEditOpen(false);
-                                        onEditSuccess?.();
+                                        onRefresh?.();
                                     }}
                                 />
                             </>
@@ -136,7 +136,7 @@ export function PostCard({post, onLike, onEditSuccess, formatRelativeTime}: Post
                 </div>
                 <CommentFormDialog
                     postId={post.id}
-                    onSuccessAction={() => onEditSuccess?.()}
+                    onSuccessAction={() => onRefresh?.()}
                     trigger={
                         <Button
                             variant="ghost"

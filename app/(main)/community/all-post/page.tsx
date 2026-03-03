@@ -198,7 +198,7 @@ export default function AllPostPage() {
                                 post={post}
                                 onLike={handleLikePost}
                                 formatRelativeTime={formatRelativeTime}
-                                onEditSuccess={() => {
+                                onRefresh={() => {
                                     setRefreshKey(prevState => prevState + 1)
                                 }}
                             />

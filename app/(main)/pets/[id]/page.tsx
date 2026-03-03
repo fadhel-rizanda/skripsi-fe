@@ -29,9 +29,11 @@ import {
   Cake,
   FileText,
   Download,
+  MapPin,
+  Link2,
 } from "lucide-react";
-import {generalService} from "@/services/generalServices";
-import {userService} from "@/services/userServices";
+import { generalService } from "@/services/generalServices";
+import { userService } from "@/services/userServices";
 // Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
@@ -131,7 +133,7 @@ export default function DetailPetPage() {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
       const { channels } = await userService.userChannels();
-      await update({channels});
+      await update({ channels });
       toast.success("Adoption request sent successfully!");
       router.push(`/adoption/${response.data.id}`);
     } catch (error: unknown) {
@@ -393,6 +395,59 @@ export default function DetailPetPage() {
                   </div>
                 </div>
               )}
+
+              {pet.address && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-slate-900">Address</h3>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="p-2 rounded-lg bg-green-100 flex-none">
+                        <MapPin className="h-4 w-4 text-green-600" />
+                      </span>
+                      <span className="leading-relaxed break-words overflow-hidden">
+                        {[
+                          pet.address.street,
+                          pet.address.district?.name,
+                          pet.address.regency?.name,
+                          pet.address.province?.name,
+                          pet.address.zip_code,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </div>
+
+                    {pet.address.link && (
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <span className="p-2 rounded-lg bg-green-100 flex-none">
+                          <Link2 className="h-4 w-4 text-green-600" />
+                        </span>
+                        <a
+                          href={pet.address.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-800 font-medium underline underline-offset-2 break-all overflow-hidden"
+                        >
+                          View Location on Maps
+                        </a>
+                      </div>
+                    )}
+
+                    {pet.address.notes && (
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <span className="p-2 rounded-lg bg-green-100 flex-none">
+                          <FileText className="h-4 w-4 text-green-600" />
+                        </span>
+                        <span className="leading-relaxed italic break-words overflow-hidden">
+                          {pet.address.notes}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button

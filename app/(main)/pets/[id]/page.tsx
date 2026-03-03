@@ -418,7 +418,7 @@ export default function DetailPetPage() {
                       </span>
                     </div>
 
-                    {pet.address.link && (
+                    {pet.address.link && isValidUrl(pet.address.link) && (
                       <div className="flex items-center gap-3 text-slate-600">
                         <span className="p-2 rounded-lg bg-green-100 flex-none">
                           <Link2 className="h-4 w-4 text-green-600" />

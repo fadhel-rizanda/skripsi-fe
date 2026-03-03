@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useTagsOptions } from "@/hooks/useFilterOptions";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 interface CommunityFiltersProps {
     searchQuery: string;
@@ -35,7 +36,7 @@ export function CommunityFilters({
         setSearch: setTagSearch,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags
-    } = useTagsOptions("physique");
+    } = useTagsOptions(TAG_TYPE.PET.PHYSIQUE);
 
     return (
         <div className="w-full flex flex-col space-y-4 items-center">

@@ -8,9 +8,9 @@ export const CreatePostSchema = z.object({
     content: z
         .string()
         .min(1, { message: "Content is required" }),
-    community_id: z.string().uuid().optional(),
-    tag_ids: z.array(z.string().uuid()).optional(),
-    attachment_id: z.string().uuid().optional(),
+    community_id: z.uuid().optional(),
+    tag_ids: z.array(z.uuid()).min(1, { message: "At least one tag is required" }),
+    attachment_id: z.uuid().optional(),
 });
 
 export const UpdatePostSchema = CreatePostSchema.partial();

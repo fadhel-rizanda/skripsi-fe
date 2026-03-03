@@ -4,6 +4,7 @@ import { useTagsOptions } from "@/hooks/useFilterOptions";
 import { SearchInput, FilterSelect, type FilterOption } from ".";
 import { Button } from "@/components/ui/button";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 const MODEL_OPTIONS: FilterOption[] = [
     { value: "user", label: "User" },
@@ -29,7 +30,7 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
         setSearch: setSearchTag,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags,
-    } = useTagsOptions("report");
+    } = useTagsOptions(TAG_TYPE.REPORT);
 
     const debouncedSearch = useDebounce(search, 500);
 

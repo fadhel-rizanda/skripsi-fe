@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, PenSquare } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { CommunityPageLayout } from "../layout";
@@ -14,16 +11,14 @@ import { postService, GetPostsParams } from "@/services/postServices";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
-import { Button } from "@/components/ui/button";
 import {Post} from "@/types/post";
+import PostFormDialog from "@/components/dialog/PostFormDialog";
 
 export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
-
-    const { data: session } = useSession();
-    const router = useRouter();
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -99,17 +94,7 @@ export default function AllPostPage() {
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page]);
-
-    const handleCreatePost = () => {
-        if (!session) {
-            toast.error("You must be logged in to create a post.");
-            router.push("/login?callbackUrl=/community/all-post");
-            return;
-        }
-
-        router.push("/community/create-post");
-    };
+    }, [searchQuery, sortBy, filterTag, pagination.current_page, pagination.per_page, refreshKey]);
 
     const handleLikePost = async (postId: string) => {
         try {
@@ -172,13 +157,12 @@ export default function AllPostPage() {
                     setFilterTag={setFilterTag}
                 />
                 <div className="flex justify-end pt-6 w-full max-w-3xl">
-                    <Button
-                        onClick={handleCreatePost}
-                        className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold"
-                    >
-                        <PenSquare  />
-                        Create Post
-                    </Button>
+                    <PostFormDialog
+                        mode={'create'}
+                        onSuccessAction={() => {
+                            setRefreshKey(prevState => prevState + 1)
+                        }}
+                    />
                 </div>
             </CommunityPageLayout>
 
@@ -214,6 +198,9 @@ export default function AllPostPage() {
                                 post={post}
                                 onLike={handleLikePost}
                                 formatRelativeTime={formatRelativeTime}
+                                onRefresh={() => {
+                                    setRefreshKey(prevState => prevState + 1)
+                                }}
                             />
                         ))
                     )}

@@ -5,6 +5,7 @@ import {useStatusesOptions, useTagsOptions} from "@/hooks/useFilterOptions";
 import {AdoptionFilterState} from "@/types";
 import {Button} from "@/components/ui/button";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 
 type AdoptionFilterBarProps = {
@@ -30,7 +31,7 @@ export function AdoptionFilterBar({onFilterChange}: AdoptionFilterBarProps) {
         setSearch: setStageSearch,
         loadMore: loadMoreStage,
         hasMore: hasMoreStage
-    } = useTagsOptions("adoption.stage");
+    } = useTagsOptions(TAG_TYPE.ADOPTION.STAGE);
 
     // Debounce search input to avoid excessive API calls
     const debouncedSearch = useDebounce(search, 500);

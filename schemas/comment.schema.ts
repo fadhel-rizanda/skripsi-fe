@@ -5,7 +5,6 @@ export const CreateCommentSchema = z.object({
         .string()
         .min(1, { message: "Content is required" })
         .max(10000, { message: "Content must be less than 10000 characters" }),
-    post_id: z.string().uuid(),
     parent_id: z.string().uuid().optional(),
 });
 

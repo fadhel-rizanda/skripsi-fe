@@ -13,6 +13,7 @@ import { requirementServices } from "@/services/adoptionServices";
 import { Requirement } from "@/types/adoption";
 import { useTagsOptions } from "@/hooks/useFilterOptions";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 interface Props {
     adoptionId: string;
@@ -30,7 +31,7 @@ export default function UpdateRequirementForm({ adoptionId, requirement, onSucce
         setSearch: setRequirementSearch,
         loadMore: loadMoreRequirement,
         hasMore: hasMoreRequirement,
-    } = useTagsOptions("requirement");
+    } = useTagsOptions(TAG_TYPE.ADOPTION.REQUIREMENT);
 
     const form = useForm<UpdateRequirementInput>({
         resolver: zodResolver(UpdateRequirementSchema),

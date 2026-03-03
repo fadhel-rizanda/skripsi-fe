@@ -39,6 +39,7 @@ import {genderOptions, PetGender, PetSize, sizeOptions} from "@/types/pet";
 import {Attachment} from "@/types/attachment";
 import {cn} from "@/lib/utils";
 import {Home, MapPin} from "lucide-react";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 type PetFormProps = {
     mode: "create" | "edit"
@@ -62,7 +63,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         setSearch: setPhysiqueSearch,
         loadMore: loadMorePhysique,
         hasMore: hasMorePhysique
-    } = useTagsOptions("physique");
+    } = useTagsOptions(TAG_TYPE.PET.PHYSIQUE);
 
     const {
         options: personalityTags,
@@ -70,7 +71,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         setSearch: setPersonalitySearch,
         loadMore: loadMorePersonality,
         hasMore: hasMorePersonality
-    } = useTagsOptions("personality");
+    } = useTagsOptions(TAG_TYPE.PET.PERSONALITY);
 
     const {
         options: typeTags,
@@ -78,7 +79,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         setSearch: setTypeSearch,
         loadMore: loadMoreType,
         hasMore: hasMoreType
-    } = useTagsOptions("type_of_animal");
+    } = useTagsOptions(TAG_TYPE.GENERAL.TYPE_OF_ANIMAL);
 
     const form = useForm({
         resolver: zodResolver(CreatePetSchema),

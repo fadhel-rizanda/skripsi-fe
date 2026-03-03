@@ -448,8 +448,6 @@ export default function DetailPetPage() {
                 </div>
               )}
 
-
-
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
                   className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"

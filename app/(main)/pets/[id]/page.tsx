@@ -469,7 +469,7 @@ export default function DetailPetPage() {
                   </Button>
                 ) : (
                   <ChatButton
-                    targetUserId={pet.user_id}
+                    targetUserId={pet.user_id ?? ""}
                     label="Chat with Provider"
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"

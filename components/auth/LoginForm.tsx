@@ -57,7 +57,7 @@ export default function LoginForm() {
         throw new Error(result.error)
       }
 
-      router.replace("/dashboard")
+      router.replace("/pets")
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")

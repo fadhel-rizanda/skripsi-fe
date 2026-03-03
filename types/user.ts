@@ -1,3 +1,5 @@
+import { Address, Tag } from "@/types/general";
+
 export interface UserProfile {
     id: string
     name: string
@@ -11,25 +13,6 @@ export interface UserProfile {
     phone: string
     is_active: boolean
 }
-
-export interface Tag {
-    id: string
-    name: string
-    type?: string
-    color_code?: string | null
-}
-
-export interface UserAddress {
-    id?: string
-    street?: string
-    city?: string
-    state?: string
-    zip_code?: string
-    country?: string
-    notes?: string
-    link?: string
-}
-
 export interface UserDetail {
     id: string
     name: string
@@ -38,7 +21,7 @@ export interface UserDetail {
     about_me?: string
     avatar?: string
     street?: string
-    address?: UserAddress
+    address?: Address
     role_name: string
     personality?: string
     pet_experience?: string

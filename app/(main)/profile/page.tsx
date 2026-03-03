@@ -3,8 +3,9 @@
 import { useSession } from "next-auth/react"
 import { redirect } from "next/navigation"
 import { Icon } from "@iconify/react"
-import UserProfileDashboard from "@/components/user-details/UserProfileDashboard"
 
+// Own profile shortcut — requires session to know whose profile to load.
+// Redirects to /profile/{id} which is publicly accessible.
 export default function ProfilePage() {
     const { data: session, status } = useSession()
 
@@ -21,5 +22,5 @@ export default function ProfilePage() {
         redirect("/login")
     }
 
-    return <UserProfileDashboard userId={session.user.id} />
+    redirect(`/profile/${session.user.id}`)
 }

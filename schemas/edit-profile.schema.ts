@@ -10,10 +10,12 @@ const baseProfileFields = {
     about_me: optionalString(1000),
     // Address
     street: optionalString(500),
-    city: optionalString(100),
-    state: optionalString(100),
+    province_id: optionalString(100),
+    regency_id: optionalString(100),
+    district_id: optionalString(100),
     zip_code: optionalString(20),
-    country: optionalString(100),
+    notes: optionalString(500),
+    link: optionalString(500),
 };
 
 // Provider only needs base fields
@@ -28,7 +30,7 @@ export const AdopterProfileSchema = z.object({
     pet_experience: optionalString(1000),
     pet_preferences: optionalString(1000),
     personality_tags: z.array(z.string().uuid()),
-    pet_experience_tags: z.array(z.string().uuid()),
+    pet_experience_tags: z.array(z.string()),
     pet_preferences_tags: z.array(z.string().uuid()),
     open_to_special_needs: z.boolean(),
 });

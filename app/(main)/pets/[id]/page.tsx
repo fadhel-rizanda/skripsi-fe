@@ -424,7 +424,7 @@ export default function DetailPetPage() {
                           <Link2 className="h-4 w-4 text-green-600" />
                         </span>
                         <a
-                          href={pet.address.link}
+href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.address.link : '#'} /* Or use a dedicated URL validation library */
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-800 font-medium underline underline-offset-2 break-all overflow-hidden"

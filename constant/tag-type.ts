@@ -11,7 +11,11 @@ export const TAG_TYPE = {
   },
   ADOPTION: {
     STAGE: "adoption.stage",
+    REQUIREMENT: "requirement",
   },
+  COMMUNITY: "community",
+  POST: "post",
+  REPORT: "report",
 } as const;
 
 export type TagType = typeof TAG_TYPE[keyof typeof TAG_TYPE];

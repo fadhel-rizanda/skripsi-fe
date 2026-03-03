@@ -16,4 +16,5 @@ export interface Post {
     created_by: UserProfile;
     is_liked: boolean;
     is_active: boolean;
+    community_id?: string;
 }

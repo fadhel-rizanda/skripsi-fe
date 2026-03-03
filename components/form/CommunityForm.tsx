@@ -34,6 +34,7 @@ import {communityService} from "@/services/communityService";
 import {useSession} from "next-auth/react";
 import {cn} from "@/lib/utils";
 import {Home, MapPin} from "lucide-react";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 type CommunityFormProps = {
     mode: "create" | "edit"
@@ -56,7 +57,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         setSearch: setCommunitySearch,
         loadMore: loadMoreCommunityTags,
         hasMore: hasMoreCommunityTags
-    } = useTagsOptions("community");
+    } = useTagsOptions(TAG_TYPE.COMMUNITY);
 
     const {
         options: usersOptions,

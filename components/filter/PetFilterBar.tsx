@@ -5,6 +5,7 @@ import {useTagsOptions} from "@/hooks/useFilterOptions";
 import { SearchInput, FilterSelect, type FilterOption } from ".";
 import {Button} from "@/components/ui/button";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 // Tambahkan tipe FilterState dan props
 type FilterState = {
@@ -31,14 +32,14 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
       setSearch: setSearchType,
     loadMore: loadMoreTypes,
     hasMore: hasMoreTypes
-  } = useTagsOptions("type_of_animal");
+  } = useTagsOptions(TAG_TYPE.GENERAL.TYPE_OF_ANIMAL);
   const {
     options: tagPersonalities,
     isLoading: isLoadingTags,
     setSearch: setSearchTagPersonality,
     loadMore: loadMoreTags,
     hasMore: hasMoreTags
-  } = useTagsOptions("personality");
+} = useTagsOptions(TAG_TYPE.PET.PERSONALITY);
 
   const ageOptions: FilterOption[] = AGE_RANGES.map((range) => ({
     value: range.value,

@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useTagsOptions } from "@/hooks/useFilterOptions";
+import {TAG_TYPE} from "@/constant/tag-type";
 
 interface PostFiltersProps {
     searchQuery: string;
@@ -35,7 +36,7 @@ export function PostFilters({
         setSearch: setTagSearch,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags
-    } = useTagsOptions("type_of_animal");
+    } = useTagsOptions(TAG_TYPE.GENERAL.TYPE_OF_ANIMAL);
 
     return (
         <div className="w-full flex flex-col space-y-4 items-center">

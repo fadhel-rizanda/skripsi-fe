@@ -26,8 +26,6 @@ export interface Pet {
 
     address_id?: string;
     address?: Address;
-    provider_id?: string;
-    adopter_id?: string;
 }
 
 export type PetDetail = Pet;

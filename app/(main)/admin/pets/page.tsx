@@ -238,8 +238,8 @@ export default function AdminPetsPage() {
 
                                             {/* PROVIDER ID */}
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                <a href={`/users/${pet.provider_id}`} className="text-blue-600 hover:underline">
-                                                    {pet.provider_id ? `${pet.provider_id}` : "-"}
+                                                <a href={`/users/${pet.user_id}`} className="text-blue-600 hover:underline">
+                                                    {pet.user_id ? `${pet.user_id}` : "-"}
                                                 </a>
                                             </td>
 

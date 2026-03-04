@@ -3,8 +3,14 @@ import api from "@/lib/axios";
 import {CreateCommunityInput} from "@/schemas/community.schema";
 import {Community} from "@/types/community";
 
+export interface GetCommunityParams extends GetAllParams {
+    tag_id?: string;
+    sort_direction?: "asc" | "desc";
+    [key: string]: any;
+}
+
 export const communityService = {
-    getCommunities: async (params: GetAllParams, signal?: AbortSignal) => {
+    getCommunities: async (params: GetCommunityParams, signal?: AbortSignal) => {
         const response = await api.get("/v1/communities", {
             params,
             signal,

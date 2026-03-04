@@ -60,7 +60,7 @@ export function Navbar() {
         return [
           { href: "/admin/users", label: "User" },
           { href: "/admin/adoptions", label: "Adoption Process" },
-          { href: "/admin/community", label: "Community" },
+          { href: "/admin/communities", label: "Community" },
           { href: "/admin/pets", label: "Pet" },
           { href: "/admin/posts", label: "Post" },
           { href: "/admin/reports", label: "Report" },
@@ -112,7 +112,7 @@ export function Navbar() {
                     <NavigationMenuLink asChild>
                       <Link
                         href={item.href}
-                        className="whitespace-nowrap hover:text-green-700 hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent font-medium transition-colors"
+                        className="whitespace-nowrap hover:text-green-700 hover:bg-transparent focus:bg-transparent data-active:bg-transparent data-[state=open]:bg-transparent font-medium transition-colors"
                       >
                         {item.label}
                       </Link>

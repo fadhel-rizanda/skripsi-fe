@@ -1,12 +1,7 @@
 
 import api from "@/lib/axios";
-import { Pet, PetDetail, PetFilterState } from "@/types/pet";
-import { ApiResponse, PaginatedResponse } from "@/types/api";
-
-interface PetListParams extends PetFilterState {
-  page?: number;
-  per_page?: number;
-}
+import { Pet, PetDetail } from "@/types/pet";
+import {ApiResponse, GetAllParams, PaginatedResponse} from "@/types/api";
 
 export type CreatePetPayload = {
   name: string
@@ -33,9 +28,15 @@ export type CreatePetPayload = {
   }
 }
 
+export interface GetPetParams extends GetAllParams {
+  tag_id?: string;
+  sort_direction?: "asc" | "desc";
+  [key: string]: any;
+}
+
 export const petService = {
   // Get list of pets via Next.js API route (no auth, public access)
-  getPetsPublic: async (params?: PetListParams, signal?: AbortSignal): Promise<PaginatedResponse<Pet[]>> => {
+  getPetsPublic: async (params?: GetPetParams, signal?: AbortSignal): Promise<PaginatedResponse<Pet[]>> => {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.set("page", params.page.toString());
@@ -58,7 +59,7 @@ export const petService = {
   },
 
   // Get list of pets with filters and pagination (requires auth)
-  getPets: async (params?: PetListParams): Promise<PaginatedResponse<Pet[]>> => {
+  getPets: async (params?: GetPetParams): Promise<PaginatedResponse<Pet[]>> => {
     const response = await api.get<PaginatedResponse<Pet[]>>("/v1/pets", { params });
     return response.data;
   },
@@ -88,7 +89,7 @@ export const petService = {
   },
 
   // Search pets by name or description
-  searchPets: async (query: string, params?: Omit<PetListParams, 'search'>): Promise<PaginatedResponse<Pet[]>> => {
+  searchPets: async (query: string, params?: Omit<GetPetParams, 'search'>): Promise<PaginatedResponse<Pet[]>> => {
     const response = await api.get<PaginatedResponse<Pet[]>>("/v1/pets", {
       params: { ...params, search: query }
     });

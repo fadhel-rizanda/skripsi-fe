@@ -60,7 +60,7 @@ export function Navbar() {
         return [
           { href: "/admin/users", label: "User" },
           { href: "/admin/adoptions", label: "Adoption Process" },
-          { href: "/admin/community", label: "Community" },
+          { href: "/admin/communities", label: "Community" },
           { href: "/admin/pets", label: "Pet" },
           { href: "/admin/posts", label: "Post" },
           { href: "/admin/reports", label: "Report" },

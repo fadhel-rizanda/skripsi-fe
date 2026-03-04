@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState, useRef, useCallback} from "react";
+import {useEffect, useState, useRef, useCallback, memo} from "react";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import {Icon} from "@iconify/react";
@@ -20,7 +20,7 @@ import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 import {AxiosError} from "axios";
 import {ErrorResponse} from "@/types";
 
-export default function ChatWindow({chat}: { chat: Chat }) {
+function ChatWindow({chat}: { chat: Chat }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const {data: session} = useSession();
@@ -397,3 +397,7 @@ export default function ChatWindow({chat}: { chat: Chat }) {
         </div>
     );
 }
+
+export default memo(ChatWindow, (prevProps, nextProps) => {
+    return prevProps.chat.id === nextProps.chat.id;
+});

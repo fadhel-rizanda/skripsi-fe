@@ -25,6 +25,7 @@ export interface Pet {
     personality_tags?: Tag[];
     additional_records?: Attachment[];
 
+    is_active?: boolean;
     address_id?: string;
     address?: Address;
 }

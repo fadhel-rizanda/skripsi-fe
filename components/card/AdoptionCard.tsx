@@ -10,6 +10,7 @@ import Image from "next/image";
 import {UserProfile} from "@/types";
 import ChatButton from "@/components/button/ChatButton";
 import {useRouter} from "next/navigation";
+import {parseColorCode} from "@/lib/color";
 
 interface AdoptionCardProps {
     adoption: Adoption;
@@ -96,13 +97,15 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
                     <div className="flex items-end gap-2">
                         <Badge
                             variant="outline"
-                            className={`font-medium ${adoption.stage_tag.color_code ?? ""}`}
+                            className="font-medium"
+                            style={parseColorCode(adoption.stage_tag.color_code || "")}
                         >
                             {adoption.stage_tag.name}
                         </Badge>
                         <Badge
                             variant="outline"
-                            className={`font-medium ${adoption.status.color_code ?? ""}`}
+                            className="font-medium"
+                            style={parseColorCode(adoption.status.color_code || "")}
                         >
                             {adoption.status.name}
                         </Badge>

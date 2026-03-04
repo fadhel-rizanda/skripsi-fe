@@ -4,12 +4,15 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import {useParams} from "next/navigation";
 import {useChatStore} from "@/store/useChatStore";
+import {useMemo} from "react";
 
 export default function ChatLayout({children}: { children: React.ReactNode; }) {
     const params = useParams();
     const chatId = params?.userId;
     const { chats } = useChatStore();
-    const activeChat = chats.find((c) => c.id === chatId);
+    const activeChat = useMemo(() => {
+        return chats.find((c) => c.id === chatId);
+    }, [chats, chatId]);
     return (
         <div className="flex h-[calc(100vh-64px)]">
             {/* Sidebar */}

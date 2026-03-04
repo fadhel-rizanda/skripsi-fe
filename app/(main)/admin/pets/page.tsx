@@ -70,8 +70,6 @@ export default function AdminPetsPage() {
         fetchPets();
     }, [fetchPets]);
 
-    console.log(pets)
-
     // Open Step 1
     const openConfirmDialog = (pet: Pet, mode: DialogMode) => {
         setSelectedPet(pet);
@@ -171,7 +169,7 @@ export default function AdminPetsPage() {
                                 </tr>
                             ) : (
                                 pets.map((pet) => {
-                                    const isActive = !pet.updated_at; // adjust based on actual active field
+                                    const isActive = pet.is_active; // adjust based on actual active field
                                     const profilePic =
                                         pet.profile_pictures?.[0]?.public_url ?? pet.profile_picture;
                                     return (

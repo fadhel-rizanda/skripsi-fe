@@ -21,6 +21,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
+import {parseColorCode} from "@/lib/color";
 
 type DialogMode = "takedown" | "restore" | null;
 type ActionStatus = "idle" | "loading" | "success" | "error";
@@ -207,10 +208,7 @@ export default function AdminCommunitiesPage() {
                                                                 key={tag.id}
                                                                 variant="secondary"
                                                                 className="border-none shadow-none font-medium px-2 py-0.5 text-[10px] capitalize"
-                                                                style={{
-                                                                    backgroundColor: tag.color_code ? `${tag.color_code}30` : "#D1F2D6",
-                                                                    color: tag.color_code ?? "#16A34A",
-                                                                }}
+                                                                style={parseColorCode(tag.color_code || "#E5E7EB")}
                                                             >
                                                                 {tag.name}
                                                             </Badge>

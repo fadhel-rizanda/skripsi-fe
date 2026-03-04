@@ -1,8 +1,9 @@
-import type {Tag, Address} from './general';
-import {Attachment} from "@/types/attachment";
+import type { Tag, Address } from './general';
+import { Attachment } from "@/types/attachment";
 
 export interface Pet {
     id: string;
+    user_id?: string;
     name: string;
     type_of_animal_name?: string;
     type_of_animal_id?: string;

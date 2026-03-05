@@ -17,6 +17,8 @@ export default async function DashboardPage() {
 
     const user = session.user
 
+
+
     return (
         <div className="p-8">
             <h1 className="text-2xl font-bold">Dashboard</h1>

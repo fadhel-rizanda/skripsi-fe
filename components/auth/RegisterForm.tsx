@@ -60,45 +60,39 @@ export function RegisterForm() {
     setRoleDialogOpen(false)
 
     startTransition(async () => {
-      try {
-        setError("") // Clear previous errors
-        const data = form.getValues()
-        const result = await registerUser(data)
+        try {
+            setError("") // Clear previous errors
+            const data = form.getValues()
+            const result = await registerUser(data)
 
-        if (!result.success) {
-          setError(result.error || "Registration failed")
-          return
-        }
-
-        // Auto login after successful registration
-        if (result.credentials) {
-          const signInResult = await signIn("credentials", {
-            email: result.credentials.email,
-            password: result.credentials.password,
-            redirect: false,
-          })
-
-          if (signInResult?.error) {
-            setError("Registration successful but login failed. Please login manually.")
-            setTimeout(() => router.push("/login"), 2000)
-            return
-          }
-
-          if (signInResult?.ok) {
-            // Redirect to greeting page for adopters, dashboard for others
-            if (selectedRole === "adopter") {
-              router.push("/greeting")
-            } else {
-              router.push("/dashboard")
+            if (!result.success) {
+                setError(result.error || "Registration failed")
+                return
             }
 
-            router.refresh()
-          }
+            // Auto login after successful registration
+            if (result.credentials) {
+                const signInResult = await signIn("credentials", {
+                    email: result.credentials.email,
+                    password: result.credentials.password,
+                    redirect: false,
+                })
+
+                if (signInResult?.error) {
+                    setError("Registration successful but login failed. Please login manually.")
+                    setTimeout(() => router.push("/login"), 2000)
+                    return
+                }
+
+                if (signInResult?.ok) {
+                    router.push("/verify-otp")
+                    router.refresh()
+                }
+            }
+        } catch (err) {
+            console.error("Registration error:", err)
+            setError(err instanceof Error ? err.message : "Unexpected error")
         }
-      } catch (err) {
-        console.error("Registration error:", err)
-        setError(err instanceof Error ? err.message : "Unexpected error")
-      }
     })
   }
 

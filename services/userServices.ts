@@ -1,7 +1,8 @@
 import api from "@/lib/axios";
-import { PaginatedResponse, GetAllParams } from "@/types/api";
-import { UserProfile } from "@/types/user";
+import { ApiResponse, PaginatedResponse, GetAllParams } from "@/types/api";
+import { UserProfile, UserDetail } from "@/types/user";
 import { GreetingFormInput } from "@/schemas/greeting.schema";
+import { UpdateProfilePayload } from "@/schemas/edit-profile.schema";
 
 export interface GetUsersParams extends GetAllParams {
     role_id?: string;
@@ -14,8 +15,16 @@ export const userService = {
         return response.data;
     },
 
-    putUsers: async (data: GreetingFormInput): Promise<void> => {
-        const response = await api.put("/v1/profile", data);
+    getUserById: async (userId: string): Promise<UserDetail> => {
+        const response = await api.get<ApiResponse<UserDetail>>(`/v1/users/${userId}`);
+        return response.data.data;
+    },
+
+    putUsers: async (data: GreetingFormInput | UpdateProfilePayload): Promise<void> => {
+        // Backend expects flat address fields, not nested under "address"
+        const { address, ...rest } = data as any;
+        const payload = address ? { ...rest, ...address } : rest;
+        const response = await api.put("/v1/profile", payload);
         return response.data;
     },
     deactivateUser: async (userId: string, notes: string): Promise<void> => {

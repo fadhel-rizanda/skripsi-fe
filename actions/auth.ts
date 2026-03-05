@@ -11,7 +11,9 @@ export interface ResendOtpResult {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export async function verifyOtp(token: string, accessToken: string): Promise<VerifyOtpResult> {
-    if (!token) {
+    const cleanToken = token.replace(/\s+/g, "")
+
+    if (!cleanToken) {
         return {
             success: false,
             error: "Activation code is required",
@@ -33,7 +35,7 @@ export async function verifyOtp(token: string, accessToken: string): Promise<Ver
                 "Authorization": `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                token,
+                token: cleanToken,
             }),
         })
 

@@ -21,7 +21,10 @@ export const userService = {
     },
 
     putUsers: async (data: GreetingFormInput | UpdateProfilePayload): Promise<void> => {
-        const response = await api.put("/v1/profile", data);
+        // Backend expects flat address fields, not nested under "address"
+        const { address, ...rest } = data as any;
+        const payload = address ? { ...rest, ...address } : rest;
+        const response = await api.put("/v1/profile", payload);
         return response.data;
     },
     deactivateUser: async (userId: string, notes: string): Promise<void> => {

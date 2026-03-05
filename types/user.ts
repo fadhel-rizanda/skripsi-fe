@@ -20,11 +20,11 @@ export interface UserDetail {
     phone?: string
     about_me?: string
     avatar?: string
-    street?: string
     address?: Address
     role_name: string
     personality?: string
     pet_experience?: string
+    pet_experience_description?: string
     pet_preferences?: string
     personality_tags: Tag[]
     pet_experience_tags: Tag[]

@@ -182,7 +182,8 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
             resetFormFromProfile(refreshed)
             setIsEditing(false)
             toast.success("Profile updated successfully!")
-        } catch {
+        } catch (err: unknown) {
+            console.error("Failed to update profile:", err)
             toast.error("Failed to update profile. Please try again.")
         }
     }

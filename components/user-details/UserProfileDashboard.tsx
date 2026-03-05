@@ -290,7 +290,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               {/* Personal Information */}
-              <SectionCard
+              {isOwnProfile && <SectionCard
                 title="Personal Information"
                 description="Update your photo and personal details here."
               >
@@ -312,7 +312,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                     </FormLabel>
                     <Input
                       value={profile.email}
-                      disabled
+                      readOnly
                       className="mt-1.5 bg-gray-50"
                     />
                   </div>
@@ -325,7 +325,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         <FormControl>
                           <Input
                             placeholder="555-123-4567"
-                            disabled={!isEditing}
+                            readOnly={!isEditing}
                             {...field}
                           />
                         </FormControl>
@@ -334,10 +334,10 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                     )}
                   />
                 </div>
-              </SectionCard>
+              </SectionCard>}
 
               {/* Address */}
-              <SectionCard
+              {isOwnProfile && <SectionCard
                 title="Address"
                 description={
                   isAdopter
@@ -355,7 +355,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         <FormControl>
                           <Input
                             placeholder="e.g. Jl. Pawsitive No. 123"
-                            disabled={!isEditing}
+                            readOnly={!isEditing}
                             {...field}
                           />
                         </FormControl>
@@ -386,6 +386,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                             emptyMessage="No provinces found."
                             mode="single"
                             disabled={!isEditing}
+                            className="disabled:opacity-100"
                           />
                         </FormControl>
                         <FormMessage />
@@ -418,6 +419,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                             emptyMessage="No regencies found."
                             mode="single"
                             disabled={!isEditing || !selectedProvinceId}
+                            className="disabled:opacity-100"
                           />
                         </FormControl>
                         <FormMessage />
@@ -448,6 +450,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                               emptyMessage="No districts found."
                               mode="single"
                               disabled={!isEditing || !selectedRegencyId}
+                              className="disabled:opacity-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -463,7 +466,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                           <FormControl>
                             <Input
                               placeholder="e.g. 62704"
-                              disabled={!isEditing}
+                              readOnly={!isEditing}
                               {...field}
                             />
                           </FormControl>
@@ -481,7 +484,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         <FormControl>
                           <Input
                             placeholder="e.g. https://maps.google.com/..."
-                            disabled={!isEditing}
+                            readOnly={!isEditing}
                             {...field}
                           />
                         </FormControl>
@@ -500,7 +503,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                             placeholder="Describe the address in more detail..."
                             className="resize-none"
                             rows={3}
-                            disabled={!isEditing}
+                            readOnly={!isEditing}
                             {...field}
                           />
                         </FormControl>
@@ -509,7 +512,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                     )}
                   />
                 </div>
-              </SectionCard>
+              </SectionCard>}
 
               {/* About */}
               <SectionCard
@@ -537,7 +540,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                           }
                           className="resize-none"
                           rows={5}
-                          disabled={!isEditing}
+                          readOnly={!isEditing}
                           {...field}
                         />
                       </FormControl>
@@ -566,7 +569,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                 placeholder="I consider myself a caring and responsible person..."
                                 className="resize-none"
                                 rows={4}
-                                disabled={!isEditing}
+                                readOnly={!isEditing}
                                 {...field}
                               />
                             </FormControl>
@@ -642,7 +645,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                               value={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger className="disabled:opacity-100">
                                   <SelectValue placeholder="Select your experience level..." />
                                 </SelectTrigger>
                               </FormControl>
@@ -669,7 +672,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                 placeholder="Describe your experience with pets..."
                                 className="resize-none"
                                 rows={4}
-                                disabled={!isEditing}
+                                readOnly={!isEditing}
                                 {...field}
                               />
                             </FormControl>
@@ -687,6 +690,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
                                 disabled={!isEditing}
+                                className="disabled:opacity-100"
                               />
                             </FormControl>
                             <FormLabel className="text-sm font-medium cursor-pointer">

@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 
 import { registerUser } from "@/actions/auth.server"
 import { registerSchema } from "@/schemas/auth.schema"
@@ -32,6 +32,8 @@ export function RegisterForm() {
   const router = useRouter()
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(registerSchema),
@@ -154,12 +156,34 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isPending}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-pressed={showPassword}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? "Hide password" : "Show password"}
+                        </span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,12 +197,34 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isPending}
+                        aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                        aria-pressed={showConfirmPassword}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                        </span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

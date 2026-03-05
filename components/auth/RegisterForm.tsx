@@ -167,12 +167,16 @@ export function RegisterForm() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         disabled={isPending}
+                        className="pr-10"
                         {...field}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isPending}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-pressed={showPassword}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -199,12 +203,16 @@ export function RegisterForm() {
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="••••••••"
                         disabled={isPending}
+                        className="pr-10"
                         {...field}
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isPending}
+                        aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                        aria-pressed={showConfirmPassword}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4" />

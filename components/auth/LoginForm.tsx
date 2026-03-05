@@ -112,12 +112,16 @@ export default function LoginForm() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       disabled={loading}
+                      className="pr-10"
                       {...field}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      disabled={loading}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />

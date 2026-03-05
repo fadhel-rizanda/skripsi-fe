@@ -136,7 +136,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
           ? "Preferences saved! Let's find your perfect pet."
           : "Address saved successfully!",
       );
-      router.push("/dashboard");
+      router.push("/pets");
     } catch (error) {
       toast.error("Failed to save preferences. Please try again.");
     }

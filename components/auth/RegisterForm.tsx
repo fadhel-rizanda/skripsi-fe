@@ -83,13 +83,7 @@ export function RegisterForm() {
                 }
 
                 if (signInResult?.ok) {
-                    // Redirect to greeting page for adopters, dashboard for others
-                    if (selectedRole === "adopter") {
-                        router.push("/greeting")
-                    } else {
-                        router.push("/dashboard")
-                    }
-
+                    router.push("/verify-otp")
                     router.refresh()
                 }
             }

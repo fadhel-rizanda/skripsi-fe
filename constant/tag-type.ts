@@ -8,6 +8,8 @@ export const TAG_TYPE = {
   },
   USER: {
     PERSONALITY: "user.personality",
+    EXPERIENCE: "user.experience",
+    PREFERENCES: "user.preferences",
   },
   ADOPTION: {
     STAGE: "adoption.stage",

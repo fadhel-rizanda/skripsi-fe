@@ -1,11 +1,13 @@
-import {UserProfile} from "@/types/user";
+import { UserProfile } from "@/types/user";
+
+export interface Tag {
+    id: string
+    name: string
+    type?: string
+    color_code?: string | null
+}
 
 export interface Status {
-    id: string;
-    name: string;
-    color_code?: string | null;
-}
-export interface Tag {
     id: string;
     name: string;
     color_code?: string | null;

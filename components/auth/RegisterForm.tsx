@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 
 import { registerUser } from "@/actions/auth.server"
 import { registerSchema } from "@/schemas/auth.schema"
@@ -32,6 +32,8 @@ export function RegisterForm() {
   const router = useRouter()
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(registerSchema),
@@ -58,45 +60,45 @@ export function RegisterForm() {
     setRoleDialogOpen(false)
 
     startTransition(async () => {
-        try {
-            setError("") // Clear previous errors
-            const data = form.getValues()
-            const result = await registerUser(data)
+      try {
+        setError("") // Clear previous errors
+        const data = form.getValues()
+        const result = await registerUser(data)
 
-            if (!result.success) {
-                setError(result.error || "Registration failed")
-                return
-            }
-
-            // Auto login after successful registration
-            if (result.credentials) {
-                const signInResult = await signIn("credentials", {
-                    email: result.credentials.email,
-                    password: result.credentials.password,
-                    redirect: false,
-                })
-
-                if (signInResult?.error) {
-                    setError("Registration successful but login failed. Please login manually.")
-                    setTimeout(() => router.push("/login"), 2000)
-                    return
-                }
-
-                if (signInResult?.ok) {
-                    // Redirect to greeting page for adopters, dashboard for others
-                    if (selectedRole === "adopter") {
-                        router.push("/greeting")
-                    } else {
-                        router.push("/dashboard")
-                    }
-
-                    router.refresh()
-                }
-            }
-        } catch (err) {
-            console.error("Registration error:", err)
-            setError(err instanceof Error ? err.message : "Unexpected error")
+        if (!result.success) {
+          setError(result.error || "Registration failed")
+          return
         }
+
+        // Auto login after successful registration
+        if (result.credentials) {
+          const signInResult = await signIn("credentials", {
+            email: result.credentials.email,
+            password: result.credentials.password,
+            redirect: false,
+          })
+
+          if (signInResult?.error) {
+            setError("Registration successful but login failed. Please login manually.")
+            setTimeout(() => router.push("/login"), 2000)
+            return
+          }
+
+          if (signInResult?.ok) {
+            // Redirect to greeting page for adopters, dashboard for others
+            if (selectedRole === "adopter") {
+              router.push("/greeting")
+            } else {
+              router.push("/dashboard")
+            }
+
+            router.refresh()
+          }
+        }
+      } catch (err) {
+        console.error("Registration error:", err)
+        setError(err instanceof Error ? err.message : "Unexpected error")
+      }
     })
   }
 
@@ -160,12 +162,25 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,12 +194,25 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect, useRef} from "react";
+import { useState, useEffect, useRef } from "react";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { PetFilterBar } from "@/components/filter/PetFilterBar";
 import { PetCard } from "@/components/card/PetCard";
@@ -10,10 +10,10 @@ import { petService } from "@/services/petServices";
 export default function FindPetPage() {
   // State Management
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState<number|undefined>(undefined);
+  const [perPage, setPerPage] = useState<number | undefined>(undefined);
   const [pets, setPets] = useState<Pet[]>([]);
   // Total data dari database (bukan panjang array saat ini)
-  const [totalData, setTotalData] = useState(0); 
+  const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // State untuk filter
@@ -57,7 +57,7 @@ export default function FindPetPage() {
     return () => {
       abortController.abort();
     };
-  }, [page, perPage, filters]); 
+  }, [page, perPage, filters]);
 
   // Handler untuk mengubah filter (nanti dipassing ke PetFilterBar)
   const handleFilterChange = (newFilters: PetFilterState) => {
@@ -84,11 +84,11 @@ export default function FindPetPage() {
         </div>
 
         {/* Content Section */}
-        <div className="w-full max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
+        <div className="w-full max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-7 auto-rows-fr">
           {loading && <div className="col-span-full text-lg font-medium text-gray-600 text-center font-sans">Loading pets...</div>}
-          
+
           {error && <div className="col-span-full text-red-500 font-medium text-center font-sans">{error}</div>}
-          
+
           {!loading && !error && pets.length === 0 && (
             <div className="col-span-full text-gray-500 italic text-center font-sans">No pets found with these filters.</div>
           )}

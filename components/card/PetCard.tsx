@@ -38,7 +38,7 @@ export function PetCard({ id, name, type, age, imageUrl, priority = false }: Pet
 
   return (
     <Card
-      className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-col p-0 h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+      className="w-full rounded-lg overflow-hidden shadow bg-white flex flex-col p-0 gap-0 h-full cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
       onClick={handleOpenDetail}
       role="button"
       tabIndex={0}
@@ -49,7 +49,7 @@ export function PetCard({ id, name, type, age, imageUrl, priority = false }: Pet
         }
       }}
     >
-      <div className="w-full h-32 sm:h-36 md:h-36 lg:h-40 relative flex-shrink-0">
+      <div className="w-full h-44 sm:h-48 md:h-52 lg:h-56 relative flex-shrink-0">
         {hasValidImage ? (
           <Image
             src={imageUrl}
@@ -66,9 +66,9 @@ export function PetCard({ id, name, type, age, imageUrl, priority = false }: Pet
         )}
         {/* Extra images badge removed as requested */}
       </div>
-      <CardContent className="p-2 sm:p-2.5 md:p-2.5 lg:p-3 flex flex-col justify-start gap-0.5 min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem]">
-        <CardTitle className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-900 line-clamp-1">{name}</CardTitle>
-        <CardDescription className="text-[10px] sm:text-[10px] md:text-xs lg:text-sm text-gray-600 line-clamp-1">{type}, {age}</CardDescription>
+      <CardContent className="px-3 pt-2 pb-3 sm:px-3.5 sm:pt-2.5 sm:pb-3.5 md:px-4 md:pt-3 md:pb-4 flex flex-col justify-start gap-0.5">
+        <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 line-clamp-1">{name}</CardTitle>
+        <CardDescription className="text-[11px] sm:text-xs md:text-sm lg:text-sm text-gray-600 line-clamp-1">{type}, {age}</CardDescription>
       </CardContent>
     </Card>
   );

@@ -50,10 +50,7 @@ export default function DetailPetPage() {
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
   const { data: session, update } = useSession();
-  // Support both shapes: `session.user.role` can be a string or an object { name }
-  const _role = session?.user?.role;
-  const roleName = _role?.name;
-  const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
+  const isOwner = !!session?.user?.id && !!pet?.user_id && String(pet.user_id) === String(session.user.id);
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -424,7 +421,7 @@ export default function DetailPetPage() {
                           <Link2 className="h-4 w-4 text-green-600" />
                         </span>
                         <a
-href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.address.link : '#'} /* Or use a dedicated URL validation library */
+                          href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.address.link : '#'} /* Or use a dedicated URL validation library */
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-800 font-medium underline underline-offset-2 break-all overflow-hidden"
@@ -458,7 +455,7 @@ href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.addr
                   <Heart className="mr-2 h-5 w-5 text-black" />
                   {adoptionLoading ? "Sending..." : "Adopt Me"}
                 </Button>
-                {isProvider ? (
+                {isOwner ? (
                   <Button
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"

@@ -50,10 +50,7 @@ export default function DetailPetPage() {
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
   const { data: session, update } = useSession();
-  // Support both shapes: `session.user.role` can be a string or an object { name }
-  const _role = session?.user?.role;
-  const roleName = _role?.name;
-  const isProvider = !!roleName && String(roleName).toLowerCase() === "provider";
+  const isOwner = !!session?.user?.id && !!pet?.user_id && String(pet.user_id) === String(session.user.id);
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -161,11 +158,57 @@ export default function DetailPetPage() {
   };
 
   const renderGenderIcon = (gender?: string) => {
-    if (!gender) return null; // Or use a generic icon like <Circle />
+    if (!gender) return null;
     const g = gender.toLowerCase();
     if (g.startsWith("m")) return <Mars className="h-4 w-4 text-green-600" />;
     if (g.startsWith("f")) return <Venus className="h-4 w-4 text-green-600" />;
-    return null; // Or use a generic icon like <Circle />
+    return null;
+  };
+
+  const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
+    available: { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" },
+    pending: { bg: "bg-amber-100", text: "text-amber-700", dot: "bg-amber-500" },
+    adopted: { bg: "bg-blue-100", text: "text-blue-700", dot: "bg-blue-500" },
+    "not available": { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" },
+  };
+  const fallbackStatusStyle = { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
+
+  const renderStatusBadge = (status?: { name: string; color_code?: string | null }) => {
+    if (!status) return null;
+    const sn = status.name.toLowerCase();
+    const style = statusStyles[sn] ?? fallbackStatusStyle;
+    return (
+      <span
+        className={`absolute top-5 right-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${style.bg} ${style.text}`}
+      >
+        <span className={`w-2 h-2 rounded-full ${style.dot} ${sn === "pending" ? "animate-pulse" : ""}`} />
+        {status.name}
+      </span>
+    );
+  };
+
+  const adoptLabelMap: Record<string, string> = {
+    pending: "Adoption in Progress",
+    adopted: "Already Adopted",
+    "not available": "Not Available",
+  };
+
+  const renderAdoptButton = () => {
+    const statusName = pet?.status?.name?.toLowerCase();
+    const isAvailable = !statusName || statusName === "available";
+    const adoptLabel = adoptLabelMap[statusName ?? ""] ?? "Adopt Me";
+
+    return (
+      <Button
+        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+        size="lg"
+        onClick={handleAdoption}
+        disabled={adoptionLoading || !isAvailable}
+      >
+        <Heart className="mr-2 h-5 w-5 text-black" />
+        {adoptionLoading ? "Sending..." : adoptLabel}
+      </Button>
+    );
   };
 
   if (loading) {
@@ -269,8 +312,11 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
+          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
             <CardContent className="space-y-6 text-base p-0!">
+              {/* Status badge — pojok kanan atas card */}
+              {renderStatusBadge(pet.status)}
+
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}
@@ -424,7 +470,7 @@ export default function DetailPetPage() {
                           <Link2 className="h-4 w-4 text-green-600" />
                         </span>
                         <a
-href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.address.link : '#'} /* Or use a dedicated URL validation library */
+                          href={pet.address.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-800 font-medium underline underline-offset-2 break-all overflow-hidden"
@@ -449,16 +495,8 @@ href={pet.address.link && !pet.address.link.startsWith('javascript:') ? pet.addr
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button
-                  className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
-                  size="lg"
-                  onClick={handleAdoption}
-                  disabled={adoptionLoading}
-                >
-                  <Heart className="mr-2 h-5 w-5 text-black" />
-                  {adoptionLoading ? "Sending..." : "Adopt Me"}
-                </Button>
-                {isProvider ? (
+                {renderAdoptButton()}
+                {isOwner ? (
                   <Button
                     size="lg"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800"

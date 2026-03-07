@@ -1,4 +1,4 @@
-import type { Tag, Address } from './general';
+import type { Tag, Address, Status } from './general';
 import { Attachment } from "@/types/attachment";
 
 export interface Pet {
@@ -26,6 +26,7 @@ export interface Pet {
     additional_records?: Attachment[];
 
     is_active?: boolean;
+    status?: Status;
     address_id?: string;
     address?: Address;
 }

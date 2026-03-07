@@ -11,8 +11,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import {CheckCircle2, AlertCircle, Loader2} from "lucide-react"
+import {cn} from "@/lib/utils"
 import {ReactNode} from "react";
 import {toast} from "sonner";
 
@@ -68,9 +68,7 @@ export function ActionDialog({
                 setInternalStatus("success")
             } catch (error: any) {
                 const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
-                if (error.response?.status === 422) {
-                    toast.error(errorMessage);
-                }
+                toast.error(errorMessage);
                 setInternalStatus("error")
             }
         }
@@ -95,19 +93,19 @@ export function ActionDialog({
                     <div className="items-center flex flex-col gap-4">
                         {/* Icon */}
                         {isIdle && (
-                            <AlertCircle className="h-10 w-10 text-gray-600" />
+                            <AlertCircle className="h-10 w-10 text-gray-600"/>
                         )}
                         {isLoading && (
-                            <Loader2 className="h-12 w-12 text-green-600 animate-spin" strokeWidth={2.5} />
+                            <Loader2 className="h-12 w-12 text-green-600 animate-spin" strokeWidth={2.5}/>
                         )}
                         {isSuccess && (
                             <div className="rounded-full bg-green-100 p-3">
-                                <CheckCircle2 className="h-12 w-12 text-green-600" strokeWidth={2.5} />
+                                <CheckCircle2 className="h-12 w-12 text-green-600" strokeWidth={2.5}/>
                             </div>
                         )}
                         {isError && (
                             <div className="rounded-full bg-red-100 p-3">
-                                <AlertCircle className="h-12 w-12 text-red-600" strokeWidth={2.5} />
+                                <AlertCircle className="h-12 w-12 text-red-600" strokeWidth={2.5}/>
                             </div>
                         )}
 

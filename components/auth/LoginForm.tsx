@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { signIn, getSession } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -58,7 +58,11 @@ export default function LoginForm() {
         throw new Error(result.error)
       }
 
-      router.replace("/pets")
+      const session = await getSession()
+      const roleName = String(session?.user?.role?.name ?? "").toLowerCase()
+      const redirectTo = roleName === "admin" ? "/admin/users" : "/pets"
+
+      router.replace(redirectTo)
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")

@@ -158,11 +158,33 @@ export default function DetailPetPage() {
   };
 
   const renderGenderIcon = (gender?: string) => {
-    if (!gender) return null; // Or use a generic icon like <Circle />
+    if (!gender) return null;
     const g = gender.toLowerCase();
     if (g.startsWith("m")) return <Mars className="h-4 w-4 text-green-600" />;
     if (g.startsWith("f")) return <Venus className="h-4 w-4 text-green-600" />;
-    return null; // Or use a generic icon like <Circle />
+    return null;
+  };
+
+  const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
+    available: { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" },
+    pending: { bg: "bg-amber-100", text: "text-amber-700", dot: "bg-amber-500" },
+    adopted: { bg: "bg-blue-100", text: "text-blue-700", dot: "bg-blue-500" },
+    "not available": { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" },
+  };
+  const fallbackStatusStyle = { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
+
+  const renderStatusBadge = (status?: { name: string; color_code?: string | null }) => {
+    if (!status) return null;
+    const sn = status.name.toLowerCase();
+    const style = statusStyles[sn] ?? fallbackStatusStyle;
+    return (
+      <span
+        className={`absolute top-5 right-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${style.bg} ${style.text}`}
+      >
+        <span className={`w-2 h-2 rounded-full ${style.dot} ${sn === "pending" ? "animate-pulse" : ""}`} />
+        {status.name}
+      </span>
+    );
   };
 
   if (loading) {
@@ -269,28 +291,7 @@ export default function DetailPetPage() {
           <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
             <CardContent className="space-y-6 text-base p-0!">
               {/* Status badge — pojok kanan atas card */}
-              {pet.status && (() => {
-                const sn = pet.status.name?.toLowerCase();
-                const fallbackStyle =
-                  sn === "available"
-                    ? { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" }
-                    : sn === "pending"
-                      ? { bg: "bg-amber-100", text: "text-amber-700", dot: "bg-amber-500" }
-                      : sn === "adopted"
-                        ? { bg: "bg-blue-100", text: "text-blue-700", dot: "bg-blue-500" }
-                        : { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
-
-                return (
-                  <span
-                    className={`absolute top-5 right-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${fallbackStyle.bg} ${fallbackStyle.text}`}
-                  >
-                    <span
-                      className={`w-2 h-2 rounded-full ${fallbackStyle.dot} ${sn === "pending" ? "animate-pulse" : ""}`}
-                    />
-                    {pet.status.name}
-                  </span>
-                );
-              })()}
+              {renderStatusBadge(pet.status)}
 
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">

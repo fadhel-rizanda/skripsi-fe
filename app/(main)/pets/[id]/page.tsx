@@ -266,8 +266,32 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
+          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
             <CardContent className="space-y-6 text-base p-0!">
+              {/* Status badge — pojok kanan atas card */}
+              {pet.status && (() => {
+                const sn = pet.status.name?.toLowerCase();
+                const fallbackStyle =
+                  sn === "available"
+                    ? { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" }
+                    : sn === "pending"
+                      ? { bg: "bg-amber-100", text: "text-amber-700", dot: "bg-amber-500" }
+                      : sn === "adopted"
+                        ? { bg: "bg-blue-100", text: "text-blue-700", dot: "bg-blue-500" }
+                        : { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
+
+                return (
+                  <span
+                    className={`absolute top-5 right-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${fallbackStyle.bg} ${fallbackStyle.text}`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${fallbackStyle.dot} ${sn === "pending" ? "animate-pulse" : ""}`}
+                    />
+                    {pet.status.name}
+                  </span>
+                );
+              })()}
+
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
                   {pet.name}
@@ -446,15 +470,29 @@ export default function DetailPetPage() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button
-                  className="bg-[#19E619] hover:bg-green-500 text-black shadow-md"
-                  size="lg"
-                  onClick={handleAdoption}
-                  disabled={adoptionLoading}
-                >
-                  <Heart className="mr-2 h-5 w-5 text-black" />
-                  {adoptionLoading ? "Sending..." : "Adopt Me"}
-                </Button>
+                {(() => {
+                  const statusName = pet.status?.name?.toLowerCase();
+                  const isAvailable = !statusName || statusName === "available";
+                  const adoptLabel = statusName === "pending"
+                    ? "Adoption in Progress"
+                    : statusName === "adopted"
+                      ? "Already Adopted"
+                      : statusName === "not available"
+                        ? "Not Available"
+                        : "Adopt Me";
+
+                  return (
+                    <Button
+                      className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                      size="lg"
+                      onClick={handleAdoption}
+                      disabled={adoptionLoading || !isAvailable}
+                    >
+                      <Heart className="mr-2 h-5 w-5 text-black" />
+                      {adoptionLoading ? "Sending..." : adoptLabel}
+                    </Button>
+                  );
+                })()}
                 {isOwner ? (
                   <Button
                     size="lg"

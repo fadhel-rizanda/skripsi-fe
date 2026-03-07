@@ -187,6 +187,30 @@ export default function DetailPetPage() {
     );
   };
 
+  const adoptLabelMap: Record<string, string> = {
+    pending: "Adoption in Progress",
+    adopted: "Already Adopted",
+    "not available": "Not Available",
+  };
+
+  const renderAdoptButton = () => {
+    const statusName = pet?.status?.name?.toLowerCase();
+    const isAvailable = !statusName || statusName === "available";
+    const adoptLabel = adoptLabelMap[statusName ?? ""] ?? "Adopt Me";
+
+    return (
+      <Button
+        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+        size="lg"
+        onClick={handleAdoption}
+        disabled={adoptionLoading || !isAvailable}
+      >
+        <Heart className="mr-2 h-5 w-5 text-black" />
+        {adoptionLoading ? "Sending..." : adoptLabel}
+      </Button>
+    );
+  };
+
   if (loading) {
     return (
       <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 lg:max-w-7xl">
@@ -471,29 +495,7 @@ export default function DetailPetPage() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                {(() => {
-                  const statusName = pet.status?.name?.toLowerCase();
-                  const isAvailable = !statusName || statusName === "available";
-                  const adoptLabel = statusName === "pending"
-                    ? "Adoption in Progress"
-                    : statusName === "adopted"
-                      ? "Already Adopted"
-                      : statusName === "not available"
-                        ? "Not Available"
-                        : "Adopt Me";
-
-                  return (
-                    <Button
-                      className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-                      size="lg"
-                      onClick={handleAdoption}
-                      disabled={adoptionLoading || !isAvailable}
-                    >
-                      <Heart className="mr-2 h-5 w-5 text-black" />
-                      {adoptionLoading ? "Sending..." : adoptLabel}
-                    </Button>
-                  );
-                })()}
+                {renderAdoptButton()}
                 {isOwner ? (
                   <Button
                     size="lg"

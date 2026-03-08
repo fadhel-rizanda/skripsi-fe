@@ -8,10 +8,9 @@ import { CommunityPageLayout } from "../layout";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { postService, GetPostsParams } from "@/services/postServices";
 
-
 import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
-import {Post} from "@/types/post";
+import { Post } from "@/types/post";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
 
 export default function AllPostPage() {

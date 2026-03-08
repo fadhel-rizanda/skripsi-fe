@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { UserProfile } from "@/types/user";
 import { ExternalLink } from "lucide-react";
+import { isValidUrl } from "@/lib/utils";
 
 interface UserCardProps {
     user: UserProfile;
@@ -11,8 +12,7 @@ interface UserCardProps {
 
 export function UserCard({ user }: UserCardProps) {
     const joinedYear = new Date(user.created_at).getFullYear();
-    const isValidAvatarUrl = user.avatar?.startsWith('http://') || user.avatar?.startsWith('https://');
-    const safeAvatarUrl = isValidAvatarUrl ? user.avatar : undefined;
+    const safeAvatarUrl = isValidUrl(user.avatar ?? '') ? user.avatar : undefined;
 
     return (
         <Card className="rounded-[16px] border-0 shadow-sm hover:shadow-md transition-shadow p-6 bg-white">
@@ -34,7 +34,7 @@ export function UserCard({ user }: UserCardProps) {
                         <h3 className="font-bold text-gray-900 text-[18px] leading-tight mb-1">{user.name}</h3>
                         <p className="text-gray-500 text-[15px] mb-3">Joined in {joinedYear}</p>
                         <Link
-                            href={`/users/${user.id}`}
+                            href={`/profile/${user.id}`}
                             className="font-bold text-black text-[15px] hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
                             View Profile

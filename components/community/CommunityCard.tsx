@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Community } from "@/types/community";
 import { ExternalLink } from "lucide-react";
+import { isValidUrl } from "@/lib/utils";
 
 interface CommunityCardProps {
     community: Community;
@@ -10,8 +11,7 @@ interface CommunityCardProps {
 
 export function CommunityCard({ community }: CommunityCardProps) {
     const rawImageUrl = community.image_url || community.attachment?.public_url;
-    const isValidImageUrl = rawImageUrl?.startsWith('http://') || rawImageUrl?.startsWith('https://');
-    const safeImageUrl = isValidImageUrl ? rawImageUrl : undefined;
+    const safeImageUrl = isValidUrl(rawImageUrl ?? '') ? rawImageUrl : undefined;
 
     return (
         <Card className="rounded-2xl border-0 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow p-6">

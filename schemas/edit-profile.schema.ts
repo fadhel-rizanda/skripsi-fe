@@ -23,10 +23,8 @@ export const AdopterProfileSchema = z.object({
         .array(z.string().uuid("Invalid personality tag"))
         .min(1, "Select at least one personality trait"),
     personality: optionalString(1000),
-    pet_experience: z.enum(["none", "beginner", "intermediate", "experienced"], {
-        message: "Please select your pet experience level",
-    }),
-    pet_experience_description: optionalString(500),
+    pet_experience: optionalString(1000),
+    pet_experience_tags: z.array(z.string().uuid("Invalid experience tag")).optional().default([]),
     open_to_special_needs: z.boolean(),
 });
 export type AdopterProfileInput = z.infer<typeof AdopterProfileSchema>;

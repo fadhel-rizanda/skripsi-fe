@@ -23,13 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,7 +37,6 @@ import {
   useDistrictsOptions,
 } from "@/hooks/useFilterOptions";
 import { TAG_TYPE } from "@/constant/tag-type";
-import { PET_EXPERIENCE_OPTIONS } from "@/constant/pet-experience";
 import {
   AdopterGreetingSchema,
   ProviderGreetingSchema,
@@ -73,6 +65,19 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
     [personalityTags],
   );
 
+  const {
+    options: petExperienceTags,
+    isLoading: isLoadingPetExperienceTags,
+    setSearch: setPetExperienceSearch,
+    loadMore: loadMorePetExperience,
+    hasMore: hasMorePetExperience,
+  } = useTagsOptions(TAG_TYPE.USER.EXPERIENCE);
+
+  const petExperienceTagsMap = useMemo(
+    () => new Map(petExperienceTags.map((tag) => [tag.id, tag.name])),
+    [petExperienceTags],
+  );
+
   const form = useForm<GreetingFormInput>({
     resolver: zodResolver(isAdopter ? AdopterGreetingSchema : ProviderGreetingSchema),
     defaultValues: {
@@ -80,8 +85,8 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
         ? {
             personality_tags: [],
             personality: "",
-            pet_experience: undefined,
-            pet_experience_description: "",
+            pet_experience: "",
+            pet_experience_tags: [],
             open_to_special_needs: false,
           }
         : {}),
@@ -234,38 +239,52 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="pet_experience"
+                  name="pet_experience_tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Experience Level *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your experience level..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {PET_EXPERIENCE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Experience Tags *</FormLabel>
+                      <FormControl>
+                        <SearchableCombobox
+                          options={petExperienceTags}
+                          selectedValues={field.value ?? []}
+                          onSelect={(tagId) => {
+                            if (!field.value?.includes(tagId)) {
+                              field.onChange([...(field.value ?? []), tagId]);
+                            }
+                          }}
+                          onSearch={setPetExperienceSearch}
+                          onLoadMore={loadMorePetExperience}
+                          isLoading={isLoadingPetExperienceTags}
+                          hasMore={hasMorePetExperience}
+                          placeholder="Search experience tags..."
+                          emptyMessage="No experience tags found."
+                          mode="multiple"
+                        />
+                      </FormControl>
                       <FormMessage />
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {field.value?.map((tagId) => (
+                          <TagBadge
+                            key={tagId}
+                            label={petExperienceTagsMap.get(tagId) || tagId}
+                            onRemove={() => {
+                              field.onChange(
+                                field.value?.filter((id) => id !== tagId),
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
                     </FormItem>
                   )}
                 />
 
                 <FormField
                   control={form.control}
-                  name="pet_experience_description"
+                  name="pet_experience"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Additional Description</FormLabel>
+                      <FormLabel>Experience Description</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Describe your experience with pets..."

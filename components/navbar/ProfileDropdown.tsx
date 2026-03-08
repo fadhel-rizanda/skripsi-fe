@@ -15,19 +15,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { isValidUrl } from "@/lib/utils"
+import { useProfileStore } from "@/store/useProfileStore"
 
 interface ProfileDropdownProps {
   user: UserProfile
 }
 
 export function ProfileDropdown({ user }: ProfileDropdownProps) {
+  const avatarUrl = useProfileStore((s) => s.avatarUrl)
+  const displayAvatar = avatarUrl ?? user.avatar
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-          {user.avatar && isValidUrl(user.avatar) ? (
+          {displayAvatar && isValidUrl(displayAvatar) ? (
             <Image
-              src={user.avatar}
+              src={displayAvatar}
               alt={user.name}
               width={36}
               height={36}

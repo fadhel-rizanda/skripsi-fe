@@ -9,13 +9,12 @@ export const AdopterGreetingSchema = z.object({
         .string()
         .max(500, "Description is too long (max 500 characters)")
         .optional(),
-    pet_experience: z.enum(["none", "beginner", "intermediate", "experienced"], {
-        message: "Please select your pet experience level",
-    }),
-    pet_experience_description: z
+    pet_experience: z
         .string()
-        .max(500, "Description is too long (max 500 characters)")
-        .optional(),
+        .max(1000, "Description is too long (max 1000 characters)")
+        .optional()
+        .or(z.literal("")),
+    pet_experience_tags: z.array(z.string().uuid("Invalid experience tag")).optional().default([]),
     address: AddressSchema,
     open_to_special_needs: z.boolean(),
 });

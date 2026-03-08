@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback, useRef, ChangeEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  ChangeEvent,
+} from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -148,25 +155,26 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
     if (!data) return;
     const addr = data.address;
     form.reset({
-        name: data.name ?? "",
-        phone: data.phone ?? "",
-        about_me: data.about_me ?? "",
-        address: {
-            street: addr?.street ?? "",
-            province_id: addr?.province_id ?? "",
-            regency_id: addr?.regency_id ?? "",
-            district_id: addr?.district_id ?? "",
-            zip_code: addr?.zip_code ?? "",
-            notes: addr?.notes ?? "",
-            link: addr?.link ?? "",
-        },
-        personality: data.personality ?? "",
-        personality_tags: data.personality_tags?.map((t: any) => t.id) ?? [],
-        pet_experience: data.pet_experience ?? "",
-        pet_experience_tags: data.pet_experience_tags?.map((t: any) => t.id) ?? [],
-        open_to_special_needs: data.open_to_special_needs ?? false,
+      name: data.name ?? "",
+      phone: data.phone ?? "",
+      about_me: data.about_me ?? "",
+      address: {
+        street: addr?.street ?? "",
+        province_id: addr?.province_id ?? "",
+        regency_id: addr?.regency_id ?? "",
+        district_id: addr?.district_id ?? "",
+        zip_code: addr?.zip_code ?? "",
+        notes: addr?.notes ?? "",
+        link: addr?.link ?? "",
+      },
+      personality: data.personality ?? "",
+      personality_tags: data.personality_tags?.map((t: any) => t.id) ?? [],
+      pet_experience: data.pet_experience ?? "",
+      pet_experience_tags:
+        data.pet_experience_tags?.map((t: any) => t.id) ?? [],
+      open_to_special_needs: data.open_to_special_needs ?? false,
     });
-}
+  }
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -211,36 +219,46 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
     if (!isOwnProfile) return;
 
     try {
-        let payload: Record<string, any> = { ...values };
+      let payload: Record<string, any> = { ...values };
 
-        if (!isAdopter) {
-            const { personality, personality_tags, pet_experience, pet_experience_tags, open_to_special_needs, ...providerData } = payload;
-            payload = providerData;
-        }
+      if (!isAdopter) {
+        const {
+          personality,
+          personality_tags,
+          pet_experience,
+          pet_experience_tags,
+          open_to_special_needs,
+          ...providerData
+        } = payload;
+        payload = providerData;
+      }
 
-        if (avatarFile) {
-            const attachmentId = await uploadAttachment(avatarFile, true);
-            payload.attachment_id = attachmentId;
-        }
+      if (avatarFile) {
+        const attachmentId = await uploadAttachment(avatarFile, true);
+        payload.attachment_id = attachmentId;
+      }
 
-        await userService.putUsers(payload as any);
+      await userService.putUsers(payload as any);
 
-        const refreshed = await userService.getUserById(userId);
-        setProfile(refreshed);
-        resetFormFromProfile(refreshed);
-        if (refreshed.avatar) setAvatarUrl(refreshed.avatar);
-        setAvatarFile(undefined);
-        setAvatarPreviewUrl(null);
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
+      const refreshed = await userService.getUserById(userId);
+      setProfile(refreshed);
+      resetFormFromProfile(refreshed);
+      if (refreshed.avatar) setAvatarUrl(refreshed.avatar);
+      setAvatarFile(undefined);
+      setAvatarPreviewUrl(null);
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
     } catch (err) {
-        console.error(err);
-        toast.error("Failed to update profile.");
+      console.error(err);
+      toast.error("Failed to update profile.");
     }
-}
+  }
 
   function handleCancel() {
     resetFormFromProfile(profile);
+    if (avatarPreviewUrl) {
+      URL.revokeObjectURL(avatarPreviewUrl);
+    }
     setAvatarFile(undefined);
     setAvatarPreviewUrl(null);
     setIsEditing(false);
@@ -250,7 +268,13 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Only JPEG, PNG, GIF, or WebP images are allowed");
       return;
@@ -291,11 +315,22 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
             <div className="relative w-20 h-20 shrink-0">
               <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
                 {avatarPreviewUrl ? (
-                  <img src={avatarPreviewUrl} alt="preview" className="w-full h-full object-cover" />
+                  <img
+                    src={avatarPreviewUrl}
+                    alt="preview"
+                    className="w-full h-full object-cover"
+                  />
                 ) : profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <Icon icon="ph:user-circle" className="w-12 h-12 text-gray-400" />
+                  <Icon
+                    icon="ph:user-circle"
+                    className="w-12 h-12 text-gray-400"
+                  />
                 )}
               </div>
               {isEditing && isOwnProfile && (
@@ -347,182 +382,42 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               {/* Personal Information */}
-              {isOwnProfile && <SectionCard
-                title="Personal Information"
-                description="Update your photo and personal details here."
-              >
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="hidden">
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <div className="space-y-4">
-                  <div>
-                    <FormLabel className="text-sm font-medium">
-                      Email address
-                    </FormLabel>
-                    <Input
-                      value={profile.email}
-                      readOnly
-                      className="mt-1.5 bg-gray-50"
-                    />
-                  </div>
+              {isOwnProfile && (
+                <SectionCard
+                  title="Personal Information"
+                  description="Update your photo and personal details here."
+                >
                   <FormField
                     control={form.control}
-                    name="phone"
+                    name="name"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                      <FormItem className="hidden">
                         <FormControl>
-                          <Input
-                            placeholder="555-123-4567"
-                            readOnly={!isEditing}
-                            {...field}
-                          />
+                          <Input {...field} />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-              </SectionCard>}
-
-              {/* Address */}
-              {isOwnProfile && <SectionCard
-                title="Address"
-                description={
-                  isAdopter
-                    ? "Your home address."
-                    : "Your shelter / organization address."
-                }
-              >
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="address.street"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Street address</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. Jl. Pawsitive No. 123"
-                            readOnly={!isEditing}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address.province_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Province</FormLabel>
-                        <FormControl>
-                          <SearchableCombobox
-                            options={provinces}
-                            selectedValues={field.value ? [field.value] : []}
-                            onSelect={(value) => {
-                              field.onChange(value);
-                              form.setValue("address.regency_id", "");
-                              form.setValue("address.district_id", "");
-                            }}
-                            onSearch={setProvincesSearch}
-                            onLoadMore={loadMoreProvinces}
-                            isLoading={isLoadingProvinces}
-                            hasMore={hasMoreProvinces}
-                            placeholder="Select province..."
-                            emptyMessage="No provinces found."
-                            mode="single"
-                            disabled={!isEditing}
-                            className="disabled:opacity-100"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address.regency_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Regency / City</FormLabel>
-                        <FormControl>
-                          <SearchableCombobox
-                            options={regencies}
-                            selectedValues={field.value ? [field.value] : []}
-                            onSelect={(value) => {
-                              field.onChange(value);
-                              form.setValue("address.district_id", "");
-                            }}
-                            onSearch={setRegenciesSearch}
-                            onLoadMore={loadMoreRegencies}
-                            isLoading={isLoadingRegencies}
-                            hasMore={hasMoreRegencies}
-                            placeholder={
-                              selectedProvinceId
-                                ? "Select regency/city..."
-                                : "Select a province first"
-                            }
-                            emptyMessage="No regencies found."
-                            mode="single"
-                            disabled={!isEditing || !selectedProvinceId}
-                            className="disabled:opacity-100"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div>
+                      <FormLabel className="text-sm font-medium">
+                        Email address
+                      </FormLabel>
+                      <Input
+                        value={profile.email}
+                        readOnly
+                        className="mt-1.5 bg-gray-50"
+                      />
+                    </div>
                     <FormField
                       control={form.control}
-                      name="address.district_id"
+                      name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>District</FormLabel>
-                          <FormControl>
-                            <SearchableCombobox
-                              options={districts}
-                              selectedValues={field.value ? [field.value] : []}
-                              onSelect={(value) => field.onChange(value)}
-                              onSearch={setDistrictsSearch}
-                              onLoadMore={loadMoreDistricts}
-                              isLoading={isLoadingDistricts}
-                              hasMore={hasMoreDistricts}
-                              placeholder={
-                                selectedRegencyId
-                                  ? "Select district..."
-                                  : "Select a regency first"
-                              }
-                              emptyMessage="No districts found."
-                              mode="single"
-                              disabled={!isEditing || !selectedRegencyId}
-                              className="disabled:opacity-100"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="address.zip_code"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ZIP / Postal code</FormLabel>
+                          <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="e.g. 62704"
+                              placeholder="555-123-4567"
                               readOnly={!isEditing}
                               {...field}
                             />
@@ -532,44 +427,190 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       )}
                     />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="address.link"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Maps link</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. https://maps.google.com/..."
-                            readOnly={!isEditing}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address.notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address notes</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe the address in more detail..."
-                            className="resize-none"
-                            rows={3}
-                            readOnly={!isEditing}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </SectionCard>}
+                </SectionCard>
+              )}
+
+              {/* Address */}
+              {isOwnProfile && (
+                <SectionCard
+                  title="Address"
+                  description={
+                    isAdopter
+                      ? "Your home address."
+                      : "Your shelter / organization address."
+                  }
+                >
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="address.street"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Street address</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. Jl. Pawsitive No. 123"
+                              readOnly={!isEditing}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.province_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Province</FormLabel>
+                          <FormControl>
+                            <SearchableCombobox
+                              options={provinces}
+                              selectedValues={field.value ? [field.value] : []}
+                              onSelect={(value) => {
+                                field.onChange(value);
+                                form.setValue("address.regency_id", "");
+                                form.setValue("address.district_id", "");
+                              }}
+                              onSearch={setProvincesSearch}
+                              onLoadMore={loadMoreProvinces}
+                              isLoading={isLoadingProvinces}
+                              hasMore={hasMoreProvinces}
+                              placeholder="Select province..."
+                              emptyMessage="No provinces found."
+                              mode="single"
+                              disabled={!isEditing}
+                              className="disabled:opacity-100"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.regency_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Regency / City</FormLabel>
+                          <FormControl>
+                            <SearchableCombobox
+                              options={regencies}
+                              selectedValues={field.value ? [field.value] : []}
+                              onSelect={(value) => {
+                                field.onChange(value);
+                                form.setValue("address.district_id", "");
+                              }}
+                              onSearch={setRegenciesSearch}
+                              onLoadMore={loadMoreRegencies}
+                              isLoading={isLoadingRegencies}
+                              hasMore={hasMoreRegencies}
+                              placeholder={
+                                selectedProvinceId
+                                  ? "Select regency/city..."
+                                  : "Select a province first"
+                              }
+                              emptyMessage="No regencies found."
+                              mode="single"
+                              disabled={!isEditing || !selectedProvinceId}
+                              className="disabled:opacity-100"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="address.district_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>District</FormLabel>
+                            <FormControl>
+                              <SearchableCombobox
+                                options={districts}
+                                selectedValues={
+                                  field.value ? [field.value] : []
+                                }
+                                onSelect={(value) => field.onChange(value)}
+                                onSearch={setDistrictsSearch}
+                                onLoadMore={loadMoreDistricts}
+                                isLoading={isLoadingDistricts}
+                                hasMore={hasMoreDistricts}
+                                placeholder={
+                                  selectedRegencyId
+                                    ? "Select district..."
+                                    : "Select a regency first"
+                                }
+                                emptyMessage="No districts found."
+                                mode="single"
+                                disabled={!isEditing || !selectedRegencyId}
+                                className="disabled:opacity-100"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="address.zip_code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ZIP / Postal code</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. 62704"
+                                readOnly={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="address.link"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Maps link</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. https://maps.google.com/..."
+                              readOnly={!isEditing}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Address notes</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe the address in more detail..."
+                              className="resize-none"
+                              rows={3}
+                              readOnly={!isEditing}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </SectionCard>
+              )}
 
               {/* About */}
               <SectionCard
@@ -719,7 +760,9 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                               {field.value?.map((tagId) => (
                                 <TagBadge
                                   key={tagId}
-                                  label={petExperienceTagsMap.get(tagId) || tagId}
+                                  label={
+                                    petExperienceTagsMap.get(tagId) || tagId
+                                  }
                                   onRemove={
                                     isEditing
                                       ? () =>

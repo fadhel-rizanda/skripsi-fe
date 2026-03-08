@@ -156,7 +156,6 @@ export default function PostDetailPage() {
         }));
         try {
             const data = await commentService.getReplies(id, commentId, { page, per_page: 15 });
-            const newReplies = page === 1 ? data.data : [...(prev => prev[commentId]?.replies ?? [])(repliesMap), ...data.data];
             const total = data.total ?? (page === 1 ? data.data.length : (repliesMap[commentId]?.total ?? 0));
             setRepliesMap(prev => ({
                 ...prev,

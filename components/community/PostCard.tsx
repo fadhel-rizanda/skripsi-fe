@@ -11,6 +11,7 @@ import PostFormDialog from "@/components/dialog/PostFormDialog";
 import { useState } from "react";
 import Image from "next/image";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
+import { isValidUrl } from "@/lib/utils";
 
 interface PostCardProps {
     post: Post;
@@ -22,6 +23,7 @@ interface PostCardProps {
 export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCardProps) {
     const { data: session } = useSession();
     const [editOpen, setEditOpen] = useState(false);
+    const safeAttachmentUrl = isValidUrl(post.attachment?.public_url ?? '') ? post.attachment!.public_url : null;
 
     return (
         <Card
@@ -79,12 +81,12 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     </Link>
 
                     {/* Attachment Image */}
-                    {post.attachment?.public_url && (
+                    {safeAttachmentUrl && (
                         <Link href={`/community/all-post/${post.id}`} className="block mb-3 mr-12">
                             <div
                                 className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
                                 <Image
-                                    src={post.attachment.public_url}
+                                    src={safeAttachmentUrl}
                                     alt={post.title || "Post attachment"}
                                     fill
                                     className="object-cover"

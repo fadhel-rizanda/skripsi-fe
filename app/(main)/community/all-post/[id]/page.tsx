@@ -81,7 +81,7 @@ export default function PostDetailPage() {
     }, [id]);
 
     // Fetch comments
-    const fetchComments = useCallback(async (page = commentsPagination.current_page, perPage = commentsPagination.per_page) => {
+    const fetchComments = useCallback(async (page: number, perPage: number) => {
         try {
             setCommentsLoading(true);
             const data = await commentService.getComments(id, { page, per_page: perPage });
@@ -96,7 +96,7 @@ export default function PostDetailPage() {
         } finally {
             setCommentsLoading(false);
         }
-    }, [id, commentsPagination.current_page, commentsPagination.per_page]);
+    }, [id]);
 
     useEffect(() => {
         fetchPost();

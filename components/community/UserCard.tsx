@@ -34,7 +34,7 @@ export function UserCard({ user }: UserCardProps) {
                         <h3 className="font-bold text-gray-900 text-[18px] leading-tight mb-1">{user.name}</h3>
                         <p className="text-gray-500 text-[15px] mb-3">Joined in {joinedYear}</p>
                         <Link
-                            href={`/users/${user.id}`}
+                            href={`/profile/${user.id}`}
                             className="font-bold text-black text-[15px] hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
                             View Profile

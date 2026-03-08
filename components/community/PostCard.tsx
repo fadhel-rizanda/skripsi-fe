@@ -1,14 +1,14 @@
-import {Button} from "@/components/ui/button";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {Card} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import {ThumbsUp, MessageSquare, Pencil} from "lucide-react";
-import {Post} from "@/types/post";
-import {useSession} from "next-auth/react";
-import {ReportDialog} from "@/components/dialog/ReportDialog";
+import { ThumbsUp, MessageSquare, Pencil } from "lucide-react";
+import { Post } from "@/types/post";
+import { useSession } from "next-auth/react";
+import { ReportDialog } from "@/components/dialog/ReportDialog";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
-import {useState} from "react";
+import { useState } from "react";
 import Image from "next/image";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 
@@ -19,8 +19,8 @@ interface PostCardProps {
     formatRelativeTime: (dateString: string) => string;
 }
 
-export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCardProps) {
-    const {data: session} = useSession();
+export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCardProps) {
+    const { data: session } = useSession();
     const [editOpen, setEditOpen] = useState(false);
 
     return (
@@ -30,7 +30,7 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
                 {/* Avatar Section */}
                 <div className="shrink-0">
                     <Avatar className="h-10 w-10 border border-gray-300">
-                        <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name}/>
+                        <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
                         <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                 </div>
@@ -51,7 +51,7 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
                                     className="h-8 w-8 text-gray-900 hover:text-gray-900"
                                     onClick={() => setEditOpen(true)}
                                 >
-                                    <Pencil className="h-4 w-4"/>
+                                    <Pencil className="h-4 w-4" />
                                 </Button>
                                 <PostFormDialog
                                     mode="edit"
@@ -69,7 +69,7 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
 
                     {/* Body */}
                     <Link href={`/community/all-post/${post.id}`}
-                          className="block hover:opacity-80 transition-opacity mb-3">
+                        className="block hover:opacity-80 transition-opacity mb-3">
                         {post.title && (
                             <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1">{post.title}</h3>
                         )}
@@ -80,9 +80,9 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
 
                     {/* Attachment Image */}
                     {post.attachment?.public_url && (
-                        <Link href={`/community/all-post/${post.id}`} className="block mb-3">
+                        <Link href={`/community/all-post/${post.id}`} className="block mb-3 mr-12">
                             <div
-                                className="relative w-full h-64 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                                className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
                                 <Image
                                     src={post.attachment.public_url}
                                     alt={post.title || "Post attachment"}
@@ -102,7 +102,7 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
                                     key={tag.id}
                                     variant="secondary"
                                     className="bg-green-50 text-green-700 hover:bg-green-100 text-base font-normal"
-                                    style={{backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined}}
+                                    style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
                                 >
                                     #{tag.name}
                                 </Badge>
@@ -119,14 +119,14 @@ export function PostCard({post, onLike, onRefresh, formatRelativeTime}: PostCard
                         className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? 'text-green-600 bg-green-50' : ''}`}
                         onClick={() => onLike(post.id)}
                     >
-                        <ThumbsUp className="h-6 w-6"/>
+                        <ThumbsUp className="h-6 w-6" />
                         <span className="text-base font-medium">
-                {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
-              </span>
+                            {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
+                        </span>
                     </Button>
                     <Button variant="ghost" size="sm"
-                            className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
-                        <MessageSquare className="h-6 w-6"/>
+                        className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
+                        <MessageSquare className="h-6 w-6" />
                         <span className="text-base font-medium">{post.comments_count} Comments</span>
                     </Button>
                     <ReportDialog

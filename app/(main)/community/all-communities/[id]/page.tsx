@@ -18,6 +18,7 @@ import { formatRelativeTime, isValidUrl } from "@/lib/utils";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
 import CommunityFormDialog from "@/components/dialog/CommunityFormDialog";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
+import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { PostCard } from "@/components/community/PostCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -347,6 +348,22 @@ export default function CommunityDetailPage() {
           <Icon icon="lucide:link" className="h-4 w-4" />
           {joining ? "Updating..." : joinButtonText}
         </Button>
+
+        {!community.is_admin && (
+          <ReportDialog
+            referenceType="community"
+            referenceId={community.id}
+            trigger={
+              <Button
+                variant="outline"
+                className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
+              >
+                <Icon icon="lucide:flag" className="h-4 w-4" />
+                Report Community
+              </Button>
+            }
+          />
+        )}
 
         {(community.is_member || community.is_admin) && (
           <PostFormDialog

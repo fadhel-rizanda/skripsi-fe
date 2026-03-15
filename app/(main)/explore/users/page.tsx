@@ -99,7 +99,7 @@ export default function AllUserPage() {
     };
 
     return (
-        <>
+        <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
                 <UserFilters
                     searchQuery={searchQuery}
@@ -160,6 +160,6 @@ export default function AllUserPage() {
                     />
                 </div>
             )}
-        </>
+        </div>
     );
 }

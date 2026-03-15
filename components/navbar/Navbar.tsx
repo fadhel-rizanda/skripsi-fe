@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { NotificationDropdown } from "./NotificationDropdown"
 import { ProfileDropdown } from "./ProfileDropdown"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useProfileStore } from "@/store/useProfileStore"
 
 interface MenuItem {
   href: string
@@ -24,6 +25,12 @@ interface MenuItem {
 export function Navbar() {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const setAvatarUrl = useProfileStore((s) => s.setAvatarUrl)
+
+  // Seed the store with the session avatar on first load
+  useEffect(() => {
+    if (session?.user?.avatar) setAvatarUrl(session.user.avatar)
+  }, [session?.user?.avatar])
 
   // Menu items berdasarkan role
   const getMenuItems = (): MenuItem[] => {
@@ -31,7 +38,7 @@ export function Navbar() {
       return [
         { href: "/pets", label: "Find a Pet" },
         { href: "/adoptions", label: "Adoption Process" },
-        { href: "/community/all-post", label: "Community" },
+        { href: "/explore/posts", label: "Community" },
         { href: "/chat", label: "Chat" },
       ]
     }
@@ -43,7 +50,7 @@ export function Navbar() {
         return [
           { href: "/pets", label: "Find a Pet" },
           { href: "/adoptions", label: "Adoption Process" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
           { href: "/chat", label: "Chat" },
         ]
 
@@ -51,7 +58,7 @@ export function Navbar() {
         return [
           { href: "/pets", label: "Find a Pet" },
           { href: "/adoptions", label: "Adoption Process" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
           { href: "/pets/create", label: "Submit Animal" },
           { href: "/chat", label: "Chat" },
         ]
@@ -70,7 +77,7 @@ export function Navbar() {
         return [
           { href: "/dashboard", label: "Dashboard" },
           { href: "/pets", label: "Find a Pet" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
         ]
     }
   }

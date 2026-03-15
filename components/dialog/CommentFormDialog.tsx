@@ -17,6 +17,9 @@ type CommentFormDialogProps = {
     trigger?: ReactNode
     userName?: string
     onSuccessAction?: () => void
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    autoFocus?: boolean
 }
 
 export default function CommentFormDialog({
@@ -25,20 +28,25 @@ export default function CommentFormDialog({
                                               trigger,
                                               userName,
                                               onSuccessAction,
+                                              open: controlledOpen,
+                                              onOpenChange: controlledOnOpenChange,
+                                              autoFocus,
                                           }: CommentFormDialogProps) {
-    const [open, setOpen] = useState(false)
+    const [internalOpen, setInternalOpen] = useState(false)
+    const isControlled = controlledOpen !== undefined
+    const open = isControlled ? controlledOpen : internalOpen
+    const setOpen = isControlled ? (controlledOnOpenChange ?? setInternalOpen) : setInternalOpen
+
+    const triggerEl = !isControlled ? (trigger ?? (
+        <button className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-[#19E619] transition-colors">
+            <MessageSquareReply className="h-4 w-4"/>
+            Reply
+        </button>
+    )) : null
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger ?? (
-                    <button
-                        className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-[#19E619] transition-colors">
-                        <MessageSquareReply className="h-4 w-4"/>
-                        Reply
-                    </button>
-                )}
-            </DialogTrigger>
+            {triggerEl && <DialogTrigger asChild>{triggerEl}</DialogTrigger>}
             <DialogContent className="sm:max-w-lg rounded-2xl p-6">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold">
@@ -55,6 +63,7 @@ export default function CommentFormDialog({
                             onSuccessAction?.()
                         }}
                         placeholder={parentId ? "Write your reply..." : "Share your thoughts..."}
+                        autoFocus={autoFocus}
                     />
                 </div>
             </DialogContent>

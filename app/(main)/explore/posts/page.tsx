@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PostCard } from "@/components/community/PostCard";
 import { Post } from "@/types/post";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
+import { formatRelativeTime } from "@/lib/utils";
 
 export default function AllPostPage() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -131,21 +132,8 @@ export default function AllPostPage() {
         setPagination(prev => ({ ...prev, per_page: perPage, current_page: 1 }));
     };
 
-    // Format date to relative time
-    const formatRelativeTime = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-        if (diffInSeconds < 60) return "just now";
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-        return date.toLocaleDateString();
-    };
-
     return (
-        <>
+        <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
                 <PostFilters
                     searchQuery={searchQuery}
@@ -217,6 +205,6 @@ export default function AllPostPage() {
                     dataPerPageOptions={[10, 15, 25, 50]}
                 />
             )}
-        </>
+        </div>
     );
 }

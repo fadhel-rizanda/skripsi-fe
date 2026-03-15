@@ -54,7 +54,7 @@ function getReferenceHref(referenceType: string, referenceId: string) {
     switch (referenceType.toUpperCase()) {
         case "USER":      return `/users/${referenceId}`;
         case "POST":      return `/posts/${referenceId}`;
-        case "COMMUNITY": return `/communities/${referenceId}`;
+        case "COMMUNITY": return `/explore/communities/${referenceId}`;
         case "PETS":      return `/pets/${referenceId}`;
         default:          return null;
     }

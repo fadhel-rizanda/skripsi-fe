@@ -6,6 +6,7 @@ export interface Comment {
     parent_id: string | null;
     created_at: string;
     updated_at: string;
+    replies_count?: number;
     created_by: {
         id: string;
         name: string;
@@ -13,6 +14,17 @@ export interface Comment {
         avatar: string | null;
         is_active: boolean;
     };
+}
+
+export interface ReplyListResponse {
+    error: boolean;
+    status: string;
+    message: string;
+    data: Comment[];
+    current_page: number;
+    per_page: number;
+    total: number | null;
+    has_more_pages: boolean;
 }
 
 export interface CommentListResponse {
@@ -47,6 +59,10 @@ export const commentService = {
     },
     deleteComment: async (postId: string, commentId: string) => {
         const response = await api.delete(`/v1/posts/${postId}/comments/${commentId}`);
+        return response.data;
+    },
+    getReplies: async (postId: string, commentId: string, params?: GetCommentsParams): Promise<ReplyListResponse> => {
+        const response = await api.get<ReplyListResponse>(`/v1/posts/${postId}/comments/${commentId}`, { params });
         return response.data;
     },
 };

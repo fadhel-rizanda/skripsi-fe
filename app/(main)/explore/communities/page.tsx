@@ -95,12 +95,12 @@ export default function AllCommunityPage() {
         if (!session) {
             e.preventDefault();
             toast.error("You must be logged in to create a community.");
-            router.push("/login?callbackUrl=/community/all-communities");
+            router.push("/login?callbackUrl=/explore/communities");
         }
     };
 
     return (
-        <>
+        <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
                 <CommunityFilters
                     searchQuery={searchQuery}
@@ -171,6 +171,6 @@ className="bg-green-400 hover:bg-green-500 text-black p-5 font-bold"
                     />
                 </div>
             )}
-        </>
+        </div>
     );
 }

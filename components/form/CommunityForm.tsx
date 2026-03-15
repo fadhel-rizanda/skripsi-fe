@@ -760,7 +760,13 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() => router.push(currentCommunityId ? `/communities/${currentCommunityId}` : "/communities")}
+                onContinue={() =>
+                    router.push(
+                        currentCommunityId
+                            ? `/explore/communities/${currentCommunityId}`
+                            : "/explore/communities",
+                    )
+                }
                 title={isEditMode ? "Update Community Profile?" : "Create Community Profile?"}
                 description="Please review the community's information before continuing."
                 successTitle={isEditMode ? "Community Profile Updated Successfully" : "Community Profile Created Successfully"}

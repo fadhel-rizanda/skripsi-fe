@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
@@ -31,6 +31,10 @@ type CommentRepliesState = {
   page: number;
   total: number;
 };
+type DeleteTarget =
+  | { type: "comment"; commentId: string }
+  | { type: "reply"; commentId: string; replyId: string }
+  | null;
 import { Post } from "@/types/post";
 import { isValidUrl } from "@/lib/utils";
 
@@ -55,6 +59,7 @@ const formatRelativeTime = (dateString: string) => {
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -72,10 +77,13 @@ export default function PostDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addCommentOpen, setAddCommentOpen] = useState(false);
-  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [commentIntentHandled, setCommentIntentHandled] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const [repliesMap, setRepliesMap] = useState<
     Record<string, CommentRepliesState>
   >({});
+  const commentsSectionRef = useRef<HTMLDivElement>(null);
+  const shouldOpenComment = searchParams.get("comment") === "1";
 
   // Fetch post detail
   const fetchPost = useCallback(async () => {
@@ -120,9 +128,26 @@ export default function PostDetailPage() {
   }, [fetchPost]);
 
   useEffect(() => {
+    setCommentIntentHandled(false);
+  }, [id]);
+
+  useEffect(() => {
     fetchComments(commentsPagination.current_page, commentsPagination.per_page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, commentsPagination.current_page, commentsPagination.per_page]);
+
+  useEffect(() => {
+    if (postLoading || !shouldOpenComment || commentIntentHandled) return;
+
+    setCommentIntentHandled(true);
+    setAddCommentOpen(true);
+    requestAnimationFrame(() => {
+      commentsSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, [postLoading, shouldOpenComment, commentIntentHandled]);
 
   const handleLike = async () => {
     if (!post) return;
@@ -170,27 +195,29 @@ export default function PostDetailPage() {
     });
   };
 
-    const handleDeleteReply = async (commentId: string, replyId: string) => {
-        if (!post) return;
-        try {
-            await commentService.deleteComment(post.id, replyId);
-            setRepliesMap(prev => ({
-                ...prev,
-                [commentId]: {
-                    ...prev[commentId],
-                    replies: prev[commentId].replies.filter(r => r.id !== replyId),
-                    total: Math.max(0, prev[commentId].total - 1),
-                },
-            }));
-            setComments(prev => prev.map(c =>
-                c.id === commentId
-                    ? { ...c, replies_count: Math.max(0, (c.replies_count ?? 0) - 1) }
-                    : c
-            ));
-        } catch (error) {
-            console.error("Failed to delete reply:", error);
-        }
-    };
+  const handleDeleteReply = async (commentId: string, replyId: string) => {
+    if (!post) return;
+    try {
+      await commentService.deleteComment(post.id, replyId);
+      setRepliesMap((prev) => ({
+        ...prev,
+        [commentId]: {
+          ...prev[commentId],
+          replies: prev[commentId].replies.filter((r) => r.id !== replyId),
+          total: Math.max(0, prev[commentId].total - 1),
+        },
+      }));
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId
+            ? { ...c, replies_count: Math.max(0, (c.replies_count ?? 0) - 1) }
+            : c,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to delete reply:", error);
+    }
+  };
 
   const handleCommentsPageChange = (page: number) => {
     setCommentsPagination((prev) => ({ ...prev, current_page: page }));
@@ -285,6 +312,35 @@ export default function PostDetailPage() {
     }
   };
 
+  const renderDeleteMenu = (
+    label: string,
+    onDelete: () => void,
+  ) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-gray-500 hover:text-gray-900"
+        >
+          <Icon icon="lucide:ellipsis-vertical" className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-full">
+        <DropdownMenuItem
+          className="text-red-600 focus:text-red-600 text-sm"
+          onClick={onDelete}
+        >
+          <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2 text-black" />
+          {label}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const deleteDialogLabel =
+    deleteTarget?.type === "reply" ? "Reply" : "Comment";
+
   const safeAttachmentUrl =
     post && isValidUrl(post.attachment?.public_url ?? "")
       ? post.attachment!.public_url
@@ -366,24 +422,36 @@ export default function PostDetailPage() {
                 </div>
                 {post.created_by.id === session?.user?.id && (
                   <>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-gray-600 hover:text-gray-900"
-                        onClick={() => setEditOpen(true)}
-                      >
-                        <Icon icon="lucide:pencil" className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => setDeleteOpen(true)}
-                      >
-                        <Icon icon="lucide:trash-2" className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                        >
+                          <Icon
+                            icon="lucide:ellipsis-vertical"
+                            className="h-4 w-4"
+                          />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                          <Icon icon="lucide:pencil" className="h-4 w-4 mr-2" />
+                          Update post
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeleteOpen(true)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Icon
+                            icon="lucide:trash-2"
+                            className="h-4 w-4 mr-2 text-black"
+                          />
+                          Delete post
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <PostFormDialog
                       mode="edit"
                       postId={post.id}
@@ -487,7 +555,11 @@ export default function PostDetailPage() {
         </Card>
 
         {/* Comments Section */}
-        <Card className="bg-transparent shadow-none border-0 !important">
+        <Card
+          id="comments"
+          ref={commentsSectionRef}
+          className="bg-transparent shadow-none border-0 !important"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-gray-900">
               Comments ({commentsPagination.total})
@@ -506,6 +578,7 @@ export default function PostDetailPage() {
             postId={post.id}
             open={addCommentOpen}
             onOpenChange={setAddCommentOpen}
+            autoFocus={shouldOpenComment}
             onSuccessAction={() => {
               setCommentsPagination((prev) => ({ ...prev, current_page: 1 }));
               fetchComments(1, commentsPagination.per_page);
@@ -513,19 +586,26 @@ export default function PostDetailPage() {
             }}
           />
           <ActionDialog
-            open={!!commentToDelete}
+            open={!!deleteTarget}
             onOpenChange={(open) => {
-              if (!open) setCommentToDelete(null);
+              if (!open) setDeleteTarget(null);
             }}
             onConfirm={async () => {
-              if (!commentToDelete) return;
-              await handleDeleteComment(commentToDelete);
+              if (!deleteTarget) return;
+              if (deleteTarget.type === "comment") {
+                await handleDeleteComment(deleteTarget.commentId);
+                return;
+              }
+              await handleDeleteReply(
+                deleteTarget.commentId,
+                deleteTarget.replyId,
+              );
             }}
             confirmVariant="destructive"
-            title="Delete Comment"
-            description="Are you sure you want to delete this comment? This action cannot be undone."
-            successTitle="Comment Deleted"
-            successDescription="Your comment has been deleted successfully."
+            title={`Delete ${deleteDialogLabel}`}
+            description={`Are you sure you want to delete this ${deleteDialogLabel.toLowerCase()}? This action cannot be undone.`}
+            successTitle={`${deleteDialogLabel} Deleted`}
+            successDescription={`Your ${deleteDialogLabel.toLowerCase()} has been deleted successfully.`}
           />
 
           {/* Comments List */}
@@ -573,32 +653,12 @@ export default function PostDetailPage() {
                             </span>
                           </div>
                           {comment.created_by.id === session?.user?.id && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 text-gray-500 hover:text-gray-900"
-                                >
-                                  <Icon
-                                    icon="lucide:ellipsis-vertical"
-                                    className="h-4 w-4"
-                                  />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-full">
-                                <DropdownMenuItem
-                                  className="text-red-600 focus:text-red-600 text-sm"
-                                  onClick={() => setCommentToDelete(comment.id)}
-                                >
-                                  <Icon
-                                    icon="lucide:trash-2"
-                                    className="h-4 w-4 mr-2 text-black"
-                                  />
-                                  Delete comment
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            renderDeleteMenu("Delete comment", () => {
+                              setDeleteTarget({
+                                type: "comment",
+                                commentId: comment.id,
+                              });
+                            })
                           )}
                         </div>
                         <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
@@ -672,27 +732,28 @@ export default function PostDetailPage() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-semibold text-gray-900 text-sm">
-                                  {reply.created_by.name}
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  • {formatRelativeTime(reply.created_at)}
-                                </span>
+                              <div className="flex items-start justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-gray-900 text-sm">
+                                    {reply.created_by.name}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    • {formatRelativeTime(reply.created_at)}
+                                  </span>
+                                </div>
+                                {reply.created_by.id === session?.user?.id && (
+                                  renderDeleteMenu("Delete reply", () => {
+                                    setDeleteTarget({
+                                      type: "reply",
+                                      commentId: comment.id,
+                                      replyId: reply.id,
+                                    });
+                                  })
+                                )}
                               </div>
                               <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                                 {reply.content}
                               </p>
-                              {reply.created_by.id === session?.user?.id && (
-                                <div className="mt-2">
-                                  <button
-                                    onClick={() => handleDeleteReply(comment.id, reply.id)}
-                                    className="text-xs text-red-500 font-medium hover:underline"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
                             </div>
                           </div>
                         ))}

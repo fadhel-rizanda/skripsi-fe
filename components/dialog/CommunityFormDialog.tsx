@@ -10,16 +10,41 @@ type CommunityFormDialogProps = {
     mode: "create" | "edit"
     communityId?: string
     trigger?: ReactNode
+    open?: boolean
+    onOpenChangeAction?: (open: boolean) => void
 }
 
-export default function CommunityFormDialog({ mode, communityId, trigger }: CommunityFormDialogProps) {
-    const [open, setOpen] = useState(false)
+export default function CommunityFormDialog({
+    mode,
+    communityId,
+    trigger,
+    open,
+    onOpenChangeAction,
+}: CommunityFormDialogProps) {
+    const [internalOpen, setInternalOpen] = useState(false)
+    const isControlled = typeof open === "boolean"
+    const dialogOpen = isControlled ? open : internalOpen
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!isControlled) {
+            setInternalOpen(nextOpen)
+        }
+        onOpenChangeAction?.(nextOpen)
+    }
+
+    const resolvedTrigger = trigger ?? (!isControlled ? (
+            <Button className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold">
+                <Icon icon="ph:users-three" /> {mode === "create" ? "Create Community" : "Edit Community"}
+            </Button>
+        ) : null)
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger ?? <Button className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold"><Icon icon="ph:users-three" /> {mode === "create" ? "Create Community" : "Edit Community"}</Button>}
-            </DialogTrigger>
+        <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+            {resolvedTrigger && (
+                <DialogTrigger asChild>
+                    {resolvedTrigger}
+                </DialogTrigger>
+            )}
             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto scrollbar-hide p-0 rounded-xl">
                 <CommunityForm mode={mode} communityId={communityId} />
             </DialogContent>

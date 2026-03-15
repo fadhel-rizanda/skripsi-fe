@@ -46,7 +46,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
                         href={`/community/all-communities/${community.id}`}
                         className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-gray-900 hover:text-green-600 transition-colors"
                     >
-                        View Profile
+                        View Community
                         <ExternalLink className="h-4 w-4" />
                     </Link>
                 </div>

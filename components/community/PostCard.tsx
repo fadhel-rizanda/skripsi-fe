@@ -3,15 +3,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ThumbsUp, MessageSquare, Pencil } from "lucide-react";
+import { ThumbsUp, MessageSquare } from "lucide-react";
 import { Post } from "@/types/post";
 import { useSession } from "next-auth/react";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
+import { ActionDialog } from "@/components/dialog/ActionDialog";
 import { useState } from "react";
 import Image from "next/image";
-import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 import { isValidUrl } from "@/lib/utils";
+import { postService } from "@/services/postServices";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Icon } from "@iconify/react";
 
 interface PostCardProps {
     post: Post;
@@ -23,7 +31,12 @@ interface PostCardProps {
 export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCardProps) {
     const { data: session } = useSession();
     const [editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const safeAttachmentUrl = isValidUrl(post.attachment?.public_url ?? '') ? post.attachment!.public_url : null;
+
+    const handleDelete = async () => {
+        await postService.deletePost(post.id);
+    };
 
     return (
         <Card
@@ -47,14 +60,30 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         </div>
                         {post.created_by.id === session?.user.id && (
                             <>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-gray-900 hover:text-gray-900"
-                                    onClick={() => setEditOpen(true)}
-                                >
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                                        >
+                                            <Icon icon="lucide:ellipsis-vertical" className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-44">
+                                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                                            <Icon icon="lucide:pencil" className="h-4 w-4 mr-2" />
+                                            Update post
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => setDeleteOpen(true)}
+                                            className="text-red-600 focus:text-red-600"
+                                        >
+                                            <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2 text-black" />
+                                            Delete post
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <PostFormDialog
                                     mode="edit"
                                     postId={post.id}
@@ -64,6 +93,17 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                                         setEditOpen(false);
                                         onRefresh?.();
                                     }}
+                                />
+                                <ActionDialog
+                                    open={deleteOpen}
+                                    onOpenChange={setDeleteOpen}
+                                    onConfirm={handleDelete}
+                                    onContinue={() => onRefresh?.()}
+                                    confirmVariant="destructive"
+                                    title="Delete Post"
+                                    description="Are you sure you want to delete this post? This action cannot be undone."
+                                    successTitle="Post Deleted"
+                                    successDescription="Your post has been deleted successfully."
                                 />
                             </>
                         )}
@@ -113,7 +153,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     )}
                 </div>
             </div>
-            <div className="flex flex-wrap justify-between items-center pt-3 border-t border-gray-300">
+            <div className="flex flex-wrap items-center pt-3 border-t border-gray-300">
                 <div className="flex flex-wrap gap-4 md:gap-6">
                     <Button
                         variant="ghost"
@@ -126,29 +166,22 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                             {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
                         </span>
                     </Button>
-                    <Button variant="ghost" size="sm"
-                        className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2">
-                        <MessageSquare className="h-6 w-6" />
-                        <span className="text-base font-medium">{post.comments_count} Comments</span>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2"
+                    >
+                        <Link href={`/community/all-post/${post.id}?comment=1#comments`}>
+                            <MessageSquare className="h-6 w-6" />
+                            <span className="text-base font-medium">{post.comments_count} Comments</span>
+                        </Link>
                     </Button>
                     <ReportDialog
                         referenceType="post"
                         referenceId={post.id}
                     />
                 </div>
-                <CommentFormDialog
-                    postId={post.id}
-                    onSuccessAction={() => onRefresh?.()}
-                    trigger={
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-black hover:text-gray-900 font-medium text-base"
-                        >
-                            Reply
-                        </Button>
-                    }
-                />
             </div>
         </Card>
     );

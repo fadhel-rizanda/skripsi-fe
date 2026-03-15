@@ -22,9 +22,10 @@ type CommentFormProps = {
     parentId?: string
     onSuccessAction?: () => void
     placeholder?: string
+    autoFocus?: boolean
 }
 
-export default function CommentForm({postId, parentId, onSuccessAction, placeholder}: CommentFormProps) {
+export default function CommentForm({postId, parentId, onSuccessAction, placeholder, autoFocus}: CommentFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const form = useForm<CreateCommentInput>({
@@ -62,6 +63,7 @@ export default function CommentForm({postId, parentId, onSuccessAction, placehol
                                     placeholder={placeholder || "Write a comment..."}
                                     className="min-h-20 md:min-h-25 resize-none rounded-xl bg-slate-50 border-slate-200"
                                     disabled={isSubmitting}
+                                    autoFocus={autoFocus}
                                     {...field}
                                 />
                             </FormControl>

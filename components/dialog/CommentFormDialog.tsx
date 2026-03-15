@@ -19,6 +19,7 @@ type CommentFormDialogProps = {
     onSuccessAction?: () => void
     open?: boolean
     onOpenChange?: (open: boolean) => void
+    autoFocus?: boolean
 }
 
 export default function CommentFormDialog({
@@ -29,6 +30,7 @@ export default function CommentFormDialog({
                                               onSuccessAction,
                                               open: controlledOpen,
                                               onOpenChange: controlledOnOpenChange,
+                                              autoFocus,
                                           }: CommentFormDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false)
     const isControlled = controlledOpen !== undefined
@@ -61,6 +63,7 @@ export default function CommentFormDialog({
                             onSuccessAction?.()
                         }}
                         placeholder={parentId ? "Write your reply..." : "Share your thoughts..."}
+                        autoFocus={autoFocus}
                     />
                 </div>
             </DialogContent>

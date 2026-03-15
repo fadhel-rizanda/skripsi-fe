@@ -33,6 +33,15 @@ export const communityService = {
         return response.data;
     },
 
+    deleteCommunity: async (id: string): Promise<void> => {
+        await api.delete(`/v1/communities/${id}`);
+    },
+
+    followCommunity: async (id: string) => {
+        const response = await api.post(`/v1/communities/${id}/follow`);
+        return response.data;
+    },
+
     takedownCommunity: async (id: string, notes: string): Promise<void> => {
         const encodedId = encodeURIComponent(id);
         await api.post(`/v1/communities/${encodedId}/takedown`, { notes });

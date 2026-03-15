@@ -297,7 +297,7 @@ export default function CommunityDetailPage() {
                 onClick={() => setDeleteOpen(true)}
                 className="text-red-600 focus:text-red-600"
               >
-                <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2 text-black" />
+                <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
                 Delete community
               </DropdownMenuItem>
             </DropdownMenuContent>

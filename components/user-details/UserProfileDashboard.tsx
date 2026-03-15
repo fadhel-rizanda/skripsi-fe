@@ -313,35 +313,58 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
           {/* Profile Header */}
           <div className="flex items-center gap-6 p-6 border-b border-gray-100">
             <div className="relative w-20 h-20 shrink-0">
-              <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                {avatarPreviewUrl ? (
-                  <img
-                    src={avatarPreviewUrl}
-                    alt="preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : profile.avatar ? (
-                  <img
-                    src={profile.avatar}
-                    alt={profile.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Icon
-                    icon="ph:user-circle"
-                    className="w-12 h-12 text-gray-400"
-                  />
-                )}
-              </div>
+              {isEditing && isOwnProfile ? (
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="group w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center cursor-pointer transition-shadow duration-200 hover:ring-2 hover:ring-green-300 hover:ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2"
+                >
+                  {avatarPreviewUrl ? (
+                    <img
+                      src={avatarPreviewUrl}
+                      alt="preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : profile.avatar ? (
+                    <img
+                      src={profile.avatar}
+                      alt={profile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Icon
+                      icon="ph:user-circle"
+                      className="w-12 h-12 text-gray-400"
+                    />
+                  )}
+                </button>
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                  {avatarPreviewUrl ? (
+                    <img
+                      src={avatarPreviewUrl}
+                      alt="preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : profile.avatar ? (
+                    <img
+                      src={profile.avatar}
+                      alt={profile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Icon
+                      icon="ph:user-circle"
+                      className="w-12 h-12 text-gray-400"
+                    />
+                  )}
+                </div>
+              )}
               {isEditing && isOwnProfile && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center shadow"
-                  >
+                  <div className="pointer-events-none absolute bottom-0 right-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow">
                     <Icon icon="ph:camera" className="w-3.5 h-3.5 text-white" />
-                  </button>
+                  </div>
                   <input
                     ref={avatarInputRef}
                     type="file"

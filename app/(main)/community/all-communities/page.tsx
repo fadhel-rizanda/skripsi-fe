@@ -100,7 +100,7 @@ export default function AllCommunityPage() {
     };
 
     return (
-        <>
+        <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
                 <CommunityFilters
                     searchQuery={searchQuery}
@@ -171,6 +171,6 @@ className="bg-green-400 hover:bg-green-500 text-black p-5 font-bold"
                     />
                 </div>
             )}
-        </>
+        </div>
     );
 }

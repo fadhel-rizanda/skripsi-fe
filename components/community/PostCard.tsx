@@ -33,6 +33,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const safeAttachmentUrl = isValidUrl(post.attachment?.public_url ?? '') ? post.attachment!.public_url : null;
+    const authorProfileHref = `/profile/${post.created_by.id}`;
 
     const handleDelete = async () => {
         await postService.deletePost(post.id);
@@ -44,10 +45,15 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
             <div className="flex gap-4">
                 {/* Avatar Section */}
                 <div className="shrink-0">
-                    <Avatar className="h-10 w-10 border border-gray-300">
-                        <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
-                        <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <Link
+                        href={authorProfileHref}
+                        className="group block rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                    >
+                        <Avatar className="h-10 w-10 border border-gray-300 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                            <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
+                            <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                    </Link>
                 </div>
 
                 {/* Content Section */}
@@ -55,7 +61,12 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     {/* Header */}
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-sm md:text-base">{post.created_by.name}</span>
+                            <Link
+                                href={authorProfileHref}
+                                className="font-bold text-gray-900 text-sm md:text-base hover:underline"
+                            >
+                                {post.created_by.name}
+                            </Link>
                             <span className="text-base text-gray-500">• {formatRelativeTime(post.created_at)}</span>
                         </div>
                         {post.created_by.id === session?.user.id && (

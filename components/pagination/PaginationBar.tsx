@@ -67,10 +67,9 @@ export function PaginationBar({
     const end = Math.min(current_page * per_page, total);
 
     return (
-        <div className="w-full flex items-center justify-center px-3 sm:px-0">
-            <div className="w-fit border-t border-gray-200 bg-white rounded-lg">
-                <div
-                    className="max-w-4xl lg:w-4xl flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="w-full px-3 sm:px-0">
+            <div className="w-full border-t border-gray-200 bg-white rounded-lg">
+                <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
                     {/* Data per page selector */}
                     <div className="flex items-center gap-2">
                         <span className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">Data per page:</span>

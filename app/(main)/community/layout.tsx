@@ -8,9 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function CommunityLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8 font-[family-name:var(--font-manrope)]">
-      <div className="max-w-4xl mx-auto space-y-6">
         {children}
-      </div>
     </div>
   );
 }

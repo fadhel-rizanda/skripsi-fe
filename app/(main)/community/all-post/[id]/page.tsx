@@ -383,15 +383,20 @@ export default function PostDetailPage() {
           <div className="flex gap-4">
             {/* Avatar */}
             <div className="shrink-0">
-              <Avatar className="h-10 w-10 border border-gray-300">
-                <AvatarImage
-                  src={post.created_by.avatar || undefined}
-                  alt={post.created_by.name}
-                />
-                <AvatarFallback>
-                  {post.created_by.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <Link
+                href={`/profile/${post.created_by.id}`}
+                className="group block rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+              >
+                <Avatar className="h-10 w-10 border border-gray-300 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                  <AvatarImage
+                    src={post.created_by.avatar || undefined}
+                    alt={post.created_by.name}
+                  />
+                  <AvatarFallback>
+                    {post.created_by.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
 
             {/* Content */}
@@ -399,9 +404,12 @@ export default function PostDetailPage() {
               {/* Header */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-gray-900 text-sm md:text-base">
+                  <Link
+                    href={`/profile/${post.created_by.id}`}
+                    className="font-bold text-gray-900 text-sm md:text-base hover:underline"
+                  >
                     {post.created_by.name}
-                  </span>
+                  </Link>
                   <span className="text-sm text-gray-500">
                     • {formatRelativeTime(post.created_at)}
                   </span>
@@ -617,23 +625,31 @@ export default function PostDetailPage() {
                   <div key={comment.id} className="space-y-2">
                     {/* Comment row */}
                     <div className="flex gap-3">
-                      <Avatar className="h-9 w-9 border border-gray-300 shrink-0">
-                        <AvatarImage
-                          src={comment.created_by.avatar || undefined}
-                          alt={comment.created_by.name}
-                        />
-                        <AvatarFallback>
-                          {comment.created_by.name
-                            .substring(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      <Link
+                        href={`/profile/${comment.created_by.id}`}
+                        className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                      >
+                        <Avatar className="h-9 w-9 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                          <AvatarImage
+                            src={comment.created_by.avatar || undefined}
+                            alt={comment.created_by.name}
+                          />
+                          <AvatarFallback>
+                            {comment.created_by.name
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
                       <div className="flex-1 bg-white border border-gray-100 rounded-xl px-4 py-3">
                         <div className="flex items-start justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900 text-sm">
+                            <Link
+                              href={`/profile/${comment.created_by.id}`}
+                              className="font-semibold text-gray-900 text-sm hover:underline"
+                            >
                               {comment.created_by.name}
-                            </span>
+                            </Link>
                             <span className="text-xs text-gray-400">
                               • {formatRelativeTime(comment.created_at)}
                             </span>
@@ -706,23 +722,31 @@ export default function PostDetailPage() {
                         )}
                         {repState.replies.map((reply) => (
                           <div key={reply.id} className="flex gap-3">
-                            <Avatar className="h-8 w-8 border border-gray-300 shrink-0">
-                              <AvatarImage
-                                src={reply.created_by.avatar || undefined}
-                                alt={reply.created_by.name}
-                              />
-                              <AvatarFallback>
-                                {reply.created_by.name
-                                  .substring(0, 2)
-                                  .toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
+                            <Link
+                              href={`/profile/${reply.created_by.id}`}
+                              className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                            >
+                              <Avatar className="h-8 w-8 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                                <AvatarImage
+                                  src={reply.created_by.avatar || undefined}
+                                  alt={reply.created_by.name}
+                                />
+                                <AvatarFallback>
+                                  {reply.created_by.name
+                                    .substring(0, 2)
+                                    .toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                            </Link>
                             <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
                               <div className="flex items-start justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-gray-900 text-sm">
+                                  <Link
+                                    href={`/profile/${reply.created_by.id}`}
+                                    className="font-semibold text-gray-900 text-sm hover:underline"
+                                  >
                                     {reply.created_by.name}
-                                  </span>
+                                  </Link>
                                   <span className="text-xs text-gray-400">
                                     • {formatRelativeTime(reply.created_at)}
                                   </span>

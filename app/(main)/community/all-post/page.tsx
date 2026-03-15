@@ -133,7 +133,7 @@ export default function AllPostPage() {
     };
 
     return (
-        <>
+        <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
                 <PostFilters
                     searchQuery={searchQuery}
@@ -205,6 +205,6 @@ export default function AllPostPage() {
                     dataPerPageOptions={[10, 15, 25, 50]}
                 />
             )}
-        </>
+        </div>
     );
 }

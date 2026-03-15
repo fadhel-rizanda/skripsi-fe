@@ -236,14 +236,14 @@ export default function CommunityDetailPage() {
   const joinButtonText = useMemo(() => {
     if (!community) return "Join Community";
     if (community.is_admin) return "You are Admin";
-    if (community.is_member) return "Leave Community";
-    return "Join Community";
+    if (community.is_member) return "Following";
+    return "Follow";
   }, [community]);
 
   if (communityLoading) {
     return (
       <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
-        <div className="max-w-384 mx-auto flex justify-center items-center py-24">
+        <div className="max-w-8xl mx-auto flex justify-center items-center py-24">
           <Icon
             icon="lucide:loader-2"
             className="h-8 w-8 animate-spin text-green-600"
@@ -256,7 +256,7 @@ export default function CommunityDetailPage() {
   if (communityError || !community) {
     return (
       <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
-        <div className="max-w-384 mx-auto space-y-4">
+        <div className="max-w-8xl mx-auto space-y-4">
           <Link
             href="/community/all-communities"
             className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-semibold"
@@ -347,13 +347,27 @@ export default function CommunityDetailPage() {
           <Icon icon="lucide:link" className="h-4 w-4" />
           {joining ? "Updating..." : joinButtonText}
         </Button>
+
+        {(community.is_member || community.is_admin) && (
+          <PostFormDialog
+            mode="create"
+            communityId={community.id}
+            onSuccessAction={() => setRefreshKey((prev) => prev + 1)}
+            trigger={
+              <Button className="w-full mt-3 bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2">
+                <Icon icon="ph:plus-circle-bold" className="w-5 h-5" />
+                Create Post
+              </Button>
+            }
+          />
+        )}
       </div>
     </Card>
   );
 
   return (
     <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
-      <div className="max-w-432 mx-auto space-y-5">
+      <div className="max-w-8xl mx-auto space-y-5">
         <Link
           href="/community/all-communities"
           className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-semibold"
@@ -384,7 +398,7 @@ export default function CommunityDetailPage() {
                   />
                 </div>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="bg-white border-gray-200 h-11">
+                  <SelectTrigger size="lg" className="w-full bg-white border-gray-200">
                     <SelectValue placeholder="Sort By" />
                   </SelectTrigger>
                   <SelectContent>
@@ -415,20 +429,6 @@ export default function CommunityDetailPage() {
               </div>
             </Card>
 
-            <div className="flex justify-end">
-              <PostFormDialog
-                mode="create"
-                communityId={community.id}
-                onSuccessAction={() => setRefreshKey((prev) => prev + 1)}
-                trigger={
-                  <Button className="bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2">
-                    <Icon icon="ph:plus-circle-bold" className="w-5 h-5" />
-                    Create Post
-                  </Button>
-                }
-              />
-            </div>
-
             <div className="space-y-4">
             {postsLoading ? (
               <Card className="rounded-2xl border-0 shadow-sm p-8 flex justify-center">
@@ -457,25 +457,25 @@ export default function CommunityDetailPage() {
               ))
             )}
             </div>
+
+            {!postsLoading && !postsError && posts.length > 0 && (
+              <div className="pt-2">
+                <PaginationBar
+                  current_page={pagination.current_page}
+                  total={pagination.total}
+                  per_page={pagination.per_page}
+                  onPageChange={handlePageChange}
+                  onDataPerPageChange={handlePerPageChange}
+                  dataPerPageOptions={[10, 15, 25]}
+                />
+              </div>
+            )}
           </div>
 
           <div className="hidden xl:block">
             <div className="sticky top-24">{communityProfileCard}</div>
           </div>
         </div>
-
-        {!postsLoading && !postsError && posts.length > 0 && (
-          <div className="pt-2">
-            <PaginationBar
-              current_page={pagination.current_page}
-              total={pagination.total}
-              per_page={pagination.per_page}
-              onPageChange={handlePageChange}
-              onDataPerPageChange={handlePerPageChange}
-              dataPerPageOptions={[10, 15, 25]}
-            />
-          </div>
-        )}
 
         <div className="xl:hidden">{communityProfileCard}</div>
       </div>

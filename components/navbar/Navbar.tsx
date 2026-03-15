@@ -38,7 +38,7 @@ export function Navbar() {
       return [
         { href: "/pets", label: "Find a Pet" },
         { href: "/adoptions", label: "Adoption Process" },
-        { href: "/community/all-post", label: "Community" },
+        { href: "/explore/posts", label: "Community" },
         { href: "/chat", label: "Chat" },
       ]
     }
@@ -50,7 +50,7 @@ export function Navbar() {
         return [
           { href: "/pets", label: "Find a Pet" },
           { href: "/adoptions", label: "Adoption Process" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
           { href: "/chat", label: "Chat" },
         ]
 
@@ -58,7 +58,7 @@ export function Navbar() {
         return [
           { href: "/pets", label: "Find a Pet" },
           { href: "/adoptions", label: "Adoption Process" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
           { href: "/pets/create", label: "Submit Animal" },
           { href: "/chat", label: "Chat" },
         ]
@@ -77,7 +77,7 @@ export function Navbar() {
         return [
           { href: "/dashboard", label: "Dashboard" },
           { href: "/pets", label: "Find a Pet" },
-          { href: "/community/all-post", label: "Community" },
+          { href: "/explore/posts", label: "Community" },
         ]
     }
   }

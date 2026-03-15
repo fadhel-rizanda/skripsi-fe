@@ -33,20 +33,20 @@ export function CommunityPageLayout({ children }: { children: ReactNode }) {
         <div className="flex w-full justify-center border-b border-gray-300 mb-8 overflow-x-auto">
           <div className="flex gap-8">
             <Link
-              href="/community/all-post"
-              className={isActive("/community/all-post") ? activeClass : inactiveClass}
+              href="/explore/posts"
+              className={isActive("/explore/posts") ? activeClass : inactiveClass}
             >
               All Posts
             </Link>
             <Link
-              href="/community/all-communities"
-              className={isActive("/community/all-communities") ? activeClass : inactiveClass}
+              href="/explore/communities"
+              className={isActive("/explore/communities") ? activeClass : inactiveClass}
             >
               All Communities
             </Link>
             <Link
-              href="/community/all-users"
-              className={isActive("/community/all-users") ? activeClass : inactiveClass}
+              href="/explore/users"
+              className={isActive("/explore/users") ? activeClass : inactiveClass}
             >
               All Users
             </Link>

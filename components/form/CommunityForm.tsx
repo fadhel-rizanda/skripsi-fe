@@ -763,8 +763,8 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 onContinue={() =>
                     router.push(
                         currentCommunityId
-                            ? `/community/all-communities/${currentCommunityId}`
-                            : "/community/all-communities",
+                            ? `/explore/communities/${currentCommunityId}`
+                            : "/explore/communities",
                     )
                 }
                 title={isEditMode ? "Update Community Profile?" : "Create Community Profile?"}

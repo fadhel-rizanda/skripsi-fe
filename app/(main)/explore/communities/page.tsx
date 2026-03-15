@@ -95,7 +95,7 @@ export default function AllCommunityPage() {
         if (!session) {
             e.preventDefault();
             toast.error("You must be logged in to create a community.");
-            router.push("/login?callbackUrl=/community/all-communities");
+            router.push("/login?callbackUrl=/explore/communities");
         }
     };
 

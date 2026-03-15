@@ -158,7 +158,7 @@ export default function CommunityDetailPage() {
   const handleJoinToggle = async () => {
     if (!session) {
       toast.error("You must be logged in to join a community.");
-      router.push(`/login?callbackUrl=/community/all-communities/${id}`);
+      router.push(`/login?callbackUrl=/explore/communities/${id}`);
       return;
     }
 
@@ -259,7 +259,7 @@ export default function CommunityDetailPage() {
       <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
         <div className="max-w-8xl mx-auto space-y-4">
           <Link
-            href="/community/all-communities"
+            href="/explore/communities"
             className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-semibold"
           >
             <Icon icon="lucide:arrow-left" className="h-4 w-4" />
@@ -386,7 +386,7 @@ export default function CommunityDetailPage() {
     <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
       <div className="max-w-8xl mx-auto space-y-5">
         <Link
-          href="/community/all-communities"
+          href="/explore/communities"
           className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-semibold"
         >
           <Icon icon="lucide:arrow-left" className="h-4 w-4" />
@@ -501,7 +501,7 @@ export default function CommunityDetailPage() {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDeleteCommunity}
-        onContinue={() => router.push("/community/all-communities")}
+        onContinue={() => router.push("/explore/communities")}
         confirmVariant="destructive"
         title="Delete Community"
         description="Are you sure you want to delete this community? This action cannot be undone."

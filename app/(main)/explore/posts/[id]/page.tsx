@@ -350,7 +350,7 @@ export default function PostDetailPage() {
       <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <Link
-            href="/community/all-post"
+            href="/explore/posts"
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 text-sm font-medium"
           >
             <Icon icon="lucide:arrow-left" className="h-4 w-4" />
@@ -371,7 +371,7 @@ export default function PostDetailPage() {
       <div className="max-w-4xl mx-auto space-y-4">
         {/* Back link */}
         <Link
-          href="/community/all-post"
+          href="/explore/posts"
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-md font-semibold w-fit"
         >
           <Icon icon="lucide:arrow-left" className="h-4 w-4" />
@@ -460,7 +460,7 @@ export default function PostDetailPage() {
                       open={deleteOpen}
                       onOpenChange={setDeleteOpen}
                       onConfirm={handleDelete}
-                      onContinue={() => router.push("/community/all-post")}
+                      onContinue={() => router.push("/explore/posts")}
                       confirmVariant="destructive"
                       title="Delete Post"
                       description="Are you sure you want to delete this post? This action cannot be undone."

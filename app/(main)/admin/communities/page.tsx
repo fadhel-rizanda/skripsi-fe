@@ -172,7 +172,7 @@ export default function AdminCommunitiesPage() {
                                         <tr key={community.id} className="hover:bg-gray-50/50 transition-colors">
                                             {/* COMMUNITY ID */}
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                <a href={`/community/all-communities/${community.id}`} className="text-blue-600 hover:underline">
+                                                <a href={`/explore/communities/${community.id}`} className="text-blue-600 hover:underline">
                                                     {community.id}
                                                 </a>
                                             </td>

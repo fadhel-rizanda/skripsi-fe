@@ -121,7 +121,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     </div>
 
                     {/* Body */}
-                    <Link href={`/community/all-post/${post.id}`}
+                    <Link href={`/explore/posts/${post.id}`}
                         className="block hover:opacity-80 transition-opacity mb-3">
                         {post.title && (
                             <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1">{post.title}</h3>
@@ -133,7 +133,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
 
                     {/* Attachment Image */}
                     {safeAttachmentUrl && (
-                        <Link href={`/community/all-post/${post.id}`} className="block mb-3 mr-12">
+                        <Link href={`/explore/posts/${post.id}`} className="block mb-3 mr-12">
                             <div
                                 className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
                                 <Image
@@ -183,7 +183,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         asChild
                         className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2"
                     >
-                        <Link href={`/community/all-post/${post.id}?comment=1#comments`}>
+                        <Link href={`/explore/posts/${post.id}?comment=1#comments`}>
                             <MessageSquare className="h-6 w-6" />
                             <span className="text-base font-medium">{post.comments_count} Comments</span>
                         </Link>

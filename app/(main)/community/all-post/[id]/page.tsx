@@ -36,25 +36,12 @@ type DeleteTarget =
   | { type: "reply"; commentId: string; replyId: string }
   | null;
 import { Post } from "@/types/post";
-import { isValidUrl } from "@/lib/utils";
+import { formatRelativeTime, isValidUrl } from "@/lib/utils";
 
 import PostFormDialog from "@/components/dialog/PostFormDialog";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
-
-const formatRelativeTime = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "just now";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800)
-    return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  return date.toLocaleDateString();
-};
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -131,10 +118,9 @@ export default function PostDetailPage() {
     setCommentIntentHandled(false);
   }, [id]);
 
-  useEffect(() => {
+    useEffect(() => {
     fetchComments(commentsPagination.current_page, commentsPagination.per_page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, commentsPagination.current_page, commentsPagination.per_page]);
+  }, [fetchComments, commentsPagination.current_page, commentsPagination.per_page]);
 
   useEffect(() => {
     if (postLoading || !shouldOpenComment || commentIntentHandled) return;
@@ -558,7 +544,7 @@ export default function PostDetailPage() {
         <Card
           id="comments"
           ref={commentsSectionRef}
-          className="bg-transparent shadow-none border-0 !important"
+          className="bg-transparent shadow-none border-0"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-gray-900">

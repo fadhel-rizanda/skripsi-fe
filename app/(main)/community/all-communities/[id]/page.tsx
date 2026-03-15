@@ -237,8 +237,8 @@ export default function CommunityDetailPage() {
   const joinButtonText = useMemo(() => {
     if (!community) return "Join Community";
     if (community.is_admin) return "You are Admin";
-    if (community.is_member) return "Following";
-    return "Follow";
+    if (community.is_member) return "Joined";
+    return "Join Community";
   }, [community]);
 
   if (communityLoading) {
@@ -341,7 +341,7 @@ export default function CommunityDetailPage() {
         )}
 
         <Button
-          className="w-full mt-5 bg-[#19E619] hover:bg-green-500 text-black font-semibold"
+          className={`w-full mt-5 text-black font-semibold ${community.is_member ? 'bg-white hover:bg-accent border' : 'bg-[#19E619] hover:bg-green-500'}`}
           onClick={handleJoinToggle}
           disabled={joining || community.is_admin}
         >
@@ -397,6 +397,8 @@ export default function CommunityDetailPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{community.name}</h1>
           <p className="text-gray-600 mt-1">{community.description}</p>
         </div>
+
+        <div className="xl:hidden">{communityProfileCard}</div>
 
         <div className="xl:grid xl:grid-cols-[minmax(0,1.4fr)_17.5rem] xl:gap-6 xl:items-start">
           <div className="min-w-0 w-full space-y-4">
@@ -493,8 +495,6 @@ export default function CommunityDetailPage() {
             <div className="sticky top-24">{communityProfileCard}</div>
           </div>
         </div>
-
-        <div className="xl:hidden">{communityProfileCard}</div>
       </div>
 
       <ActionDialog

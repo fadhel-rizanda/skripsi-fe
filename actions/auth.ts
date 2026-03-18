@@ -8,7 +8,7 @@ export interface ResendOtpResult {
     error?: string
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export async function verifyOtp(token: string, accessToken: string): Promise<VerifyOtpResult> {
     const cleanToken = token.replace(/\s+/g, "")

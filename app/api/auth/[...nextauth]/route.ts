@@ -5,7 +5,7 @@ import {JWT} from "next-auth/jwt";
 import {AuthOptions} from "next-auth";
 import { cookies } from 'next/headers'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000/api"
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
     try {

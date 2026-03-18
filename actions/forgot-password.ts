@@ -8,7 +8,7 @@ export interface ResetPasswordResult {
     error?: string
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000"
 
 export async function sendForgotPasswordEmail(email: string): Promise<ForgotPasswordResult> {
     if (!email) {

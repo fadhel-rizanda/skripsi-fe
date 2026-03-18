@@ -21,12 +21,10 @@ export const userService = {
     },
 
     putUsers: async (data: GreetingFormInput | UpdateProfilePayload): Promise<void> => {
-        // Backend expects flat address fields, not nested under "address"
-        const { address, ...rest } = data as any;
-        const payload = address ? { ...rest, ...address } : rest;
-        const response = await api.put("/v1/profile", payload);
+        const response = await api.put("/v1/profile", data);
         return response.data;
     },
+
     deactivateUser: async (userId: string, notes: string): Promise<void> => {
         await api.post(`/v1/users/${userId}/deactivate`, { notes });
     },

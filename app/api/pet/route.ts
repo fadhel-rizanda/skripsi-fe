@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000/api";
 
 // Whitelist of allowed query parameters
 const ALLOWED_PARAMS = [

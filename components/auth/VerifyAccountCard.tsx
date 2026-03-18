@@ -150,15 +150,6 @@ export default function OtpVerificationCard() {
                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {form.formState.isSubmitting ? "Verifying..." : "Verify"}
                 </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-11"
-                  onClick={() => router.push("/profile")}
-                >
-                  Verify Later
-                </Button>
               </div>
             </form>
           </Form>

@@ -17,11 +17,11 @@ export interface CreateReportPayload {
 
 export const reportServices = {
     getReports: async (params: GetReportParams, signal?: AbortSignal): Promise<PaginatedResponse<Report[]>> => {
-        const response = await api.get("/v1/reports", { params, signal });
+        const response = await api.get("/api/v1/reports", { params, signal });
         return response.data;
     },
     createReport: async (data: CreateReportPayload): Promise<Report> => {
-        const response = await api.post("/v1/reports", data);
+        const response = await api.post("/api/v1/reports", data);
         return response.data.data;
     },
 }

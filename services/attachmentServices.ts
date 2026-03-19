@@ -4,12 +4,12 @@ import axios from "axios";
 
 export const attachmentService = {
     getPresignedUrl: async (data: PresignedUrlInput) => {
-        const response = await api.post("/v1/attachments/presigned-url", data);
+        const response = await api.post("/api/v1/attachments/presigned-url", data);
         return response.data;
     },
 
     confirmUpload: async (id: string) => {
-        const response = await api.patch(`/v1/attachments/${id}/confirm`);
+        const response = await api.patch(`/api/v1/attachments/${id}/confirm`);
         return response.data;
     },
 
@@ -42,7 +42,7 @@ export const attachmentService = {
     },
 
     generateDownloadUrl: async (id: string, mode?: 'preview' | 'download') => {
-        const response = await api.get(`/v1/attachments/${id}/download-url`,{
+        const response = await api.get(`/api/v1/attachments/${id}/download-url`,{
             params: {mode},
         });
         return response.data.data;

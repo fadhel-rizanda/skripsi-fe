@@ -3,13 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     output: "standalone",
     env: {
-        INTERNAL_API_URL: process.env.INTERNAL_API_URL || "http://laravel_frankenphp/api",
+        INTERNAL_API_URL: process.env.INTERNAL_API_URL || "http://laravel_frankenphp",
     },
     async rewrites() {
         return [
             {
-                source: "/backend/api/:path*",
-                destination: "http://laravel_frankenphp/api/:path*",
+                source: "/backend/:path*",
+                destination: "http://laravel_frankenphp/:path*",
             },
         ];
     },
@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
         serverActions: {
             allowedOrigins: [
                 "localhost:3000",
-                "54.169.84.199:3000",
+                process.env.NEXT_PUBLIC_ALLOWED_ORIGIN || "http://localhost:3000",
             ],
         },
     },

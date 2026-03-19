@@ -26,7 +26,7 @@ export async function registerUser(input: RegisterFormData): Promise<RegisterRes
     const { password_confirmation, ...registerData } = validatedFields.data
 
     try {
-        const res = await fetch(`${API_URL}/v1/auth/register`, {
+        const res = await fetch(`${API_URL}/api/v1/auth/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

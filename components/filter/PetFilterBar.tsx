@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AGE_RANGES } from "@/lib/constants/pet";
 import { useDebounce } from "@/hooks/useDebounce";
 import {useTagsOptions} from "@/hooks/useFilterOptions";
-import { SearchInput, FilterSelect, type FilterOption } from ".";
+import { SearchInput } from ".";
 import {Button} from "@/components/ui/button";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {TAG_TYPE} from "@/constant/tag-type";

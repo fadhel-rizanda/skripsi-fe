@@ -41,9 +41,9 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
     hasMore: hasMoreTags
 } = useTagsOptions(TAG_TYPE.PET.PERSONALITY);
 
-  const ageOptions: FilterOption[] = AGE_RANGES.map((range) => ({
-    value: range.value,
-    label: range.label,
+  const ageOptions = AGE_RANGES.map((range) => ({
+    id: range.value,
+    name: range.label,
   }));
 
   // Debounce search input to avoid excessive API calls
@@ -98,12 +98,20 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
             mode="single"
             className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
-        <FilterSelect
-          name="age"
-          value={age}
-          onChange={setAge}
-          options={ageOptions}
-          placeholder="Any Age"
+        <SearchableCombobox
+            options={ageOptions}
+            selectedValues={[age].filter(Boolean)}
+            onSelect={(value) => {
+              if (value === age) {
+                setAge("");
+              } else {
+                setAge(value);
+              }
+            }}
+            placeholder="Any Age"
+            emptyMessage="No age options found."
+            mode="single"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
         />
         <SearchableCombobox
             options={tagPersonalities}

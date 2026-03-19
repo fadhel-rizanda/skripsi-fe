@@ -56,7 +56,7 @@ export function AdoptionFilter({ onSearchChange, onStatusChange, onProcessChange
                 />
             </InputGroup>
 
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                 <SearchableCombobox
                     options={STATUS_OPTIONS}
                     selectedValues={selectedStatus ? [selectedStatus] : []}
@@ -66,7 +66,7 @@ export function AdoptionFilter({ onSearchChange, onStatusChange, onProcessChange
                     }}
                     placeholder="Status"
                     mode="single"
-                    className="w-full sm:w-37.5 h-11 bg-white border-gray-200 text-gray-600"
+                    className="h-11 w-full bg-white border-gray-200 text-gray-600 sm:w-37.5"
                 />
 
                 <SearchableCombobox
@@ -78,7 +78,7 @@ export function AdoptionFilter({ onSearchChange, onStatusChange, onProcessChange
                     }}
                     placeholder="Process"
                     mode="single"
-                    className="w-full sm:w-40 h-11 bg-white border-gray-200 text-gray-600"
+                    className="h-11 w-full bg-white border-gray-200 text-gray-600 sm:w-40"
                 />
             </div>
         </Card>

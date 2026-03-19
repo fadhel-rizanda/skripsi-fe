@@ -11,7 +11,7 @@ export interface RegisterResult {
     }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000"
 
 export async function registerUser(input: RegisterFormData): Promise<RegisterResult> {
     const validatedFields = registerSchema.safeParse(input)
@@ -26,7 +26,7 @@ export async function registerUser(input: RegisterFormData): Promise<RegisterRes
     const { password_confirmation, ...registerData } = validatedFields.data
 
     try {
-        const res = await fetch(`${API_URL}/v1/auth/register`, {
+        const res = await fetch(`${API_URL}/api/v1/auth/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -5,11 +5,11 @@ import {JWT} from "next-auth/jwt";
 import {AuthOptions} from "next-auth";
 import { cookies } from 'next/headers'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000"
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
     try {
-        const res = await fetch(`${API_URL}/v1/auth/refresh`, {
+        const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -60,7 +60,7 @@ export const authOptions: AuthOptions = {
                 }
 
                 try {
-                    const res = await fetch(`${API_URL}/v1/auth/login`, {
+                    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -130,7 +130,7 @@ export const authOptions: AuthOptions = {
                     const cookieStore = await cookies()
                     const selectedRole = cookieStore.get('selectedRole')?.value || 'adopter'
 
-                    const res = await fetch(`${API_URL}/v1/auth/provider`, {
+                    const res = await fetch(`${API_URL}/api/v1/auth/provider`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

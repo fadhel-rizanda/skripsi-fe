@@ -133,7 +133,7 @@ export default function DetailPetPage() {
       const { channels } = await userService.userChannels();
       await update({ channels });
       toast.success("Adoption request sent successfully!");
-      router.push(`/adoption/${response.data.id}`);
+      router.push(`/adoptions/${response.data.id}`);
     } catch (error: unknown) {
       type ErrorWithResponse = {
         response?: { data?: { message?: string } };

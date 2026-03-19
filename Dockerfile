@@ -1,0 +1,46 @@
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+FROM base AS builder
+# Build args
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_REVERB_APP_KEY
+ARG NEXT_PUBLIC_REVERB_HOST
+ARG NEXT_PUBLIC_REVERB_PORT
+ARG NEXT_PUBLIC_REVERB_SCHEME
+ARG NEXT_PUBLIC_REVERB_APP_ID
+ARG NEXT_PUBLIC_ALLOWED_ORIGIN
+ARG NEXT_PUBLIC_REVERB_APP_SECRET
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_REVERB_APP_KEY=$NEXT_PUBLIC_REVERB_APP_KEY
+ENV NEXT_PUBLIC_REVERB_HOST=$NEXT_PUBLIC_REVERB_HOST
+ENV NEXT_PUBLIC_REVERB_PORT=$NEXT_PUBLIC_REVERB_PORT
+ENV NEXT_PUBLIC_REVERB_SCHEME=$NEXT_PUBLIC_REVERB_SCHEME
+ENV NEXT_PUBLIC_REVERB_APP_ID=$NEXT_PUBLIC_REVERB_APP_ID
+ENV NEXT_PUBLIC_ALLOWED_ORIGIN=$NEXT_PUBLIC_ALLOWED_ORIGIN
+ENV NEXT_PUBLIC_REVERB_APP_SECRET=$NEXT_PUBLIC_REVERB_APP_SECRET
+
+ENV NEXT_PRIVATE_STANDALONE=true
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm run build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+ENV PORT=3000
+CMD ["node", "server.js"]

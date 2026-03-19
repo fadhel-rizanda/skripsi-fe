@@ -11,6 +11,7 @@ import {useChatStore} from "@/store/useChatStore";
 import { useNotificationStore } from "@/store/useNotificationStore"
 import {useAdoptionStore} from "@/store/useAdoptionStore";
 
+// TODO Fix reassign channel saat adopt dan segala macam create
 export const CHANNEL_ICON_MAP: Record<string, string> = {
     notification: "ph:bell",
     chat: "ph:chat-circle",
@@ -84,8 +85,11 @@ export function useNotificationToast() {
                     if (!messageData) return;
 
                     const actions = storeActionsRef.current;
-                    const refreshKey = adoptionRefreshMap[messageData.reference_type];
-                    if (refreshKey) actions[refreshKey]();
+                    const refreshKey = adoptionRefreshMap[messageData.reference_type as keyof typeof adoptionRefreshMap];
+                    if (refreshKey) {
+                        const actionFunc = (storeActionsRef.current as any)[refreshKey];
+                        if (typeof actionFunc === 'function') actionFunc();
+                    }
 
                     actions.setHasUnread(true);
 

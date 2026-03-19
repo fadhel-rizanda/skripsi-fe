@@ -64,12 +64,6 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/settings" className="cursor-pointer">
-            <Icon icon="mdi:settings" className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer text-red-600 focus:text-red-600"

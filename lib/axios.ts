@@ -2,7 +2,7 @@ import axios, {AxiosError} from "axios";
 import {getSession, signOut} from "next-auth/react";
 import {toast} from "sonner";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: BASE_URL,

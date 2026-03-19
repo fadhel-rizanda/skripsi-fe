@@ -48,6 +48,9 @@ export default function LoginForm() {
     setError("")
     setLoading(true)
 
+    const cleanUrl = window.location.pathname
+    window.history.replaceState({}, "", cleanUrl)
+
     try {
       const result = await signIn("credentials", {
         ...data,

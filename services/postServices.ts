@@ -26,37 +26,37 @@ export interface UpdatePostPayload {
 
 export const postService = {
     getPosts: async (params?: GetPostsParams): Promise<PaginatedResponse<Post[]>> => {
-        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", { params });
+        const response = await api.get<PaginatedResponse<Post[]>>("/api/v1/posts", { params });
         return response.data;
     },
     getPostById: async (id: string): Promise<Post> => {
-        const response = await api.get<ApiResponse<Post>>(`/v1/posts/${id}`);
+        const response = await api.get<ApiResponse<Post>>(`/api/v1/posts/${id}`);
         return response.data.data;
     },
     createPost: async (data: CreatePostPayload) => {
-        const response = await api.post("/v1/posts", data);
+        const response = await api.post("/api/v1/posts", data);
         return response.data;
     },
     updatePost: async (id: string, data: UpdatePostPayload) => {
-        const response = await api.put(`/v1/posts/${id}`, data);
+        const response = await api.put(`/api/v1/posts/${id}`, data);
         return response.data;
     },
     deletePost: async (id: string) => {
-        const response = await api.delete(`/v1/posts/${id}`);
+        const response = await api.delete(`/api/v1/posts/${id}`);
         return response.data;
     },
     takedownPost: async (id: string, notes: string): Promise<void> => {
-        await api.post(`/v1/posts/${id}/takedown`, { notes });
+        await api.post(`/api/v1/posts/${id}/takedown`, { notes });
     },
     restorePost: async (id: string, notes: string): Promise<void> => {
-        await api.post(`/v1/posts/${id}/restore`, { notes });
+        await api.post(`/api/v1/posts/${id}/restore`, { notes });
     },
     likePost: async (id: string) => {
-        const response = await api.post(`/v1/posts/${id}/likes`);
+        const response = await api.post(`/api/v1/posts/${id}/likes`);
         return response.data;
     },
     searchPosts: async (query: string, params?: Omit<GetPostsParams, 'search'>): Promise<PaginatedResponse<Post[]>> => {
-        const response = await api.get<PaginatedResponse<Post[]>>("/v1/posts", {
+        const response = await api.get<PaginatedResponse<Post[]>>("/api/v1/posts", {
             params: { ...params, search: query }
         });
         return response.data;

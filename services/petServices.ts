@@ -60,37 +60,37 @@ export const petService = {
 
   // Get list of pets with filters and pagination (requires auth)
   getPets: async (params?: GetPetParams): Promise<PaginatedResponse<Pet[]>> => {
-    const response = await api.get<PaginatedResponse<Pet[]>>("/v1/pets", { params });
+    const response = await api.get<PaginatedResponse<Pet[]>>("/api/v1/pets", { params });
     return response.data;
   },
 
   // Get single pet detail by ID
   getPetById: async (id: string | number): Promise<PetDetail> => {
-    const response = await api.get<ApiResponse<PetDetail>>(`/v1/pets/${id}`);
+    const response = await api.get<ApiResponse<PetDetail>>(`/api/v1/pets/${id}`);
     return response.data.data;
   },
 
   // Create new pet
   createPet: async (data: CreatePetPayload) => {
-    const response = await api.post("/v1/pets", data);
+    const response = await api.post("/api/v1/pets", data);
     return response.data;
   },
 
   // Update existing pet
   updatePet: async (id: string | number, data: CreatePetPayload) => {
-    const response = await api.put(`/v1/pets/${id}`, data);
+    const response = await api.put(`/api/v1/pets/${id}`, data);
     return response.data;
   },
 
   // Delete pet
   deletePet: async (id: string | number) => {
-    const response = await api.delete(`/v1/pets/${id}`);
+    const response = await api.delete(`/api/v1/pets/${id}`);
     return response.data;
   },
 
   // Search pets by name or description
   searchPets: async (query: string, params?: Omit<GetPetParams, 'search'>): Promise<PaginatedResponse<Pet[]>> => {
-    const response = await api.get<PaginatedResponse<Pet[]>>("/v1/pets", {
+    const response = await api.get<PaginatedResponse<Pet[]>>("/api/v1/pets", {
       params: { ...params, search: query }
     });
     return response.data;
@@ -98,26 +98,26 @@ export const petService = {
 
   // Adopt a pet
   adoptPet: async (petId: string | number, note?: string) => {
-    const response = await api.post(`/v1/pets/${petId}/adopt`, { note });
+    const response = await api.post(`/api/v1/pets/${petId}/adopt`, { note });
     return response.data;
   },
 
   reject: async (petId: string, adoptionId: string, signal?: AbortSignal) => {
-    const response = await api.post(`/v1/pets/${petId}/adopt/${adoptionId}/reject`, {signal});
+    const response = await api.post(`/api/v1/pets/${petId}/adopt/${adoptionId}/reject`, {signal});
     return response.data;
   },
 
   cancel: async (petId: string, adoptionId: string, signal?: AbortSignal) => {
-    const response = await api.post(`/v1/pets/${petId}/adopt/${adoptionId}/cancel`, {signal});
+    const response = await api.post(`/api/v1/pets/${petId}/adopt/${adoptionId}/cancel`, {signal});
     return response.data;
   },
 
   takedownPet: async (id: string, notes: string): Promise<void> => {
     const encodedId = encodeURIComponent(id);
-    await api.post(`/v1/pets/${encodedId}/takedown`, { notes });
+    await api.post(`/api/v1/pets/${encodedId}/takedown`, { notes });
   },
   restorePet: async (id: string, notes: string): Promise<void> => {
     const encodedId = encodeURIComponent(id);
-    await api.post(`/v1/pets/${encodedId}/restore`, { notes });
+    await api.post(`/api/v1/pets/${encodedId}/restore`, { notes });
   },
 };

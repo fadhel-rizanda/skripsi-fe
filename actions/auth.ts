@@ -28,7 +28,7 @@ export async function verifyOtp(token: string, accessToken: string): Promise<Ver
     }
 
     try {
-        const res = await fetch(`${API_URL}/v1/auth/activation-code/verify`, {
+        const res = await fetch(`${API_URL}/api/v1/auth/activation-code/verify`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export async function resendOtp(accessToken: string): Promise<ResendOtpResult> {
     }
 
     try {
-        const res = await fetch(`${API_URL}/v1/auth/activation-code/resend`, {
+        const res = await fetch(`${API_URL}/api/v1/auth/activation-code/resend`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

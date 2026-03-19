@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.INTERNAL_API_URL || "http://localhost:8000";
 
 // Whitelist of allowed query parameters
 const ALLOWED_PARAMS = [
@@ -25,7 +25,7 @@ const petService = {
     });
 
     const queryString = queryParams.toString();
-    const url = `${API_URL}/v1/pets${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_URL}/api/v1/pets${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(url, {
       headers: {

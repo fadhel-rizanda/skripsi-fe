@@ -188,7 +188,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t bg-white">
+        <div className="lg:hidden absolute top-full left-0 w-full border-t border-b shadow-md bg-white z-50">
           <div className="px-4 py-4 space-y-3">
             {/* Mobile Navigation Links */}
             {menuItems.map((item) => (

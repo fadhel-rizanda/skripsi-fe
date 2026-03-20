@@ -4,6 +4,5 @@ node_modules
 .gitignore
 *.log
 .env*.local
-.env
 out
 coverage

@@ -1,0 +1,29 @@
+services:
+  frontend_prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3001/backend
+        - NEXT_PUBLIC_REVERB_APP_ID=121744
+        - NEXT_PUBLIC_REVERB_APP_KEY=nefpkqjc8inuxy43qhia
+        - NEXT_PUBLIC_REVERB_HOST=localhost
+        - NEXT_PUBLIC_REVERB_PORT=8081
+        - NEXT_PUBLIC_REVERB_SCHEME=http
+        - NEXT_PUBLIC_ALLOWED_ORIGIN_DEV=localhost:3000
+        - NEXT_PUBLIC_ALLOWED_ORIGIN_PROD=localhost:3001
+    env_file: .env.prod
+    image: skripsi-fe-frontend-prod
+    pull_policy: never
+    container_name: skripsi-fe-frontend-prod
+    environment:
+      - INTERNAL_API_URL=http://laravel_frankenphp_prod
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+    networks:
+      - skripsi-be_laravel_prod
+
+networks:
+  skripsi-be_laravel_prod:
+    external: true

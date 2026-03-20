@@ -29,7 +29,6 @@ const nextConfig: NextConfig = {
     experimental: {
         serverActions: {
             allowedOrigins: [
-                "localhost:3000",
                 process.env.NEXT_PUBLIC_ALLOWED_ORIGIN_DEV || "localhost:3000",
                 process.env.NEXT_PUBLIC_ALLOWED_ORIGIN_PROD || "localhost:3001",
             ],

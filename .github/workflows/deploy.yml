@@ -1,0 +1,65 @@
+name: CI/CD Frontend
+on:
+  push:
+    branches:
+        - main
+        - development
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3000/backend
+          NEXT_PUBLIC_REVERB_APP_ID: ${{ secrets.NEXT_PUBLIC_REVERB_APP_ID }}
+          NEXT_PUBLIC_REVERB_APP_KEY: ${{ secrets.NEXT_PUBLIC_REVERB_APP_KEY }}
+          NEXT_PUBLIC_REVERB_HOST: localhost
+          NEXT_PUBLIC_REVERB_PORT: 8080
+          NEXT_PUBLIC_REVERB_SCHEME: http
+          NEXT_PUBLIC_ALLOWED_ORIGIN: localhost:3000
+          INTERNAL_API_URL: http://localhost:8000
+
+  cd:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/skripsi-fe
+            git pull origin main
+            docker compose -f docker-compose.prod.yaml up -d --build
+            docker image prune -f

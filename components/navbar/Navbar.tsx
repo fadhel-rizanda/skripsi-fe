@@ -187,46 +187,50 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t bg-white">
-          <div className="px-4 py-4 space-y-3">
-            {/* Mobile Navigation Links */}
-            {menuItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block py-2 px-4 rounded-md hover:bg-gray-50 hover:text-green-700 font-medium transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+      <div
+        className={`lg:hidden absolute top-full left-0 w-full bg-white z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+          mobileMenuOpen
+            ? "max-h-[500px] opacity-100 border-t border-b shadow-md"
+            : "max-h-0 opacity-0 shadow-none pointer-events-none"
+        }`}
+      >
+        <div className="px-4 py-4 space-y-3">
+          {/* Mobile Navigation Links */}
+          {menuItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block py-2 px-4 rounded-md hover:bg-gray-50 hover:text-green-700 font-medium transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+
+          {/* Mobile Auth Buttons (only show if not authenticated) */}
+          {status !== "authenticated" && (
+            <div className="pt-4 space-y-2 border-t">
+              <Button
+                className="w-full bg-transparent hover:bg-gray-50 text-black font-bold rounded-full"
+                asChild
               >
-                {item.label}
-              </Link>
-            ))}
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  Login
+                </Link>
+              </Button>
 
-            {/* Mobile Auth Buttons (only show if not authenticated) */}
-            {status !== "authenticated" && (
-              <div className="pt-4 space-y-2 border-t">
-                <Button
-                  className="w-full bg-transparent hover:bg-gray-50 text-black font-bold rounded-full"
-                  asChild
-                >
-                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    Login
-                  </Link>
-                </Button>
-
-                <Button
-                  className="w-full bg-green-700 hover:bg-green-800 text-white font-bold rounded-full"
-                  asChild
-                >
-                  <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                    Sign Up
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
+              <Button
+                className="w-full bg-green-700 hover:bg-green-800 text-white font-bold rounded-full"
+                asChild
+              >
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                  Sign Up
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </nav>
   )
 }

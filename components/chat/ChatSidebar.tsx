@@ -72,8 +72,8 @@ export default function ChatSidebar() {
 
     if (loading) {
         return (
-            <aside className="w-80 border-r bg-white h-full flex flex-col">
-                <div className="p-4 border-b flex justify-between items-center">
+            <aside className="w-full md:w-80 md:min-w-80 border-r bg-white h-full flex flex-col">
+                <div className="p-3 md:p-4 border-b flex justify-between items-center">
                     <h2 className="text-xl font-bold">Messages</h2>
                     <Button type="button" variant="outline" size="sm" onClick={refreshChats} disabled={loading}>
                         <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
@@ -95,8 +95,8 @@ export default function ChatSidebar() {
     }
 
     return (
-        <aside className="w-80 border-r bg-white h-full flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
+        <aside className="w-full md:w-80 md:min-w-80 border-r bg-white h-full flex flex-col">
+            <div className="p-3 md:p-4 border-b flex justify-between items-center">
                 <h2 className="text-xl font-bold">Messages</h2>
                 <Button type="button" variant="outline" size="sm" onClick={refreshChats}>
                     <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
@@ -107,7 +107,7 @@ export default function ChatSidebar() {
                 {chats.map((chat) => (
                     <Link key={chat.id} href={`/chat/${chat.id}`} onClick={() => (chat.unread_count > 0) && handleMarkAsRead(chat.id)}>
                         <div className={clsx(
-                            "flex gap-3 px-4 py-4 cursor-pointer transition relative border-l-4",
+                            "flex gap-3 px-3 md:px-4 py-4 cursor-pointer transition relative border-l-4",
                             activeId === chat.id
                                 ? "bg-emerald-50 border-emerald-500"
                                 : "hover:bg-gray-50 border-transparent"

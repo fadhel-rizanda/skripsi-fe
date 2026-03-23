@@ -75,7 +75,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-xl p-8">
+    <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-xl p-6 sm:p-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
@@ -149,15 +149,15 @@ export default function LoginForm() {
           />
 
           {/* Remember / Forgot */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-1 text-xs sm:text-sm">
+            <label className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground whitespace-nowrap">
               <input type="checkbox" className="rounded" />
               Remember me
             </label>
 
             <Link
               href="/forgot-password"
-              className="text-muted-foreground hover:underline"
+              className="text-muted-foreground hover:underline text-right"
             >
               Forgot your password?
             </Link>

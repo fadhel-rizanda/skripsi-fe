@@ -20,7 +20,7 @@ import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 import {AxiosError} from "axios";
 import {ErrorResponse} from "@/types";
 
-function ChatWindow({chat}: { chat: Chat }) {
+function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const {data: session} = useSession();
@@ -224,11 +224,11 @@ function ChatWindow({chat}: { chat: Chat }) {
     if (loading) {
         return (
             <div className="flex flex-col h-full bg-[#F9FAFB]">
-                <div className="bg-white border-b px-6 py-4 flex items-center gap-3">
+                <div className="bg-white border-b px-3 md:px-6 py-3 md:py-4 flex items-center gap-3">
                     <Skeleton className="h-8 w-8 rounded-full"/>
                     <Skeleton className="h-4 w-32"/>
                 </div>
-                <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                <div className="flex-1 p-3 md:p-6 space-y-5 md:space-y-6 overflow-y-auto">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i} className={`flex gap-3 ${i % 2 === 0 ? "justify-end" : "justify-start"}`}>
                             {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full shrink-0"/>}
@@ -240,7 +240,7 @@ function ChatWindow({chat}: { chat: Chat }) {
                         </div>
                     ))}
                 </div>
-                <div className="bg-white border-t px-6 py-4 flex gap-2">
+                <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex gap-2">
                     <Skeleton className="h-10 flex-1 rounded-2xl"/>
                     <Skeleton className="h-10 w-10 rounded-full"/>
                 </div>
@@ -250,7 +250,19 @@ function ChatWindow({chat}: { chat: Chat }) {
 
     return (
         <div className="flex flex-col h-full bg-[#F9FAFB]">
-            <div className="bg-white border-b px-6 py-4 font-semibold flex items-center gap-3 text-gray-800">
+            <div className="bg-white border-b px-3 md:px-6 py-3 md:py-4 font-semibold flex items-center gap-2 md:gap-3 text-gray-800">
+                {onBack && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden"
+                        onClick={onBack}
+                        aria-label="Back to chat list"
+                    >
+                        <Icon icon="ph:arrow-left" className="w-5 h-5"/>
+                    </Button>
+                )}
                 <Avatar className="h-8 w-8">
                     {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
                         <Image
@@ -270,10 +282,10 @@ function ChatWindow({chat}: { chat: Chat }) {
                         </AvatarFallback>
                     )}
                 </Avatar>
-                <span>{chat.name}</span>
+                <span className="truncate">{chat.name}</span>
             </div>
 
-            <div ref={scrollRef} className="flex-1 p-6 space-y-5 overflow-y-auto bg-[#E9F2E9]">
+            <div ref={scrollRef} className="flex-1 p-3 md:p-6 space-y-4 md:space-y-5 overflow-y-auto bg-[#E9F2E9]">
                 {loadingMore && (
                     <div className="text-center text-[11px] text-gray-400 py-2">
                         Loading more messages...
@@ -348,7 +360,7 @@ function ChatWindow({chat}: { chat: Chat }) {
                 })}
             </div>
 
-            <div className="bg-white border-t px-6 py-4 flex flex-col gap-2">
+            <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2">
                 {file && (
                     <div className="text-[10px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md flex items-center justify-between">
                         <span>📎 {file.name}</span>
@@ -356,7 +368,7 @@ function ChatWindow({chat}: { chat: Chat }) {
                     </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 md:gap-2">
                     <Input
                         placeholder="Type a message..."
                         value={content}
@@ -387,10 +399,10 @@ function ChatWindow({chat}: { chat: Chat }) {
                     <Button
                         onClick={handleSendMessage}
                         disabled={isSending || (!content.trim() && !file)}
-                        className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-6"
+                        className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-3 md:px-6"
                     >
-                        Send
-                        <Icon icon="ph:paper-plane-right" className="ml-2 w-4 h-4"/>
+                        <span className="hidden sm:inline">Send</span>
+                        <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4"/>
                     </Button>
                 </div>
             </div>

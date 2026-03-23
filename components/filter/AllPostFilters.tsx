@@ -3,13 +3,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { useTagsOptions } from "@/hooks/useFilterOptions";
 import {TAG_TYPE} from "@/constant/tag-type";
 
@@ -30,6 +23,11 @@ export function PostFilters({
     filterTag,
     setFilterTag,
 }: PostFiltersProps) {
+    const sortOptions = [
+        { id: "newest", name: "Newest" },
+        { id: "oldest", name: "Oldest" },
+    ];
+
     const {
         options: tags,
         isLoading: isLoadingTags,
@@ -45,22 +43,24 @@ export function PostFilters({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-black" />
                     <Input
                         placeholder="Search by title..."
-                        className="pl-9 bg-white border-gray-200 rounded-lg focus-visible:ring-green-500 h-12"
+                        className="pl-9 bg-white border-gray-200 rounded-lg h-12 focus-visible:ring-0 focus-visible:border-gray-300"
 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
 
-                <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[220px] bg-white border-gray-200 rounded-lg" style={{ height: '48px' }}>
-                        <SelectValue placeholder="Sort By" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="newest">Newest</SelectItem>
-                        <SelectItem value="oldest">Oldest</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="w-full md:w-[220px]">
+                    <SearchableCombobox
+                        options={sortOptions}
+                        selectedValues={sortBy ? [sortBy] : []}
+                        onSelect={setSortBy}
+                        placeholder="Sort By"
+                        emptyMessage="No sorting options."
+                        mode="single"
+                        className="w-full bg-white border-gray-200 rounded-lg h-12"
+                    />
+                </div>
 
                 <div className="w-full md:w-[220px]">
                     <SearchableCombobox

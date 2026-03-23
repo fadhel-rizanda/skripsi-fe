@@ -39,7 +39,7 @@ export function getEcho(token: string) {
         forceTLS: process.env.NEXT_PUBLIC_REVERB_SCHEME === "https",
         disableStats: true,
         enabledTransports: ['ws', 'wss'],
-        authEndpoint: `${process.env.NEXT_PUBLIC_API_URL}/broadcasting/auth`,
+        authEndpoint: `${process.env.NEXT_PUBLIC_API_URL}/api/broadcasting/auth`,
         auth: {
             headers: {
                 Authorization: `Bearer ${token}`,

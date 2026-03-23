@@ -114,8 +114,8 @@ export function SearchableCombobox({
                     size="sm"
                     disabled={disabled}
                 >
-                    {displayValue}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                    <span className="truncate flex-1 text-left">{displayValue}</span>
+                    <ChevronsUpDown className="ml-1 h-3 w-3 sm:ml-2 sm:h-4 sm:w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start" onWheel={(e) => e.stopPropagation()}>

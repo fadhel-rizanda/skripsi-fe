@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AGE_RANGES } from "@/lib/constants/pet";
 import { useDebounce } from "@/hooks/useDebounce";
 import {useTagsOptions} from "@/hooks/useFilterOptions";
-import { SearchInput, FilterSelect, type FilterOption } from ".";
+import { SearchInput } from ".";
 import {Button} from "@/components/ui/button";
 import {SearchableCombobox} from "@/components/combobox/SearchableCombobox";
 import {TAG_TYPE} from "@/constant/tag-type";
@@ -41,9 +41,9 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
     hasMore: hasMoreTags
 } = useTagsOptions(TAG_TYPE.PET.PERSONALITY);
 
-  const ageOptions: FilterOption[] = AGE_RANGES.map((range) => ({
-    value: range.value,
-    label: range.label,
+  const ageOptions = AGE_RANGES.map((range) => ({
+    id: range.value,
+    name: range.label,
   }));
 
   // Debounce search input to avoid excessive API calls
@@ -70,15 +70,15 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
   }, [debouncedSearch, age, typeOfAnimalId, tagPersonalityId]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center overflow-x-auto overflow-y-hidden shadow-sm border border-gray-200 scrollbar-hide [-webkit-overflow-scrolling:touch]">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg p-2 md:p-2.5 lg:p-3 flex flex-col md:flex-row flex-wrap gap-2 md:gap-2.5 lg:gap-3 items-stretch md:items-center shadow-sm border border-gray-200">
       <SearchInput
         name="search"
         value={search}
         onChange={setSearch}
         placeholder="Search by name..."
-        className="w-full md:w-auto"
+        className="w-full md:w-[220px] lg:w-[260px] shrink-0"
       />
-      <div className="flex flex-row flex-nowrap gap-2 md:gap-2.5 lg:gap-3 overflow-x-auto scrollbar-hide md:overflow-visible md:flex-1 md:justify-start">
+      <div className="flex flex-row flex-nowrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 w-full md:flex-1 overflow-x-hidden">
         <SearchableCombobox
             options={animalTypes}
             selectedValues={[typeOfAnimalId].filter(Boolean)}
@@ -96,14 +96,22 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
             placeholder="Type of Animal"
             emptyMessage="No types found."
             mode="single"
-            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-1.5 sm:px-2.5 py-1.5 flex-1 min-w-0 text-[10px] sm:text-xs md:text-sm"
         />
-        <FilterSelect
-          name="age"
-          value={age}
-          onChange={setAge}
-          options={ageOptions}
-          placeholder="Any Age"
+        <SearchableCombobox
+            options={ageOptions}
+            selectedValues={[age].filter(Boolean)}
+            onSelect={(value) => {
+              if (value === age) {
+                setAge("");
+              } else {
+                setAge(value);
+              }
+            }}
+            placeholder="Any Age"
+            emptyMessage="No age options found."
+            mode="single"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-1.5 sm:px-2.5 py-1.5 flex-1 min-w-0 text-[10px] sm:text-xs md:text-sm"
         />
         <SearchableCombobox
             options={tagPersonalities}
@@ -122,10 +130,10 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
             placeholder="Tags"
             emptyMessage="No tags found."
             mode="single"
-            className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
+            className="bg-[#F6F8F6] border-gray-300 h-8 px-1.5 sm:px-2.5 py-1.5 flex-1 min-w-0 text-[10px] sm:text-xs md:text-sm"
         />
         {(search || age || typeOfAnimalId || tagPersonalityId) && (
-            <Button type="button" onClick={handleReset} className="h-8 w-8">x</Button>
+            <Button type="button" onClick={handleReset} className="h-8 w-8 shrink-0">x</Button>
         )}
       </div>
     </div>

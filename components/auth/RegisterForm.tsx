@@ -60,47 +60,47 @@ export function RegisterForm() {
     setRoleDialogOpen(false)
 
     startTransition(async () => {
-        try {
-            setError("") // Clear previous errors
-            const data = form.getValues()
-            const result = await registerUser(data)
+      try {
+        setError("") // Clear previous errors
+        const data = form.getValues()
+        const result = await registerUser(data)
 
-            if (!result.success) {
-                console.error(result.error)
-                setError(result.error || "Registration failed")
-                return
-            }
-
-            // Auto login after successful registration
-            if (result.credentials) {
-                const signInResult = await signIn("credentials", {
-                    email: result.credentials.email,
-                    password: result.credentials.password,
-                    redirect: false,
-                })
-
-                if (signInResult?.error) {
-                    setError("Registration successful but login failed. Please login manually.")
-                    setTimeout(() => router.push("/login"), 2000)
-                    return
-                }
-
-                if (signInResult?.ok) {
-                    router.push("/verify-otp")
-                    router.refresh()
-                }
-            }
-        } catch (err) {
-            console.error("Registration error:", err)
-            setError(err instanceof Error ? err.message : "Unexpected error")
+        if (!result.success) {
+          console.error(result.error)
+          setError(result.error || "Registration failed")
+          return
         }
+
+        // Auto login after successful registration
+        if (result.credentials) {
+          const signInResult = await signIn("credentials", {
+            email: result.credentials.email,
+            password: result.credentials.password,
+            redirect: false,
+          })
+
+          if (signInResult?.error) {
+            setError("Registration successful but login failed. Please login manually.")
+            setTimeout(() => router.push("/login"), 2000)
+            return
+          }
+
+          if (signInResult?.ok) {
+            router.push("/verify-otp")
+            router.refresh()
+          }
+        }
+      } catch (err) {
+        console.error("Registration error:", err)
+        setError(err instanceof Error ? err.message : "Unexpected error")
+      }
     })
   }
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-10">
+    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
 
           {error && (
             <Alert variant="destructive">
@@ -149,7 +149,7 @@ export function RegisterForm() {
           />
 
           {/* Password */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <FormField
               control={form.control}
               name="password"

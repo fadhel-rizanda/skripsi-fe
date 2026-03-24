@@ -5,14 +5,14 @@
  * Returns null when no navigable URL can be determined.
  */
 export function getNotificationUrl(referenceType: string, referenceId: string): string | null {
-    if (!referenceId) return null;
-
     switch (referenceType) {
         case "adoption":
+            if (!referenceId) return null;
             return `/adoptions/${referenceId}`;
 
         case "requirement":
             // For requirement notifications, reference_id == adoption_id
+            if (!referenceId) return null;
             return `/adoptions/${referenceId}`;
 
         case "meetngreet":
@@ -22,14 +22,19 @@ export function getNotificationUrl(referenceType: string, referenceId: string): 
             return `/adoptions`;
 
         case "pet":
+            if (!referenceId) return null;
             return `/pets/${referenceId}`;
 
         case "chat":
             return `/chat`;
 
-        case "community":
         case "post":
-            return `/community`;
+            if (!referenceId) return `/explore`;
+            return `/explore/posts/${referenceId}`;
+
+        case "community":
+            if (!referenceId) return `/explore`;
+            return `/explore/communities/${referenceId}`;
 
         default:
             return null;

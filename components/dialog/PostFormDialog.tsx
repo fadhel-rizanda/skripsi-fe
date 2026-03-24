@@ -38,8 +38,8 @@ export default function PostFormDialog({
             {!isControlled && (
                 <DialogTrigger asChild>
                     {trigger ?? (
-                        <Button className="bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2">
-                            <Icon icon="ph:plus-circle-bold" className="w-5 h-5"/>
+                        <Button className="bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2 text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5">
+                            <Icon icon="ph:plus-circle-bold" className="w-4 h-4 sm:w-5 sm:h-5"/>
                             {mode === "create" ? "Create Post" : "Edit Post"}
                         </Button>
                     )}

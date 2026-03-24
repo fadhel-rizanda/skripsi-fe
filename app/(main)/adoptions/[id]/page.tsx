@@ -48,7 +48,7 @@ export default function AdoptionDetailPage() {
 
     return (
         <>
-            <div className="w-full flex flex-col items-center justify-start gap-4 bg-[#E8F5E9] min-h-screen pb-10">
+            <div className="w-full flex flex-col items-center justify-start gap-4 sm:gap-6 bg-[#E8F5E9] min-h-screen px-4 sm:px-6 pt-4 sm:pt-6 pb-10">
                 <AdoptionHeader stage={adoption?.stage_tag.name} petName={adoption?.pet.name}/>
                 <SubmittedCollapsible currentUser={session?.user} adoption={adoption} />
 

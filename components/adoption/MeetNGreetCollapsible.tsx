@@ -139,19 +139,19 @@ export default function MeetNGreetCollapsible({
                 type="single"
                 collapsible
                 defaultValue="item-1"
-                className={`w-full max-w-4xl border rounded-2xl px-4 bg-white transition-opacity ${
+                className={`w-full max-w-4xl border rounded-xl sm:rounded-2xl px-3 sm:px-4 bg-white transition-opacity ${
                     stageState === "inactive" ? "opacity-50 pointer-events-none" : ""
                 }`}
             >
                 <AccordionItem value="item-1" className="border-none">
-                    <AccordionTrigger className="hover:no-underline py-3">
-                        <div className="flex items-center gap-3">
-                            <div className={`h-4 w-4 rounded-full ${dotColor}`}/>
-                            <span className="text-base font-bold text-slate-900">Meet &amp; Greet</span>
+                    <AccordionTrigger className="hover:no-underline py-2.5 sm:py-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <div className={`h-3 w-3 sm:h-4 sm:w-4 rounded-full ${dotColor} shrink-0`}/>
+                            <span className="text-sm sm:text-base font-bold text-slate-900 text-left shrink-0">Meet &amp; Greet</span>
                             {headerBadge && (
                                 <Badge
                                     variant="outline"
-                                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium border ${headerBadge.className}`}
+                                    className={`flex items-center gap-1 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-medium border ${headerBadge.className}`}
                                 >
                                     {headerBadge.label}
                                 </Badge>
@@ -159,17 +159,17 @@ export default function MeetNGreetCollapsible({
                         </div>
                     </AccordionTrigger>
 
-                    <AccordionContent className="pt-0 pb-4 text-sm">
+                    <AccordionContent className="pt-0 pb-3 sm:pb-4 text-xs sm:text-sm">
                         {role === "provider" && !hasSchedule && !loading && !isReadOnly && (
                             <div className="mb-4">
                                 <CreateMeetNGreetDialog existing={adoption.meet_n_greet} adoptionId={adoption.id}/>
                             </div>
                         )}
 
-                        <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
+                        <div className="border-t border-slate-100 pt-3 sm:pt-4 flex flex-col gap-2 sm:gap-3">
                             {loading ? (
-                                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-6 animate-pulse">
-                                    <div className="h-3 w-1/3 bg-slate-200 rounded mb-3"/>
+                                <div className="bg-slate-50 border border-slate-200 rounded-lg sm:rounded-xl px-3 sm:px-4 py-4 sm:py-6 animate-pulse">
+                                    <div className="h-2 sm:h-3 w-1/3 bg-slate-200 rounded mb-2 sm:mb-3"/>
                                     <div className="h-2 w-1/2 bg-slate-100 rounded mb-2"/>
                                     <div className="h-2 w-2/5 bg-slate-100 rounded"/>
                                 </div>
@@ -187,7 +187,7 @@ export default function MeetNGreetCollapsible({
                                                     onSuccessAction={triggerMeetNGreetRefresh}
                                                     trigger={
                                                         <Button variant="outline"
-                                                                className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-100">
+                                                                className="rounded-lg sm:rounded-xl h-8 px-2 sm:px-3 text-[10px] sm:text-xs font-bold gap-1 sm:gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-100">
                                                             <CalendarClock className="h-3.5 w-3.5"/>
                                                             Propose New Time/Location
                                                         </Button>
@@ -208,8 +208,8 @@ export default function MeetNGreetCollapsible({
                                     )}
                                 </>
                             ) : (
-                                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-                                    <p className="text-xs text-slate-500">
+                                <div className="bg-slate-50 border border-slate-200 rounded-lg sm:rounded-xl px-3 sm:px-4 py-3">
+                                    <p className="text-[10px] sm:text-xs text-slate-500">
                                         No schedule has been proposed yet.
                                     </p>
                                 </div>

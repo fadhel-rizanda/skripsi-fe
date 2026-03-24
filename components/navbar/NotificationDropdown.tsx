@@ -2,6 +2,7 @@
 
 import {Icon} from "@iconify/react"
 import {useEffect, useState} from "react"
+import {useRouter} from "next/navigation"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,8 +17,10 @@ import {Notification} from "@/types/notification"
 import {CHANNEL_ICON_MAP} from "@/hooks/useNotificationToast"
 import {formatDistanceToNowStrict} from "date-fns"
 import {useNotificationStore} from "@/store/useNotificationStore";
+import {getNotificationUrl} from "@/lib/notification-helpers";
 
 export function NotificationDropdown() {
+    const router = useRouter();
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [loading, setLoading] = useState(false)
     const [page, setPage] = useState(1)
@@ -127,7 +130,7 @@ export function NotificationDropdown() {
                 </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-96" align="end" forceMount>
+            <DropdownMenuContent className="w-[calc(100vw-2rem)] sm:w-96" align="end" sideOffset={8} collisionPadding={16} forceMount>
                 <DropdownMenuLabel>
                     <div className="flex items-center justify-between">
                         <span>Notifications</span>
@@ -163,7 +166,9 @@ export function NotificationDropdown() {
                             }
                         }}
                     >
-                        {notifications.map((notif, index) => (
+                        {notifications.map((notif, index) => {
+                            const url = getNotificationUrl(notif.reference_type, notif.reference_id);
+                            return (
                             <DropdownMenuItem
                                 key={`${notif.id}-${index}`}
                                 onSelect={(e) => e.preventDefault()}
@@ -171,12 +176,15 @@ export function NotificationDropdown() {
                                     if (!notif.read_at) {
                                         handleMarkAsRead(notif.id)
                                     }
+                                    if (url) {
+                                        router.push(url);
+                                    }
                                 }}
-                                className={`flex items-center cursor-pointer ${
-                                    notif.read_at ? "bg-gray-100 cursor-default" : ""
+                                className={`flex items-start gap-3 p-3 ${url ? "cursor-pointer hover:bg-green-50" : "cursor-default"} ${
+                                    notif.read_at ? "bg-gray-100" : ""
                                 }`}
                             >
-                                <div className="relative inline-flex items-center shrink-0">
+                                <div className="relative inline-flex items-center shrink-0 mt-0.5">
                                     <Icon
                                         icon={CHANNEL_ICON_MAP[notif.reference_type] || "ph:bell"}
                                         className="h-6 w-6 opacity-50"
@@ -190,23 +198,24 @@ export function NotificationDropdown() {
                                     )}
                                 </div>
 
-                                <div className="flex-1">
-                                    <div className="flex items-start justify-between">
-                                        <p className="text-sm font-medium truncate w-60">{notif.title}</p>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <p className="text-xs sm:text-sm font-medium truncate">{notif.title}</p>
 
-                                        <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                                        <span className="text-[9px] sm:text-[10px] text-gray-400 whitespace-nowrap shrink-0">
                                     {formatDistanceToNowStrict(new Date(notif.created_at), {
                                         addSuffix: true,
                                     })}
                                   </span>
                                     </div>
 
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1 line-clamp-2">
                                         {notif.message}
                                     </p>
                                 </div>
                             </DropdownMenuItem>
-                        ))}
+                         );
+                        })}
 
                         {fetchingMore && (
                             <div className="py-3 text-center text-xs text-gray-400">

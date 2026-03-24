@@ -64,8 +64,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const isOwnProfile = !!session?.user?.id && session.user.id === userId;
-  const isAdopter =
-    (profile?.role_name ?? session?.user?.role?.name) === "adopter";
+  const roleName = String(
+    profile?.role_name ?? session?.user?.role?.name ?? "",
+  ).toLowerCase();
+  const isAdmin = roleName === "admin";
+  const isAdopter = roleName === "adopter";
+  const isProvider = roleName === "provider";
 
   // Provider: pet listing state
   const [pets, setPets] = useState<Pet[]>([]);
@@ -212,8 +216,8 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
   }, [petPage, petPerPage]);
 
   useEffect(() => {
-    if (!isAdopter && isOwnProfile) fetchPets();
-  }, [fetchPets, isAdopter, isOwnProfile]);
+    if (isProvider && isOwnProfile) fetchPets();
+  }, [fetchPets, isProvider, isOwnProfile]);
 
   async function onSubmit(values: AdopterProfileInput) {
     if (!isOwnProfile) return;
@@ -377,7 +381,9 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
             </div>
             <div className="flex-1">
               <h1 className="text-2xl font-bold">{profile.name}</h1>
-              {isAdopter ? (
+              {isAdmin ? (
+                <p className="text-amber-600 font-semibold mt-0.5">Admin</p>
+              ) : isAdopter ? (
                 <p className="text-green-600 font-semibold mt-0.5">Adopter</p>
               ) : (
                 <p className="text-blue-600 font-semibold mt-0.5">Provider</p>
@@ -432,29 +438,31 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         className="mt-1.5 bg-gray-50"
                       />
                     </div>
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="555-123-4567"
-                              readOnly={!isEditing}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {!isAdmin && (
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="555-123-4567"
+                                readOnly={!isEditing}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 </SectionCard>
               )}
 
               {/* Address */}
-              {isOwnProfile && (
+              {isOwnProfile && !isAdmin && (
                 <SectionCard
                   title="Address"
                   description={
@@ -636,40 +644,42 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
               )}
 
               {/* About */}
-              <SectionCard
-                title="About"
-                description={
-                  isAdopter
-                    ? "Tell us more about you."
-                    : "Tell us about your organization."
-                }
-              >
-                <FormField
-                  control={form.control}
-                  name="about_me"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {isAdopter ? "About me" : "About our shelter"}
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={
-                            isAdopter
-                              ? "I'm an experienced dog owner looking for a new furry friend..."
-                              : "We are a no-kill shelter focused on..."
-                          }
-                          className="resize-none"
-                          rows={5}
-                          readOnly={!isEditing}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </SectionCard>
+              {!isAdmin && (
+                <SectionCard
+                  title="About"
+                  description={
+                    isAdopter
+                      ? "Tell us more about you."
+                      : "Tell us about your organization."
+                  }
+                >
+                  <FormField
+                    control={form.control}
+                    name="about_me"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {isAdopter ? "About me" : "About our shelter"}
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder={
+                              isAdopter
+                                ? "I'm an experienced dog owner looking for a new furry friend..."
+                                : "We are a no-kill shelter focused on..."
+                            }
+                            className="resize-none"
+                            rows={5}
+                            readOnly={!isEditing}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </SectionCard>
+              )}
 
               {/* Adopter-only: Pet Experience, Personality, Pet Preferences */}
               {isAdopter && (
@@ -881,7 +891,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
         </div>
 
         {/* Provider-only: Our Animals (own profile only) */}
-        {!isAdopter && isOwnProfile && (
+        {isProvider && isOwnProfile && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 className="text-xl font-semibold mb-6">Our animals</h2>
             {isPetsLoading ? (

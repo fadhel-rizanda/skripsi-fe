@@ -171,7 +171,6 @@ export function NotificationDropdown() {
                             return (
                             <DropdownMenuItem
                                 key={`${notif.id}-${index}`}
-                                onSelect={(e) => e.preventDefault()}
                                 onClick={() => {
                                     if (!notif.read_at) {
                                         handleMarkAsRead(notif.id)

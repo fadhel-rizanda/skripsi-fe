@@ -555,7 +555,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         if (isEditMode) {
             return (
                 <>
-                    <h3 className="text-xl font-semibold border-b pb-2">Address *</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold border-b pb-2">Address *</h3>
                     {renderAddressFields()}
                 </>
             )
@@ -564,14 +564,14 @@ export default function PetForm({mode, petId}: PetFormProps) {
         // Create mode: toggle between "same as mine" (BE duplicates user address) or custom
         return (
             <>
-                <div className="flex items-center justify-between border-b pb-2">
-                    <h3 className="text-xl font-semibold">Address *</h3>
-                    <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-2 gap-2 sm:gap-0">
+                    <h3 className="text-lg sm:text-xl font-semibold">Address *</h3>
+                    <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg w-full sm:w-auto">
                         <button
                             type="button"
                             onClick={() => handleToggleOwnerAddress(true)}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
                                 useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
                             )}
                         >
@@ -582,7 +582,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                             type="button"
                             onClick={() => handleToggleOwnerAddress(false)}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
                                 !useOwnerAddress ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"
                             )}
                         >
@@ -593,7 +593,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 </div>
 
                 {useOwnerAddress ? (
-                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 mt-4 sm:mt-0">
                         <Home className="h-4 w-4 shrink-0 text-slate-400"/>
                         <p>Pet location will use your registered address.</p>
                     </div>
@@ -606,23 +606,26 @@ export default function PetForm({mode, petId}: PetFormProps) {
 
     return (
         <>
-            <div className="min-h-screen bg-green-50 py-12 px-4">
+            <div className="min-h-screen bg-green-50 py-6 sm:py-12 px-2 sm:px-4 md:px-6">
                 <div className="max-w-6xl mx-auto">
                     <Card className="rounded-2xl shadow-xl">
-                        <CardContent className="p-10">
+                        <CardContent className="p-4 sm:p-6 md:p-10">
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                                    if (useOwnerAddress) {
-                                        const nonAddressErrors = Object.keys(errors).filter(k => k !== "address")
-                                        if (nonAddressErrors.length === 0) {
-                                            onSubmit()
-                                        }
-                                    }
-                                })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <form 
+                                  onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                                      if (useOwnerAddress) {
+                                          const nonAddressErrors = Object.keys(errors).filter(k => k !== "address")
+                                          if (nonAddressErrors.length === 0) {
+                                              onSubmit()
+                                          }
+                                      }
+                                  })}
+                                  className="[&_label]:text-xs sm:[&_label]:text-sm [&_input]:text-xs sm:[&_input]:text-sm [&_input]:h-9 sm:[&_input]:h-10 [&_textarea]:text-xs sm:[&_textarea]:text-sm [&_button[role='combobox']]:text-xs sm:[&_button[role='combobox']]:text-sm [&_button[role='combobox']]:h-9 sm:[&_button[role='combobox']]:h-10"
+                                >
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
                                         {/* LEFT COLUMN */}
                                         <div className="space-y-6">
-                                            <h3 className="text-xl font-semibold mb-6 border-b pb-2">
+                                            <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">
                                                 {isEditMode ? "Edit Pet Information" : "Pet Information"}
                                             </h3>
 
@@ -832,9 +835,9 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                         {/* RIGHT COLUMN */}
                                         <div className="space-y-8">
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Profile Picture*</h3>
-                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
-                                                    <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
+                                                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Profile Picture*</h3>
+                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
+                                                    <Icon icon="ph:camera" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
                                                     <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px)</p>
                                                     <label htmlFor="profile-upload">
@@ -874,9 +877,9 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                             </div>
 
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Additional Records</h3>
-                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
-                                                    <Icon icon="ph:cloud-arrow-up" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
+                                                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Additional Records</h3>
+                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
+                                                    <Icon icon="ph:cloud-arrow-up" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Click to upload or drag and drop</p>
                                                     <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records</p>
                                                     <label htmlFor="additional-upload">
@@ -917,20 +920,20 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                         </div>
                                     </div>
 
-                                    <div className="mt-10 space-y-4 flex flex-wrap justify-between border-t pt-6">
+                                    <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-t pt-6 gap-4 sm:gap-0">
                                         <FormField
                                             control={form.control}
                                             name="special_needs"
                                             render={({field}) => (
-                                                <FormItem className="flex items-center space-x-3 pt-4">
+                                                <FormItem className="flex items-center space-x-3 pt-4 sm:pt-0">
                                                     <FormControl>
                                                         <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
                                                     </FormControl>
-                                                    <FormLabel>Does this animal have any special needs?</FormLabel>
+                                                    <FormLabel className="text-sm font-medium">Does this animal have any special needs?</FormLabel>
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button type="submit" className="mt-4 bg-green-600 hover:bg-green-700 text-white">
+                                        <Button type="submit" className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base h-11 sm:h-auto">
                                             {isEditMode ? "Update Pet Profile" : "Submit new pet profile"}
                                         </Button>
                                     </div>

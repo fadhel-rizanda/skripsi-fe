@@ -200,13 +200,12 @@ export default function DetailPetPage() {
 
     return (
       <Button
-        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-        size="lg"
+        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
         onClick={handleAdoption}
         disabled={adoptionLoading || !isAvailable}
       >
-        <Heart className="mr-2 h-5 w-5 text-black" />
-        {adoptionLoading ? "Sending..." : adoptLabel}
+        <Heart className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-black shrink-0" />
+        <span className="truncate">{adoptionLoading ? "Sending..." : adoptLabel}</span>
       </Button>
     );
   };
@@ -254,7 +253,7 @@ export default function DetailPetPage() {
     <div className="min-h-screen bg-[#eaf5ea]">
       <div className="w-full mx-auto px-4 lg:px-12 py-6 sm:py-8 lg:py-12 lg:max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
-          <div className="space-y-4 w-full md:w-138 md:flex-none mx-auto md:mx-0">
+          <div className="space-y-4 w-full xl:w-138 xl:flex-none mx-auto xl:mx-0">
             <div className="relative w-full h-96 md:h-auto md:aspect-4/3 rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
@@ -312,7 +311,7 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-4! sm:p-6! md:p-8!">
+          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full xl:w-138 xl:flex-none mx-auto xl:mx-0 p-4! sm:p-6! md:p-8!">
             <CardContent className="space-y-4 sm:space-y-6 text-sm sm:text-base p-0!">
               {/* Status badge — pojok kanan atas card */}
               {renderStatusBadge(pet.status)}
@@ -494,24 +493,22 @@ export default function DetailPetPage() {
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="flex flex-col xl:flex-row gap-3 pt-4 w-full border-t border-slate-100 mt-2">
                 {renderAdoptButton()}
                 {isOwner ? (
                   <Button
-                    size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
                     onClick={() => router.push(`/pets/${pet.id}/edit`)}
                   >
-                    <Edit className="mr-2 h-5 w-5" />
-                    Edit Information
+                    <Edit className="mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="truncate">Edit Information</span>
                   </Button>
                 ) : (
                   <ChatButton
                     targetUserId={pet.user_id ?? ""}
                     label="Chat with Provider"
-                    size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    iconClassName="mr-2 h-5 w-5 text-slate-800"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all truncate"
+                    iconClassName="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-slate-800 shrink-0"
                   />
                 )}
               </div>

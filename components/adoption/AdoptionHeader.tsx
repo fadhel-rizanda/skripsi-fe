@@ -9,21 +9,21 @@ export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) 
     const isFailed = isRejected || isCancelled;
 
     const progressMap: Record<string, number> = {
-        "Submitted": 15,
-        "Meet & Greet": 35,
-        "Requirement": 55,
-        "Handover": 75,
+        "Submitted": 12,
+        "Meet & Greet": 31,
+        "Requirement": 50,
+        "Handover": 69,
         "Completed": 100,
         "Rejected": 100,
         "Cancelled": 100,
     };
 
     const steps = [
-        { label: "Submitted", pos: "left-[15%]" },
-        { label: "Meet & Greet", pos: "left-[35%]" },
-        { label: "Requirement", pos: "left-[55%]" },
-        { label: "Handover", pos: "left-[75%]" },
-        { label: "Completed", pos: "left-[90%]" },
+        { label: "Submitted", pos: "left-[12%]" },
+        { label: "Meet & Greet", pos: "left-[31%]" },
+        { label: "Requirement", pos: "left-[50%]" },
+        { label: "Handover", pos: "left-[69%]" },
+        { label: "Completed", pos: "left-[88%]" },
     ];
 
     const progress = stage ? progressMap[stage] : 0;
@@ -39,7 +39,7 @@ export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) 
             {/* Header Text */}
             <div className="mb-8 sm:mb-12">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-black">
-                    Application <br/>
+                    Application <br />
                     <span className={isRejected ? "text-red-600" : isCancelled ? "text-gray-600" : "text-black"}>
                         {isFailed ? stage : "Progress"}
                     </span>
@@ -58,12 +58,11 @@ export default function AdoptionHeader({ stage, petName }: AdoptionHeaderProps) 
                     {steps.map((step) => (
                         <span
                             key={step.label}
-                            className={`absolute -translate-x-1/2 text-center leading-tight w-16 sm:w-auto text-[9px] sm:text-xs md:text-sm font-semibold transition-colors duration-300 
-                            ${step.pos} ${
-                                !isFailed && stage && progressMap[stage] >= progressMap[step.label]
+                            className={`absolute -translate-x-1/2 text-center leading-tight break-words w-[50px] sm:w-auto text-[8px] sm:text-xs md:text-sm font-semibold transition-colors duration-300 
+                            ${step.pos} ${!isFailed && stage && progressMap[stage] >= progressMap[step.label]
                                     ? "text-[#19E619]"
                                     : "text-[#A5D6A7]"
-                            }`}
+                                }`}
                         >
                             {step.label}
                         </span>

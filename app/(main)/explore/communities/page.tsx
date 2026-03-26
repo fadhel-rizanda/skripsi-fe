@@ -100,7 +100,7 @@ export default function AllCommunityPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
             <CommunityPageLayout>
                 <CommunityFilters
                     searchQuery={searchQuery}
@@ -110,10 +110,10 @@ export default function AllCommunityPage() {
                     filterTag={filterTag}
                     setFilterTag={setFilterTag}
                 />
-                <div className="flex justify-end pt-6 w-full max-w-3xl">
+                <div className="flex justify-end pt-4 sm:pt-6 w-full max-w-3xl">
                     <CommunityFormDialog mode="create" trigger={
                         <Button
-className="bg-green-400 hover:bg-green-500 text-black p-5 font-bold"
+                            className="bg-green-400 hover:bg-green-500 text-black px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-bold"
                             onClick={handleCreateCommunity}
                         >
                             <Icon icon="ph:users-three" /> Create Community
@@ -147,7 +147,7 @@ className="bg-green-400 hover:bg-green-500 text-black p-5 font-bold"
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                         {communities.map((community) => (
                             <CommunityCard
                                 key={community.id}

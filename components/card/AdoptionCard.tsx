@@ -33,8 +33,8 @@ function UserRow({
     canChat: boolean;
 }) {
     return (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <Avatar className="w-10 h-10 border-2 border-white shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-white shadow-sm">
                 {avatar && isValidUrl(avatar) ? (
                     <Image
                         src={avatar}
@@ -46,17 +46,19 @@ function UserRow({
                         onError={() => console.error("Image failed to load:", avatar)}
                     />
                 ) : (
-                    <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
+                    <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold text-xs sm:text-sm">
                         {avatarFallback}
                     </AvatarFallback>
                 )}
             </Avatar>
             <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{name}</p>
-                <p className="text-xs text-gray-500 truncate">{email}</p>
+                <p className="font-medium text-gray-900 truncate text-sm sm:text-base">{name}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 truncate">{email}</p>
             </div>
             {canChat && chatTargetId && (
-                <ChatButton targetUserId={chatTargetId} label="Chat"/>
+                <div className="shrink-0">
+                    <ChatButton targetUserId={chatTargetId} label="Chat"/>
+                </div>
             )}
         </div>
     );
@@ -75,36 +77,36 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
             {/* Header */}
             <div
                 onClick={() => router.push(`/adoptions/${adoption.id}`)}
-                className="bg-linear-to-br p-6 border-b border-gray-100 cursor-pointer"
+                className="bg-linear-to-br p-4 sm:p-6 border-b border-gray-100 cursor-pointer"
             >
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white rounded-xl shadow-sm">
-                            <Icon icon="lucide:paw-print" className="w-5 h-5"/>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-white rounded-xl shadow-sm shrink-0">
+                            <Icon icon="lucide:paw-print" className="w-4 h-4 sm:w-5 sm:h-5"/>
                         </div>
-                        <div>
-                            <div className="text-lg flex items-center gap-1">
-                                <span className="font-semibold">{adoption.pet.name}</span>
-                                <span className="text-gray-400">-</span>
-                                <span className="font-light text-sm">{adoption.pet.id}</span>
+                        <div className="min-w-0">
+                            <div className="text-base sm:text-lg flex flex-wrap items-center gap-1">
+                                <span className="font-semibold truncate">{adoption.pet.name}</span>
+                                <span className="text-gray-400 hidden sm:inline">-</span>
+                                <span className="font-light text-xs sm:text-sm text-gray-500">{adoption.pet.id}</span>
                             </div>
-                            <p className="text-sm text-gray-600 mt-0.5">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 break-all">
                                 Adoption ID: {adoption.id}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-end gap-2">
+                    <div className="flex flex-wrap items-center gap-2 pl-11 sm:pl-0">
                         <Badge
                             variant="outline"
-                            className="font-medium"
+                            className="font-medium text-[10px] sm:text-xs"
                             style={parseColorCode(adoption.stage_tag.color_code || "")}
                         >
                             {adoption.stage_tag.name}
                         </Badge>
                         <Badge
                             variant="outline"
-                            className="font-medium"
+                            className="font-medium text-[10px] sm:text-xs"
                             style={parseColorCode(adoption.status.color_code || "")}
                         >
                             {adoption.status.name}
@@ -114,8 +116,8 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
                 </div>
             </div>
 
-            <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {/* Provider */}
                     <div className="space-y-3">
                         <div
@@ -152,8 +154,8 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 pt-4 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
-                    <Icon icon="lucide:calendar" className="w-3.5 h-3.5"/>
+                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500">
+                    <Icon icon="lucide:calendar" className="w-3 h-3 sm:w-3.5 sm:h-3.5"/>
                     <span>
                         Created{" "}
                         {new Date(adoption.created_at).toLocaleDateString("en-US", {

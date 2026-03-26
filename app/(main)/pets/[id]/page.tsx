@@ -179,7 +179,7 @@ export default function DetailPetPage() {
     const style = statusStyles[sn] ?? fallbackStatusStyle;
     return (
       <span
-        className={`absolute top-5 right-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${style.bg} ${style.text}`}
+        className={`absolute top-4 right-4 sm:top-5 sm:right-5 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${style.bg} ${style.text}`}
       >
         <span className={`w-2 h-2 rounded-full ${style.dot} ${sn === "pending" ? "animate-pulse" : ""}`} />
         {status.name}
@@ -200,13 +200,12 @@ export default function DetailPetPage() {
 
     return (
       <Button
-        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
-        size="lg"
+        className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
         onClick={handleAdoption}
         disabled={adoptionLoading || !isAvailable}
       >
-        <Heart className="mr-2 h-5 w-5 text-black" />
-        {adoptionLoading ? "Sending..." : adoptLabel}
+        <Heart className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-black shrink-0" />
+        <span className="truncate">{adoptionLoading ? "Sending..." : adoptLabel}</span>
       </Button>
     );
   };
@@ -252,9 +251,9 @@ export default function DetailPetPage() {
 
   return (
     <div className="min-h-screen bg-[#eaf5ea]">
-      <div className="w-full mx-auto px-4 lg:px-12 py-12 lg:max-w-7xl">
+      <div className="w-full mx-auto px-4 lg:px-12 py-6 sm:py-8 lg:py-12 lg:max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 sm:gap-x-6 md:gap-x-8 justify-center items-start">
-          <div className="space-y-4 w-full md:w-138 md:flex-none mx-auto md:mx-0">
+          <div className="space-y-4 w-full xl:w-138 xl:flex-none mx-auto xl:mx-0">
             <div className="relative w-full h-96 md:h-auto md:aspect-4/3 rounded-2xl overflow-hidden bg-gray-100 shadow-xl">
               {currentImage ? (
                 <>
@@ -312,13 +311,13 @@ export default function DetailPetPage() {
             )}
           </div>
 
-          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full md:w-138 md:flex-none mx-auto md:mx-0 p-8!">
-            <CardContent className="space-y-6 text-base p-0!">
+          <Card className="relative rounded-2xl shadow-xl border-0 bg-white/95 w-full xl:w-138 xl:flex-none mx-auto xl:mx-0 p-4! sm:p-6! md:p-8!">
+            <CardContent className="space-y-4 sm:space-y-6 text-sm sm:text-base p-0!">
               {/* Status badge — pojok kanan atas card */}
               {renderStatusBadge(pet.status)}
 
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900">
+                <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900 mt-6 sm:mt-0">
                   {pet.name}
                 </h1>
                 {pet.about && (
@@ -349,7 +348,7 @@ export default function DetailPetPage() {
                     <span className="p-2 rounded-lg bg-green-100">
                       {renderGenderIcon(pet.gender)}
                     </span>
-                    <span>Gender: {pet.gender}</span>
+                    <span>Gender: <span className="capitalize">{pet.gender}</span></span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">
@@ -361,7 +360,7 @@ export default function DetailPetPage() {
                     <span className="p-2 rounded-lg bg-green-100">
                       <Ruler className="h-4 w-4 text-green-600" />
                     </span>
-                    <span>Size: {pet.size}</span>
+                    <span>Size: <span className="capitalize">{pet.size}</span></span>
                   </div>
                 </div>
               </div>
@@ -375,7 +374,7 @@ export default function DetailPetPage() {
                     {pet.physique_tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-base"
+                        className="bg-green-100 text-green-700 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm"
                       >
                         {tag.name}
                       </span>
@@ -393,7 +392,7 @@ export default function DetailPetPage() {
                     {pet.personality_tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-base"
+                        className="bg-green-100 text-green-700 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm"
                       >
                         {tag.name}
                       </span>
@@ -420,7 +419,7 @@ export default function DetailPetPage() {
                             <span className="text-slate-400 flex-none">
                               <FileText className="h-5 w-5 text-green-600" />
                             </span>
-                            <span className="text-base text-slate-700 truncate">
+                            <span className="text-sm sm:text-base text-slate-700 truncate">
                               {record.filename}
                             </span>
                           </div>
@@ -494,24 +493,22 @@ export default function DetailPetPage() {
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="flex flex-col xl:flex-row gap-3 pt-4 w-full border-t border-slate-100 mt-2">
                 {renderAdoptButton()}
                 {isOwner ? (
                   <Button
-                    size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
                     onClick={() => router.push(`/pets/${pet.id}/edit`)}
                   >
-                    <Edit className="mr-2 h-5 w-5" />
-                    Edit Information
+                    <Edit className="mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="truncate">Edit Information</span>
                   </Button>
                 ) : (
                   <ChatButton
                     targetUserId={pet.user_id ?? ""}
                     label="Chat with Provider"
-                    size="lg"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800"
-                    iconClassName="mr-2 h-5 w-5 text-slate-800"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all truncate"
+                    iconClassName="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-slate-800 shrink-0"
                   />
                 )}
               </div>

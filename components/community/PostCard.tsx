@@ -63,11 +63,11 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         <div className="flex items-center gap-2">
                             <Link
                                 href={authorProfileHref}
-                                className="font-bold text-gray-900 text-sm md:text-base hover:underline"
+                                className="font-bold text-gray-900 text-xs sm:text-sm md:text-base hover:underline"
                             >
                                 {post.created_by.name}
                             </Link>
-                            <span className="text-base text-gray-500">• {formatRelativeTime(post.created_at)}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">• {formatRelativeTime(post.created_at)}</span>
                         </div>
                         {post.created_by.id === session?.user.id && (
                             <>
@@ -124,9 +124,9 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     <Link href={`/explore/posts/${post.id}`}
                         className="block hover:opacity-80 transition-opacity mb-3">
                         {post.title && (
-                            <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1">{post.title}</h3>
+                            <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1">{post.title}</h3>
                         )}
-                        <p className="text-gray-700 leading-relaxed text-sm md:text-base line-clamp-3">
+                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base line-clamp-3">
                             {post.content}
                         </p>
                     </Link>
@@ -154,7 +154,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                                 <Badge
                                     key={tag.id}
                                     variant="secondary"
-                                    className="bg-green-50 text-green-700 hover:bg-green-100 text-base font-normal"
+                                    className="bg-green-50 text-green-700 hover:bg-green-100 text-xs sm:text-sm font-normal"
                                     style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
                                 >
                                     #{tag.name}
@@ -165,15 +165,15 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                 </div>
             </div>
             <div className="flex flex-wrap items-center pt-3 border-t border-gray-300">
-                <div className="flex flex-wrap gap-4 md:gap-6">
+                <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-6">
                     <Button
                         variant="ghost"
                         size="sm"
                         className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? 'text-green-600 bg-green-50' : ''}`}
                         onClick={() => onLike(post.id)}
                     >
-                        <ThumbsUp className="h-6 w-6" />
-                        <span className="text-base font-medium">
+                        <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-xs sm:text-sm font-medium">
                             {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
                         </span>
                     </Button>
@@ -184,8 +184,8 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2"
                     >
                         <Link href={`/explore/posts/${post.id}?comment=1#comments`}>
-                            <MessageSquare className="h-6 w-6" />
-                            <span className="text-base font-medium">{post.comments_count} Comments</span>
+                            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+                            <span className="text-xs sm:text-sm font-medium">{post.comments_count} Comments</span>
                         </Link>
                     </Button>
                     <ReportDialog

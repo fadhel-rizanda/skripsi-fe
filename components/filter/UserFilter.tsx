@@ -41,13 +41,13 @@ export function UserFilter({ onSearchChange, onRoleChange }: UserFilterProps) {
 
     return (
         <Card className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-none shadow-sm rounded-xl bg-white">
-            <InputGroup className="w-full flex-1 h-11 bg-white border-gray-200">
+            <InputGroup className="w-full flex-1 h-9 sm:h-11 bg-white border-gray-200">
                 <InputGroupAddon>
                     <Search className="size-5 text-gray-400" />
                 </InputGroupAddon>
                 <InputGroupInput
                     placeholder="Search by name..."
-                    className="text-base h-full"
+                    className="text-sm sm:text-base h-full"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -68,7 +68,7 @@ export function UserFilter({ onSearchChange, onRoleChange }: UserFilterProps) {
                 }}
                 placeholder="Role"
                 mode="single"
-                className="w-full sm:w-[150px] h-11 bg-white border-gray-200 text-gray-600"
+                className="w-full sm:w-[150px] h-9 sm:h-11 bg-white border-gray-200 text-gray-600 text-sm sm:text-base"
             />
         </Card>
     );

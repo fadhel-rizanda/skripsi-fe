@@ -306,12 +306,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
   const joinedYear = new Date(profile.created_at).getFullYear();
 
   return (
-    <div className="min-h-screen bg-green-50 py-10 px-4">
+    <div className="min-h-screen bg-green-50 py-6 sm:py-10 px-3 sm:px-4 md:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Single unified card: header + all form sections */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Profile Header */}
-          <div className="flex items-center gap-6 p-6 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 p-4 sm:p-6 border-b border-gray-100">
             <div className="relative w-20 h-20 shrink-0">
               {isEditing && isOwnProfile ? (
                 <button
@@ -375,26 +375,26 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                 </>
               )}
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold">{profile.name}</h1>
+            <div className="flex-1 text-center sm:text-left mt-2 sm:mt-0">
+              <h1 className="text-xl sm:text-2xl font-bold">{profile.name}</h1>
               {isAdopter ? (
-                <p className="text-green-600 font-semibold mt-0.5">Adopter</p>
+                <p className="text-green-600 font-semibold mt-0.5 text-sm sm:text-base">Adopter</p>
               ) : (
-                <p className="text-blue-600 font-semibold mt-0.5">Provider</p>
+                <p className="text-blue-600 font-semibold mt-0.5 text-sm sm:text-base">Provider</p>
               )}
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                 Joined in {joinedYear}
               </p>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 shrink-0 w-full sm:w-auto mt-4 sm:mt-0">
               {isOwnProfile && !isEditing && (
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
-                  <Icon icon="ph:pencil" className="mr-2 w-4 h-4" />
+                <Button variant="outline" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => setIsEditing(true)}>
+                  <Icon icon="ph:pencil" className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                   Edit Profile
                 </Button>
               )}
               {isOwnProfile && (
-                <Button variant="destructive" onClick={() => signOut()}>
+                <Button variant="destructive" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => signOut()}>
                   Logout
                 </Button>
               )}
@@ -423,13 +423,13 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                   />
                   <div className="space-y-4">
                     <div>
-                      <FormLabel className="text-sm font-medium">
+                      <FormLabel className="text-xs sm:text-sm font-medium">
                         Email address
                       </FormLabel>
                       <Input
                         value={profile.email}
                         readOnly
-                        className="mt-1.5 bg-gray-50"
+                        className="mt-1.5 bg-gray-50 text-xs sm:text-sm h-9 sm:h-10"
                       />
                     </div>
                     <FormField
@@ -437,11 +437,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Phone Number</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="555-123-4567"
                               readOnly={!isEditing}
+                              className="text-xs sm:text-sm h-9 sm:h-10"
                               {...field}
                             />
                           </FormControl>
@@ -469,11 +470,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="address.street"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Street address</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Street address</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="e.g. Jl. Pawsitive No. 123"
                               readOnly={!isEditing}
+                              className="text-xs sm:text-sm h-9 sm:h-10"
                               {...field}
                             />
                           </FormControl>
@@ -486,7 +488,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="address.province_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Province</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Province</FormLabel>
                           <FormControl>
                             <SearchableCombobox
                               options={provinces}
@@ -516,7 +518,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="address.regency_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Regency / City</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Regency / City</FormLabel>
                           <FormControl>
                             <SearchableCombobox
                               options={regencies}
@@ -550,7 +552,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="address.district_id"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>District</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">District</FormLabel>
                             <FormControl>
                               <SearchableCombobox
                                 options={districts}
@@ -582,11 +584,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="address.zip_code"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>ZIP / Postal code</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">ZIP / Postal code</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="e.g. 62704"
                                 readOnly={!isEditing}
+                                className="text-xs sm:text-sm h-9 sm:h-10"
                                 {...field}
                               />
                             </FormControl>
@@ -600,11 +603,12 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="address.link"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Maps link</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Maps link</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="e.g. https://maps.google.com/..."
                               readOnly={!isEditing}
+                              className="text-xs sm:text-sm h-9 sm:h-10"
                               {...field}
                             />
                           </FormControl>
@@ -617,11 +621,11 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       name="address.notes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Address notes</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Address notes</FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Describe the address in more detail..."
-                              className="resize-none"
+                              className="resize-none text-xs sm:text-sm"
                               rows={3}
                               readOnly={!isEditing}
                               {...field}
@@ -649,7 +653,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                   name="about_me"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">
                         {isAdopter ? "About me" : "About our shelter"}
                       </FormLabel>
                       <FormControl>
@@ -659,7 +663,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                               ? "I'm an experienced dog owner looking for a new furry friend..."
                               : "We are a no-kill shelter focused on..."
                           }
-                          className="resize-none"
+                          className="resize-none text-xs sm:text-sm"
                           rows={5}
                           readOnly={!isEditing}
                           {...field}
@@ -684,11 +688,11 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="personality"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>My Personality</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">My Personality</FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="I consider myself a caring and responsible person..."
-                                className="resize-none"
+                                className="resize-none text-xs sm:text-sm"
                                 rows={4}
                                 readOnly={!isEditing}
                                 {...field}
@@ -703,7 +707,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="personality_tags"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Personality Tags</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Personality Tags</FormLabel>
                             <div className="flex flex-wrap items-center gap-2">
                               {field.value?.map((tagId) => (
                                 <TagBadge
@@ -759,11 +763,11 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="pet_experience"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Experience Description</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Experience Description</FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Describe your experience with pets..."
-                                className="resize-none"
+                                className="resize-none text-xs sm:text-sm"
                                 rows={4}
                                 readOnly={!isEditing}
                                 {...field}
@@ -778,7 +782,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                         name="pet_experience_tags"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Experience Tags</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Experience Tags</FormLabel>
                             <div className="flex flex-wrap items-center gap-2">
                               {field.value?.map((tagId) => (
                                 <TagBadge
@@ -836,7 +840,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                 className="disabled:opacity-100"
                               />
                             </FormControl>
-                            <FormLabel className="text-sm font-medium cursor-pointer">
+                            <FormLabel className="text-xs sm:text-sm font-medium cursor-pointer">
                               I&apos;m open to pets with special needs
                             </FormLabel>
                           </FormItem>
@@ -849,24 +853,25 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
 
               {/* Action Buttons */}
               {isEditing && (
-                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-100">
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full sm:w-auto flex-1 sm:flex-none text-sm sm:text-base h-10 sm:h-11"
                     onClick={handleCancel}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8"
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 w-full sm:w-auto flex-1 sm:flex-none text-sm sm:text-base h-10 sm:h-11"
                     disabled={form.formState.isSubmitting}
                   >
                     {form.formState.isSubmitting ? (
                       <>
                         <Icon
                           icon="ph:circle-notch"
-                          className="mr-2 w-4 h-4 animate-spin"
+                          className="mr-2 w-4 h-4 sm:w-5 sm:h-5 animate-spin"
                         />
                         Saving...
                       </>
@@ -882,8 +887,8 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
 
         {/* Provider-only: Our Animals (own profile only) */}
         {!isAdopter && isOwnProfile && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold mb-6">Our animals</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Our animals</h2>
             {isPetsLoading ? (
               <div className="py-10 text-center">
                 <Icon
@@ -897,7 +902,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
               </p>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                   {pets.map((pet) => (
                     <PetCard
                       key={pet.id}
@@ -945,11 +950,11 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 p-6 border-b border-gray-100">
+    <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 sm:gap-6 p-4 sm:p-6 border-b border-gray-100">
       <div>
-        <h2 className="text-base font-semibold">{title}</h2>
+        <h2 className="text-base sm:text-lg font-semibold">{title}</h2>
         {description && (
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">{description}</p>
         )}
       </div>
       <div>{children}</div>

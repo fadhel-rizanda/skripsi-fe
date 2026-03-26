@@ -127,10 +127,10 @@ export default function AdminUsersPage() {
     const isTerminate = dialogMode === "terminate";
 
     return (
-        <div className="min-h-[calc(100vh-64px)] w-full bg-[#E7F3E7] px-6 py-10 md:px-12 md:py-12">
+        <div className="min-h-[calc(100vh-64px)] w-full bg-[#E7F3E7] px-4 py-6 sm:px-6 sm:py-10 md:px-12 md:py-12">
             <div className="max-w-4xl mx-auto flex flex-col gap-6">
                 <div>
-                    <h1 className="text-[2rem] font-bold text-gray-900 tracking-tight">Users</h1>
+                    <h1 className="text-2xl sm:text-[2rem] font-bold text-gray-900 tracking-tight">Users</h1>
                     <p className="text-gray-500 mt-1">Manage and monitor all users.</p>
                 </div>
 

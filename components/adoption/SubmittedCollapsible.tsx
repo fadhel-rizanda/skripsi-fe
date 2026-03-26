@@ -49,21 +49,21 @@ export default function SubmittedCollapsible({
 
     if (!adoption) {
         return (
-            <div className="w-full max-w-4xl border rounded-2xl px-4 py-4 bg-white animate-pulse">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="h-4 w-4 rounded-full bg-slate-200"/>
-                    <div className="h-4 w-32 bg-slate-200 rounded"/>
-                </div>
-                <div className="h-3 w-3/4 bg-slate-100 rounded mb-6"/>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-50 pt-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="space-y-2">
-                            <div className="h-2 w-16 bg-slate-100 rounded"/>
-                            <div className="h-3 w-24 bg-slate-200 rounded"/>
-                        </div>
-                    ))}
-                </div>
+        <div className="w-full max-w-4xl border rounded-xl sm:rounded-2xl px-3 sm:px-4 py-3 sm:py-4 bg-white animate-pulse">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-slate-200"/>
+                <div className="h-4 w-28 sm:w-32 bg-slate-200 rounded"/>
             </div>
+            <div className="h-3 w-3/4 bg-slate-100 rounded mb-4 sm:mb-6"/>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 border-t border-slate-50 pt-3 sm:pt-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="space-y-1.5 sm:space-y-2">
+                        <div className="h-2 w-16 bg-slate-100 rounded"/>
+                        <div className="h-3 w-24 bg-slate-200 rounded"/>
+                    </div>
+                ))}
+            </div>
+        </div>
         );
     }
 
@@ -72,30 +72,30 @@ export default function SubmittedCollapsible({
             type="single"
             collapsible
             defaultValue="item-1"
-            className="w-full max-w-4xl border rounded-2xl px-4 bg-white"
+            className="w-full max-w-4xl border rounded-xl sm:rounded-2xl px-3 sm:px-4 bg-white"
         >
             <AccordionItem value="item-1" className="border-none">
-                <AccordionTrigger className="hover:no-underline py-3">
-                    <div className="flex items-center gap-3">
-                        <div className="h-4 w-4 rounded-full bg-[#19E619]"/>
-                        <span className="text-base font-bold text-slate-900">
+                <AccordionTrigger className="hover:no-underline py-2.5 sm:py-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-[#19E619] shrink-0"/>
+                        <span className="text-sm sm:text-base font-bold text-slate-900 text-left">
                             Application Submitted
                         </span>
                     </div>
                 </AccordionTrigger>
 
-                <AccordionContent className="pt-0 pb-4 text-sm">
-                    <p className="text-slate-500 mb-4">
+                <AccordionContent className="pt-0 pb-3 sm:pb-4 text-xs sm:text-sm">
+                    <p className="text-slate-500 mb-3 sm:mb-4">
                         We have received your application. Thank you for your
                         interest in adopting!
                     </p>
 
-                    <div className="border-t border-slate-100 pt-4">
-                        <h3 className="font-bold text-sm mb-3 text-slate-900">
+                    <div className="border-t border-slate-100 pt-3 sm:pt-4">
+                        <h3 className="font-bold text-xs sm:text-sm mb-2.5 sm:mb-3 text-slate-900">
                             Application Details
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-2.5 sm:gap-y-3 gap-x-4">
                             <DetailItem
                                 label="Animal Name"
                                 value={adoption.pet?.name || "Unknown Pet"}
@@ -139,8 +139,8 @@ export default function SubmittedCollapsible({
 function DetailItem({label, value}: { label: string; value: string }) {
     return (
         <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-slate-900">{label}:</span>
-            <span className="text-xs text-slate-600">{value}</span>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-900">{label}:</span>
+            <span className="text-xs sm:text-sm text-slate-600">{value}</span>
         </div>
     );
 }

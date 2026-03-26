@@ -37,6 +37,12 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Install CA certificates
+RUN apk add --no-cache ca-certificates && \
+    wget -q -O /usr/local/share/ca-certificates/zerossl.crt \
+    https://crt.sh/?d=7394617 && \
+    update-ca-certificates
+
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

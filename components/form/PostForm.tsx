@@ -212,7 +212,7 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                     name="tag_ids"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Tags</FormLabel>
+                            <FormLabel>Tags*</FormLabel>
                             <FormControl>
                                 <SearchableCombobox
                                     options={postTags}

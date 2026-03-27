@@ -50,7 +50,7 @@ type UserGreetingFormProps = {
 export default function UserGreetingForm({ role }: UserGreetingFormProps) {
   const isAdopter = role === "adopter";
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   const {
     options: personalityTags,
@@ -141,6 +141,13 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
           ? "Preferences saved! Let's find your perfect pet."
           : "Address saved successfully!",
       );
+      await update({
+          ...session,
+          user: {
+              ...session?.user,
+              address_street: values.address.street,
+          },
+      })
       router.push("/pets");
     } catch (error) {
       toast.error("Failed to save preferences. Please try again.");

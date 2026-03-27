@@ -247,7 +247,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         const allowedTypes = [
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
             "application/pdf",
-            "video/mp4", "video/quicktime",
+            "video/mp4", "video/quicktime", "video/webm",
         ]
         const maxSize = 10 * 1024 * 1024
 
@@ -839,7 +839,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
                                                     <Icon icon="ph:camera" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px)</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px, MAX. 5mb)</p>
                                                     <label htmlFor="profile-upload">
                                                         <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Select File</span>
@@ -881,7 +881,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
                                                     <Icon icon="ph:cloud-arrow-up" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Click to upload or drag and drop</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records (MAX. 10mb)</p>
                                                     <label htmlFor="additional-upload">
                                                         <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Upload Files</span>

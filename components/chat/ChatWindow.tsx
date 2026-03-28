@@ -169,7 +169,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         }
     };
 
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const handleDeleteMessage = async (messageId: string) => {
+        setIsDeleting(true);
         try {
             await chatService.deleteMessage(chat.id, messageId);
 
@@ -184,6 +187,8 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 const errData = error.response?.data as ErrorResponse;
                 toast.error(errData?.message || "Failed to delete message");
             }
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -200,6 +205,14 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             console.error("Download failed:", error);
             toast.error("Failed to download file.");
         }
+    };
+
+    const canModifyMessage = (createdAt: string | Date, limitMinutes: number) => {
+        if (!createdAt) return false;
+        const createdTime = new Date(createdAt).getTime();
+        const now = Date.now();
+        const diffMinutes = (now - createdTime) / (1000 * 60);
+        return diffMinutes <= limitMinutes;
     };
 
     useEffect(() => {
@@ -528,14 +541,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                             }
                                             {
                                                 m.content?.trim() &&
-                                                m.created_at &&
-                                                (() => {
-                                                    const createdTime = new Date(m.created_at).getTime();
-                                                    const now = Date.now();
-                                                    const diffMinutes = (now - createdTime) / (1000 * 60);
-
-                                                    return diffMinutes <= 10;
-                                                })() &&
+                                                canModifyMessage(m.created_at, 10) &&
                                                 <DropdownMenuItem
                                                     onClick={() => {
                                                         setEditingMessageId(m.id);
@@ -546,14 +552,8 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                 </DropdownMenuItem>
                                             }
                                             {
-                                                m.created_at && (() => {
-                                                    const createdTime = new Date(m.created_at).getTime();
-                                                    const now = Date.now();
-                                                    const diffMinutes = (now - createdTime) / (1000 * 60);
-
-                                                    return diffMinutes <= 15;
-                                                })() &&
-                                               ( <DropdownMenuItem
+                                                canModifyMessage(m.created_at, 15) &&
+                                               <DropdownMenuItem
                                                     className="text-red-600 focus:text-red-600 focus:bg-red-50"
                                                     onClick={() => {
                                                         setMessageToDelete(m.id);
@@ -562,7 +562,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                 >
                                                     <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2"/>
                                                     Delete
-                                                </DropdownMenuItem>)
+                                               </DropdownMenuItem>
                                             }
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -596,9 +596,9 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                             variant="destructive"
                             className="bg-red-500! hover:bg-red-600!"
                             onClick={() => messageToDelete && handleDeleteMessage(messageToDelete)}
-                            disabled={!messageToDelete}
+                            disabled={!messageToDelete || isDeleting}
                         >
-                            Delete
+                            {isDeleting ? "Deleting..." : "Delete"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

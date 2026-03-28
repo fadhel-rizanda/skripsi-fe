@@ -13,6 +13,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { isValidUrl } from "@/lib/utils";
 import { postService } from "@/services/postServices";
+import { usePathname, useRouter } from "next/navigation";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,10 +31,40 @@ interface PostCardProps {
 
 export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCardProps) {
     const { data: session } = useSession();
+    const router = useRouter();
+    const pathname = usePathname();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const safeAttachmentUrl = isValidUrl(post.attachment?.public_url ?? '') ? post.attachment!.public_url : null;
     const authorProfileHref = `/profile/${post.created_by.id}`;
+    const postCommentHref = `/explore/posts/${post.id}?comment=1#comments`;
+
+    const redirectToLogin = (callbackUrl?: string) => {
+        const targetUrl = callbackUrl ?? pathname ?? "/explore/posts";
+        router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+    };
+
+    const handleLikeClick = () => {
+        if (!session?.user?.id) {
+            redirectToLogin();
+            return;
+        }
+        onLike(post.id);
+    };
+
+    const handleCommentClick = () => {
+        if (!session?.user?.id) {
+            redirectToLogin(postCommentHref);
+            return;
+        }
+        router.push(postCommentHref);
+    };
+
+    const handleReportClick = () => {
+        if (!session?.user?.id) {
+            redirectToLogin(`/explore/posts/${post.id}`);
+        }
+    };
 
     const handleDelete = async () => {
         await postService.deletePost(post.id);
@@ -170,7 +201,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         variant="ghost"
                         size="sm"
                         className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? 'text-green-600 bg-green-50' : ''}`}
-                        onClick={() => onLike(post.id)}
+                        onClick={handleLikeClick}
                     >
                         <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
                         <span className="text-xs sm:text-sm font-medium">
@@ -180,18 +211,23 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     <Button
                         variant="ghost"
                         size="sm"
-                        asChild
                         className="text-gray-900 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2"
+                        onClick={handleCommentClick}
                     >
-                        <Link href={`/explore/posts/${post.id}?comment=1#comments`}>
-                            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
-                            <span className="text-xs sm:text-sm font-medium">{post.comments_count} Comments</span>
-                        </Link>
+                        <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-xs sm:text-sm font-medium">{post.comments_count} Comments</span>
                     </Button>
-                    <ReportDialog
-                        referenceType="post"
-                        referenceId={post.id}
-                    />
+                    {session?.user?.id ? (
+                        <ReportDialog
+                            referenceType="post"
+                            referenceId={post.id}
+                        />
+                    ) : (
+                        <Button variant="ghost" size="sm" className="text-red-600 gap-1.5 px-2" onClick={handleReportClick}>
+                            <Icon icon="lucide:flag" className="h-4 w-4 sm:h-5 sm:w-5" />
+                            <span className="text-xs sm:text-sm font-medium">Report</span>
+                        </Button>
+                    )}
                 </div>
             </div>
         </Card>

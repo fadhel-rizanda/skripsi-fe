@@ -188,6 +188,21 @@ export default function CommunityDetailPage() {
     }
   };
 
+  const handleReportCommunityClick = () => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to report a community.");
+      router.push(`/login?callbackUrl=/explore/communities/${id}`);
+    }
+  };
+
+  const handleCreatePostClick = (e: React.MouseEvent) => {
+    if (!session?.user?.id) {
+      e.preventDefault();
+      toast.error("You must be logged in to create a post.");
+      router.push(`/login?callbackUrl=/explore/communities/${id}`);
+    }
+  };
+
   const handleDeleteCommunity = async () => {
     if (!community) return;
     await communityService.deleteCommunity(community.id);
@@ -350,19 +365,30 @@ export default function CommunityDetailPage() {
         </Button>
 
         {!community.is_admin && (
-          <ReportDialog
-            referenceType="community"
-            referenceId={community.id}
-            trigger={
-              <Button
-                variant="outline"
-                className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
-              >
-                <Icon icon="lucide:flag" className="h-4 w-4" />
-                Report Community
-              </Button>
-            }
-          />
+          session?.user?.id ? (
+            <ReportDialog
+              referenceType="community"
+              referenceId={community.id}
+              trigger={
+                <Button
+                  variant="outline"
+                  className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
+                >
+                  <Icon icon="lucide:flag" className="h-4 w-4" />
+                  Report Community
+                </Button>
+              }
+            />
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
+              onClick={handleReportCommunityClick}
+            >
+              <Icon icon="lucide:flag" className="h-4 w-4" />
+              Report Community
+            </Button>
+          )
         )}
 
         {(community.is_member || community.is_admin) && (
@@ -371,7 +397,7 @@ export default function CommunityDetailPage() {
             communityId={community.id}
             onSuccessAction={() => setRefreshKey((prev) => prev + 1)}
             trigger={
-              <Button className="w-full mt-3 bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2">
+              <Button className="w-full mt-3 bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2" onClick={handleCreatePostClick}>
                 <Icon icon="ph:plus-circle-bold" className="w-5 h-5" />
                 Create Post
               </Button>

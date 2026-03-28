@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Icon } from "@iconify/react";
 
 import { PostFilters } from "@/components/filter/AllPostFilters";
 import { CommunityPageLayout } from "../layout";
@@ -19,6 +23,8 @@ export default function AllPostPage() {
     const [sortBy, setSortBy] = useState("newest");
     const [filterTag, setFilterTag] = useState("all");
     const [refreshKey, setRefreshKey] = useState(0);
+    const { data: session } = useSession();
+    const router = useRouter();
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -132,6 +138,14 @@ export default function AllPostPage() {
         setPagination(prev => ({ ...prev, per_page: perPage, current_page: 1 }));
     };
 
+    const handleCreatePost = (e: React.MouseEvent) => {
+        if (!session?.user?.id) {
+            e.preventDefault();
+            toast.error("You must be logged in to create a post.");
+            router.push("/login?callbackUrl=/explore/posts");
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <CommunityPageLayout>
@@ -146,6 +160,16 @@ export default function AllPostPage() {
                 <div className="flex justify-end pt-6 w-full max-w-3xl">
                     <PostFormDialog
                         mode={'create'}
+                        trigger={
+                            <button
+                                type="button"
+                                className="inline-flex items-center justify-center gap-2 bg-[#19E619] hover:bg-green-500 text-black font-bold text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-md"
+                                onClick={handleCreatePost}
+                            >
+                                <Icon icon="ph:plus-circle-bold" className="w-4 h-4 sm:w-5 sm:h-5" />
+                                Create Post
+                            </button>
+                        }
                         onSuccessAction={() => {
                             setRefreshKey(prevState => prevState + 1)
                         }}

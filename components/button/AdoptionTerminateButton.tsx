@@ -8,6 +8,8 @@ import { AxiosError } from "axios";
 import { ErrorResponse, UserProfile } from "@/types";
 import { toast } from "sonner";
 import { petService } from "@/services/petServices";
+import {userService} from "@/services/userServices";
+import {useSession} from "next-auth/react";
 
 interface AdoptionTerminateButtonProps {
     adoption?: Adoption;
@@ -26,12 +28,17 @@ export default function AdoptionTerminateButton({
                                                 }: AdoptionTerminateButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
 
+    const { data: session, update } = useSession();
     const isProvider = currentUser?.role.name === "provider";
     const action = isProvider ? "reject" : "cancel";
     const label = isProvider ? "Reject Application" : "Cancel Application";
     const loadingLabel = isProvider ? "Rejecting..." : "Cancelling...";
 
     const handleTerminate = async () => {
+        if(!session?.user?.id) {
+            toast.error("You must be logged in to perform this action.");
+            return;
+        }
         if (!adoption?.pet?.id || !adoption?.id) {
             toast.error("Unable to perform action: Missing adoption details.");
             return;
@@ -54,6 +61,10 @@ export default function AdoptionTerminateButton({
                 onError?.(error);
             }
         } finally {
+            const res = await userService.userChannels();
+            const channels = res.data.channels ?? [];
+            await update({ user: { channels } });
+
             setIsLoading(false);
         }
     };

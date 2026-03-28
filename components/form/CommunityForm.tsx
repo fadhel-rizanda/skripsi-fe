@@ -71,7 +71,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
         resolver: zodResolver(CreateCommunitySchema),
         defaultValues: {
             name: "",
-            website: "",
+            website: undefined,
             attachment_id: undefined,
             description: "",
             tag_ids: [],

@@ -18,7 +18,7 @@ import { otpSchema, OtpFormInput } from "@/schemas/auth.schema"
 
 export default function OtpVerificationCard() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, update } = useSession();
 
   const [error, setError] = useState("")
   const [resending, setResending] = useState(false)
@@ -46,6 +46,14 @@ export default function OtpVerificationCard() {
         setError(result.error || "Verification failed")
         return
       }
+
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          email_verified_at: new Date().toISOString(),
+        },
+      })
 
       router.push("/greeting?verified=true")
     } catch (err) {

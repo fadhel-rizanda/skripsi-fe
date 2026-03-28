@@ -19,6 +19,15 @@ import {getEcho} from "@/lib/echo";
 import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
 import {AxiosError} from "axios";
 import {ErrorResponse} from "@/types";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
 
 function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -33,6 +42,11 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [content, setContent] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
+
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editContent, setEditContent] = useState<string>("");
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -74,7 +88,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             console.error("Failed to load more messages:", error);
             if (error instanceof AxiosError) {
                 const errData = error.response?.data as ErrorResponse;
-                toast.error(errData?.message);
+                toast.error(errData?.message || "Failed to load more messages");
             }
         } finally {
             setLoadingMore(false);
@@ -121,13 +135,62 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             console.error("Failed to send message", error);
             if (error instanceof AxiosError) {
                 const errData = error.response?.data as ErrorResponse;
-                toast.error(errData?.message);
+                toast.error(errData?.message || "Failed to send message");
             }
         } finally {
             setIsSending(false);
         }
     };
 
+    const handleEditMessage = async (messageId: string) => {
+        if (!editContent.trim()) {
+            toast.error("Message cannot be empty");
+            return;
+        }
+
+        try {
+            await chatService.editMessage(chat.id, messageId, editContent);
+
+            setMessages(prev => prev.map(m =>
+                m.id === messageId
+                    ? {...m, content: editContent, edited: true}
+                    : m
+            ));
+
+            setEditingMessageId(null);
+            setEditContent("");
+            toast.success("Message updated");
+        } catch (error) {
+            console.error("Failed to edit message:", error);
+            if (error instanceof AxiosError) {
+                const errData = error.response?.data as ErrorResponse;
+                toast.error(errData?.message || "Failed to edit message");
+            }
+        }
+    };
+
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteMessage = async (messageId: string) => {
+        setIsDeleting(true);
+        try {
+            await chatService.deleteMessage(chat.id, messageId);
+
+            setMessages(prev => prev.filter(m => m.id !== messageId));
+
+            setDeleteDialogOpen(false);
+            setMessageToDelete(null);
+            toast.success("Message deleted");
+        } catch (error) {
+            console.error("Failed to delete message:", error);
+            if (error instanceof AxiosError) {
+                const errData = error.response?.data as ErrorResponse;
+                toast.error(errData?.message || "Failed to delete message");
+            }
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const handleDownload = async (attachment: Attachment) => {
         try {
@@ -142,6 +205,14 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             console.error("Download failed:", error);
             toast.error("Failed to download file.");
         }
+    };
+
+    const canModifyMessage = (createdAt: string | Date, limitMinutes: number) => {
+        if (!createdAt) return false;
+        const createdTime = new Date(createdAt).getTime();
+        const now = Date.now();
+        const diffMinutes = (now - createdTime) / (1000 * 60);
+        return diffMinutes <= limitMinutes;
     };
 
     useEffect(() => {
@@ -160,12 +231,6 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 const response = await chatService.getMessages(chat?.id);
                 const messagesData = response.data.messages || [];
 
-                // console.log('📨 Initial messages loaded:', {
-                //     count: messagesData.length,
-                //     cursor: response.data.next_cursor,
-                //     hasMore: response.data.has_more
-                // });
-
                 setMessages(messagesData);
                 setCursor(response.data.next_cursor);
                 setHasMore(response.data.has_more);
@@ -177,7 +242,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 setLoading(false);
             }
         };
-        fetchMessages().then(r => r);
+        fetchMessages();
     }, [chat?.id]);
 
     useEffect(() => {
@@ -194,7 +259,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
         el.addEventListener("scroll", onScroll);
         return () => el.removeEventListener("scroll", onScroll);
-    }, [loadMore, hasMore, loadingMore, cursor]);
+    }, [loadMore, hasMore, loadingMore]);
 
     useEffect(() => {
         if (!session?.accessToken || !chat?.id) return;
@@ -205,19 +270,50 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         const channelName = `chat.${chat.id}`;
 
         echo.private(channelName)
-            .listen(".message.sent", (response: any) => {
-                const newMessage = response.data;
+            .listen('.message.sent', (response: any) => {
+                const {type, data} = response;
 
-                setMessages((prev) => {
-                    if (prev.some(m => m.id === newMessage.id)) return prev;
-                    return [...prev, newMessage];
-                });
+                switch (type) {
+                    case 'message.sent':
+                        if (!data?.id) return;
 
-                shouldAutoScrollRef.current = true;
+                        setMessages((prev) => {
+                            if (prev.some(m => m.id === data.id)) return prev;
+                            return [...prev, data];
+                        });
+                        shouldAutoScrollRef.current = true;
+                        break;
+
+                    case 'message.updated':
+                        if (!data?.id) return;
+
+                        setMessages(prev =>
+                            prev.map(m =>
+                                m.id === data.id
+                                    ? {
+                                        ...m,
+                                        content: data.content,
+                                        updated_at: data.updated_at
+                                    }
+                                    : m
+                            )
+                        );
+                        break;
+
+                    case 'message.deleted':
+                        if (!data?.id) return;
+
+                        setMessages(prev => prev.filter(m => m.id !== data.id));
+                        break;
+
+                    default:
+                        console.warn("Unknown message type:", type);
+                        break;
+                }
             });
 
         return () => {
-            echo.leave(`private-${channelName}`)
+            echo.leave(`private-${channelName}`);
         };
     }, [chat?.id, session?.accessToken]);
 
@@ -250,7 +346,9 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
     return (
         <div className="flex flex-col h-full bg-[#F9FAFB]">
-            <div className="bg-white border-b px-3 md:px-6 py-3 md:py-4 font-semibold flex items-center gap-2 md:gap-3 text-gray-800">
+            {/* Header */}
+            <div
+                className="bg-white border-b px-3 md:px-6 py-3 md:py-4 font-semibold flex items-center gap-2 md:gap-3 text-gray-800">
                 {onBack && (
                     <Button
                         type="button"
@@ -285,9 +383,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 <span className="truncate">{chat.name}</span>
             </div>
 
-            <div ref={scrollRef} className="flex-1 p-3 md:p-6 space-y-4 md:space-y-5 overflow-y-auto bg-[#E9F2E9]">
+            {/* Messages */}
+            <div ref={scrollRef} className="flex-1 p-3 md:p-6 space-y-4 overflow-y-auto bg-[#E9F2E9]">
                 {loadingMore && (
-                    <div className="text-center text-[11px] text-gray-400 py-2">
+                    <div className="text-center text-xs text-gray-400 py-2">
                         Loading more messages...
                     </div>
                 )}
@@ -296,110 +395,271 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
                     return (
                         <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                            <div className={`ml-12 flex items-center gap-2 mb-1 text-[11px] text-gray-500 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                                <span className="font-semibold text-gray-700">
+                            {/* Header: Name & Time */}
+                            <div
+                                className={`flex items-center gap-2 mb-1 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                                <span className="text-xs font-semibold text-gray-700">
                                     {isMe ? "You" : m.sender.name}
                                 </span>
-                                <span>
-                                    {new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                <span className="text-[11px] text-gray-500">
+                                    {new Date(m.created_at).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </span>
+                                {m.created_at !== m.updated_at && (
+                                    <span
+                                        className="text-[11px] text-gray-400 italic">(edited)</span>
+                                )}
                             </div>
 
-                            <div className={`flex gap-3 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                                <div className="flex items-end">
-                                    <Avatar className="h-9 w-9 shrink-0 shadow-sm border border-white">
-                                        {m.sender.avatar && isValidUrl(m.sender.avatar) ? (
-                                            <Image
-                                                src={m.sender.avatar}
-                                                alt={chat.name || "Message Avatar"}
-                                                fill
-                                                priority
-                                                className="rounded-full object-cover"
-                                                sizes="32px"
-                                                onError={(e) => {
-                                                    console.error("Image failed to load:", m.sender.avatar);
+                            {/* Message Body */}
+                            <div className={`flex gap-2 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"} group`}>
+                                {/* Avatar */}
+                                <Avatar className="h-9 w-9 shrink-0 shadow-sm border border-gray-200">
+                                    {m.sender.avatar && isValidUrl(m.sender.avatar) ? (
+                                        <Image
+                                            src={m.sender.avatar}
+                                            alt={m.sender.name}
+                                            fill
+                                            priority
+                                            className="rounded-full object-cover"
+                                            sizes="36px"
+                                            onError={(e) => {
+                                                console.error("Image failed to load:", m.sender.avatar);
+                                            }}
+                                        />
+                                    ) : (
+                                        <AvatarFallback
+                                            className="bg-emerald-100 text-emerald-700 font-semibold text-sm">
+                                            {m.sender.name[0].toUpperCase()}
+                                        </AvatarFallback>
+                                    )}
+                                </Avatar>
+
+                                {/* Message Bubble */}
+                                <div className="flex flex-col gap-1 min-w-0 flex-1">
+                                    {editingMessageId === m.id ? (
+                                        // Edit Mode
+                                        <div
+                                            className="px-4 py-2.5 rounded-2xl shadow-sm border-2 border-emerald-500 bg-white">
+                                            <textarea
+                                                value={editContent}
+                                                onChange={(e) => setEditContent(e.target.value)}
+                                                className="w-full text-sm resize-none border-none focus:outline-none focus:ring-0 p-0 bg-transparent text-gray-800"
+                                                rows={3}
+                                                autoFocus
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleEditMessage(m.id);
+                                                    }
+                                                    if (e.key === 'Escape') {
+                                                        setEditingMessageId(null);
+                                                        setEditContent("");
+                                                    }
                                                 }}
                                             />
-                                        ) : (
-                                            <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
-                                                {m.sender.name[0]}
-                                            </AvatarFallback>
-                                        )}
-                                    </Avatar>
+                                            <div className="flex gap-2 mt-2 justify-end">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => {
+                                                        setEditingMessageId(null);
+                                                        setEditContent("");
+                                                    }}
+                                                    className="h-7 px-3 text-xs"
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleEditMessage(m.id)}
+                                                    disabled={!editContent.trim()}
+                                                    className="h-7 px-3 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
+                                                >
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        // View Mode
+                                        <div className={clsx(
+                                            "px-4 py-2.5 rounded-2xl shadow-sm",
+                                            isMe
+                                                ? "bg-emerald-500 text-white rounded-tr-sm"
+                                                : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
+                                        )}>
+                                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                                {m.content}
+                                            </p>
+
+                                            {/* Attachment */}
+                                            {m.attachment && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className={clsx(
+                                                        "mt-2 w-full justify-start gap-2 h-auto py-2 px-3 rounded-lg transition-colors",
+                                                        isMe
+                                                            ? "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                                                            : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                                                    )}
+                                                    onClick={() => handleDownload(m.attachment as Attachment)}
+                                                >
+                                                    <Icon icon="ph:file-arrow-down" className="w-4 h-4 shrink-0"/>
+                                                    <span className="truncate text-xs font-medium">
+                                                        {m.attachment.filename}
+                                                    </span>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-col">
-                                    <div className={clsx(
-                                        "px-3 py-2 rounded-lg text-xs shadow-sm leading-relaxed",
-                                        isMe
-                                            ? "bg-[#22C55E] text-white rounded-tr-none"
-                                            : "bg-white text-gray-700 rounded-tl-none"
-                                    )}>
-                                        <p className="whitespace-pre-wrap wrap-break-word">{m.content}</p>
-                                        {m.attachment && (
+                                {/* Dropdown Menu */}
+                                {editingMessageId !== m.id && isMe && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
                                             <Button
-                                                type="button"
-                                                variant="outline"
-                                                className={clsx(
-                                                    "mt-1 p-2 rounded-lg flex items-center gap-2 text-xs transition-all hover:bg-black/10",
-                                                    isMe ? "bg-white/20 text-white border-white/30" : "bg-gray-100 text-gray-700 border-gray-200"
-                                                )}
-                                                onClick={() => handleDownload(m.attachment as Attachment)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
                                             >
-                                                <Icon icon="ph:file-arrow-down" className="w-4 h-4"/>
-                                                <span className="truncate font-medium max-w-37.5">
-                                                    {m.attachment.filename}
-                                                </span>
+                                                <Icon icon="lucide:more-vertical" className="h-4 w-4"/>
                                             </Button>
-                                        )}
-                                    </div>
-                                </div>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-40">
+                                            {
+                                                m.content?.trim() &&
+                                                <DropdownMenuItem
+                                                    onClick={() => navigator.clipboard.writeText(m.content)}>
+                                                    <Icon icon="lucide:copy" className="h-4 w-4 mr-2"/>
+                                                    Copy text
+                                                </DropdownMenuItem>
+                                            }
+                                            {
+                                                m.content?.trim() &&
+                                                canModifyMessage(m.created_at, 10) &&
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setEditingMessageId(m.id);
+                                                        setEditContent(m.content);
+                                                    }}
+                                                ><Icon icon="lucide:pencil" className="h-4 w-4 mr-2"/>
+                                                    Edit
+                                                </DropdownMenuItem>
+                                            }
+                                            {
+                                                canModifyMessage(m.created_at, 15) &&
+                                               <DropdownMenuItem
+                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                                    onClick={() => {
+                                                        setMessageToDelete(m.id);
+                                                        setDeleteDialogOpen(true);
+                                                    }}
+                                                >
+                                                    <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2"/>
+                                                    Delete
+                                               </DropdownMenuItem>
+                                            }
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
                         </div>
                     );
                 })}
             </div>
 
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Delete Message</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this message? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setDeleteDialogOpen(false);
+                                setMessageToDelete(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            className="bg-red-500! hover:bg-red-600!"
+                            onClick={() => messageToDelete && handleDeleteMessage(messageToDelete)}
+                            disabled={!messageToDelete || isDeleting}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Input Area */}
             <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2">
                 {file && (
-                    <div className="text-[10px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md flex items-center justify-between">
-                        <span>📎 {file.name}</span>
-                        <button onClick={() => setFile(null)} className="text-red-500 font-bold">x</button>
+                    <div
+                        className="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg flex items-center justify-between border border-emerald-200">
+                        <div className="flex items-center gap-2">
+                            <Icon icon="ph:paperclip" className="w-4 h-4"/>
+                            <span className="font-medium truncate">{file.name}</span>
+                        </div>
+                        <button
+                            onClick={() => setFile(null)}
+                            className="text-red-500 hover:text-red-700 font-bold ml-2"
+                        >
+                            <Icon icon="ph:x" className="w-4 h-4"/>
+                        </button>
                     </div>
                 )}
 
-                <div className="flex gap-1.5 md:gap-2">
+                <div className="flex gap-2">
                     <Input
                         placeholder="Type a message..."
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                            }
+                        }}
                         disabled={isSending}
                         className="rounded-full focus-visible:ring-emerald-500 focus-visible:ring-2"
                     />
 
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            className="hidden"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className={`rounded-full shrink-0 ${file ? "border-emerald-500 text-emerald-500" : ""}`}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <Icon icon="ph:paperclip-horizontal" className="w-6 h-6 rotate-90"/>
-                        </Button>
-                    </div>
+                    <Input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={clsx(
+                            "rounded-full shrink-0",
+                            file && "border-emerald-500 text-emerald-500 bg-emerald-50"
+                        )}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <Icon icon="ph:paperclip" className="w-5 h-5"/>
+                    </Button>
 
                     <Button
                         onClick={handleSendMessage}
                         disabled={isSending || (!content.trim() && !file)}
-                        className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-3 md:px-6"
+                        className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
                     >
                         <span className="hidden sm:inline">Send</span>
                         <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4"/>

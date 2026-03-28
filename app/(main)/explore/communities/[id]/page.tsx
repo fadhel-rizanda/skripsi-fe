@@ -39,11 +39,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {userService} from "@/services/userServices";
 
 export default function CommunityDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   const [community, setCommunity] = useState<Community | null>(null);
   const [communityLoading, setCommunityLoading] = useState(true);
@@ -184,6 +185,9 @@ export default function CommunityDetailPage() {
     } catch (error: any) {
       toast.error(error?.response?.data?.message ?? "Failed to update membership.");
     } finally {
+      const res = await userService.userChannels();
+      const channels = res.data.channels ?? [];
+      await update({ user: { channels } });
       setJoining(false);
     }
   };

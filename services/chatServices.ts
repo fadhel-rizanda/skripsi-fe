@@ -28,4 +28,14 @@ export const chatService = {
         const response = await api.patch(`/api/v1/chats/${chatId}/read`);
         return response.data;
     },
+
+    editMessage: async (chatId: string, messageId: string, content: string) => {
+        const response = await api.put(`/api/v1/chats/${chatId}/messages/${messageId}`, {content});
+        return response.data;
+    },
+
+    deleteMessage: async (chatId: string, messageId: string) => {
+        const response = await api.delete(`/api/v1/chats/${chatId}/messages/${messageId}`);
+        return response.data;
+    }
 };

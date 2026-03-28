@@ -5,8 +5,6 @@ import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { chatService } from "@/services/chatServices";
-import { useSession } from "next-auth/react";
-import { userService } from "@/services/userServices";
 
 interface ChatButtonProps {
     targetUserId: string;
@@ -25,7 +23,6 @@ export default function ChatButton({
 }: ChatButtonProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const { data: session, update } = useSession();
 
     const handleChat = async () => {
         if (!targetUserId) return;
@@ -37,15 +34,6 @@ export default function ChatButton({
                 type: "private",
                 user_ids: [targetUserId],
             });
-
-            const alreadySubscribed = session?.user.channels.some(
-                (ch) => ch.name === `chat.${chat.data.id}`
-            );
-
-            if (!alreadySubscribed) {
-                const { channels } = await userService.userChannels();
-                await update({ channels });
-            }
 
             router.push(`/chat/${chat.data.id}`);
         } catch (error) {

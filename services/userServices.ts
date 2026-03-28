@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 import { ApiResponse, PaginatedResponse, GetAllParams } from "@/types/api";
-import { UserProfile, UserDetail } from "@/types/user";
+import { UserProfile, UserDetail, Channel } from "@/types/user";
 import { GreetingFormInput } from "@/schemas/greeting.schema";
 import { UpdateProfilePayload } from "@/schemas/edit-profile.schema";
 
@@ -33,8 +33,8 @@ export const userService = {
         await api.post(`/api/v1/users/${userId}/activate`, { notes });
     },
 
-    userChannels: async (): Promise<{ channels: string[] }> => {
-        const response = await api.get<{ channels: string[] }>(`/api/v1/users/channels`);
+    userChannels: async (): Promise<ApiResponse<{ channels: Channel[] }>> => {
+        const response = await api.get<ApiResponse<{ channels: Channel[] }>>(`/api/v1/users/channels`);
         return response.data;
     },
 

@@ -50,6 +50,7 @@ import {
 } from "@/schemas/edit-profile.schema";
 import { UserDetail } from "@/types/user";
 import { Pet } from "@/types/pet";
+import ChatButton from "@/components/button/ChatButton";
 
 export default function UserProfileDashboard({ userId }: { userId: string }) {
   const { data: session } = useSession();
@@ -397,6 +398,9 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                 <Button variant="destructive" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => signOut()}>
                   Logout
                 </Button>
+              )}
+              {!isOwnProfile && (
+                  <ChatButton targetUserId={userId} label="Chat" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11 bg-[#19E619] hover:bg-green-500 text-black px-4 font-bold gap-1.5"/>
               )}
             </div>
           </div>

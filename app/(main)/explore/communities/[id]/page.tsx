@@ -195,9 +195,7 @@ export default function CommunityDetailPage() {
   };
 
   const handleReportCommunityClick = () => {
-    if (!session?.user?.id) {
-      handleAuthRedirect("You must be logged in to report a community.");
-    }
+    handleAuthRedirect("You must be logged in to report a community.");
   };
 
   const handleCreatePostClick = (e: React.MouseEvent) => {

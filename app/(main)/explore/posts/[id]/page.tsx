@@ -51,10 +51,13 @@ export default function PostDetailPage() {
   const postDetailPath = `/explore/posts/${id}`;
   const commentTargetPath = `${postDetailPath}?comment=1#comments`;
 
-  const redirectToLogin = (callbackUrl?: string) => {
-    const targetUrl = callbackUrl ?? postDetailPath;
-    router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
-  };
+  const redirectToLogin = useCallback(
+    (callbackUrl?: string) => {
+      const targetUrl = callbackUrl ?? postDetailPath;
+      router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+    },
+    [postDetailPath, router],
+  );
 
   const [post, setPost] = useState<Post | null>(null);
   const [postLoading, setPostLoading] = useState(true);
@@ -152,6 +155,7 @@ export default function PostDetailPage() {
     commentIntentHandled,
     session?.user?.id,
     commentTargetPath,
+    redirectToLogin,
   ]);
 
   const handleAddCommentClick = () => {
@@ -166,6 +170,7 @@ export default function PostDetailPage() {
   const handleReportClick = () => {
     if (!session?.user?.id) {
       redirectToLogin(postDetailPath);
+      return;
     }
   };
 

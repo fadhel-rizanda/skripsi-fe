@@ -470,7 +470,7 @@ export default function CommunityDetailPage() {
                   placeholder="Tags"
                   emptyMessage="No tags found."
                   mode="single"
-                  className="bg-white border-gray-200 h-11"
+                  className="w-full bg-white border-gray-200 h-11"
                 />
               </div>
             </Card>

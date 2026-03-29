@@ -188,18 +188,21 @@ export default function CommunityDetailPage() {
     }
   };
 
+  const handleAuthRedirect = (message: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    toast.error(message);
+    router.push(`/login?callbackUrl=/explore/communities/${id}`);
+  };
+
   const handleReportCommunityClick = () => {
     if (!session?.user?.id) {
-      toast.error("You must be logged in to report a community.");
-      router.push(`/login?callbackUrl=/explore/communities/${id}`);
+      handleAuthRedirect("You must be logged in to report a community.");
     }
   };
 
   const handleCreatePostClick = (e: React.MouseEvent) => {
     if (!session?.user?.id) {
-      e.preventDefault();
-      toast.error("You must be logged in to create a post.");
-      router.push(`/login?callbackUrl=/explore/communities/${id}`);
+      handleAuthRedirect("You must be logged in to create a post.", e);
     }
   };
 

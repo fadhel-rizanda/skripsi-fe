@@ -48,6 +48,16 @@ export default function PostDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+  const postDetailPath = `/explore/posts/${id}`;
+  const commentTargetPath = `${postDetailPath}?comment=1#comments`;
+
+  const redirectToLogin = useCallback(
+    (callbackUrl?: string) => {
+      const targetUrl = callbackUrl ?? postDetailPath;
+      router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+    },
+    [postDetailPath, router],
+  );
 
   const [post, setPost] = useState<Post | null>(null);
   const [postLoading, setPostLoading] = useState(true);
@@ -125,6 +135,12 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (postLoading || !shouldOpenComment || commentIntentHandled) return;
 
+    if (!session?.user?.id) {
+      setCommentIntentHandled(true);
+      redirectToLogin(commentTargetPath);
+      return;
+    }
+
     setCommentIntentHandled(true);
     setAddCommentOpen(true);
     requestAnimationFrame(() => {
@@ -133,10 +149,38 @@ export default function PostDetailPage() {
         block: "start",
       });
     });
-  }, [postLoading, shouldOpenComment, commentIntentHandled]);
+  }, [
+    postLoading,
+    shouldOpenComment,
+    commentIntentHandled,
+    session?.user?.id,
+    commentTargetPath,
+    redirectToLogin,
+  ]);
+
+  const handleAddCommentClick = () => {
+    if (!session?.user?.id) {
+      redirectToLogin(commentTargetPath);
+      return;
+    }
+
+    setAddCommentOpen(true);
+  };
+
+  const handleReportClick = () => {
+    if (!session?.user?.id) {
+      redirectToLogin(postDetailPath);
+      return;
+    }
+  };
 
   const handleLike = async () => {
     if (!post) return;
+    if (!session?.user?.id) {
+      redirectToLogin(postDetailPath);
+      return;
+    }
+
     try {
       const response: { status: boolean | "success"; message: string } =
         await postService.likePost(post.id);
@@ -536,14 +580,26 @@ export default function PostDetailPage() {
                 variant="ghost"
                 size="sm"
                 className="text-gray-900 gap-1.5 px-2 cursor-pointer hover:text-green-600 hover:bg-green-50"
-                onClick={() => setAddCommentOpen(true)}
+                onClick={handleAddCommentClick}
               >
                 <Icon icon="lucide:message-square" className="h-5 w-5" />
                 <span className="text-base font-medium">
                   {commentsPagination.total} Comments
                 </span>
               </Button>
-              <ReportDialog referenceType="post" referenceId={post.id} />
+              {session?.user?.id ? (
+                <ReportDialog referenceType="post" referenceId={post.id} />
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 gap-1.5 px-2"
+                  onClick={handleReportClick}
+                >
+                  <Icon icon="lucide:flag" className="h-5 w-5" />
+                  <span className="text-base font-medium">Report</span>
+                </Button>
+              )}
             </div>
           </div>
         </Card>
@@ -560,7 +616,7 @@ export default function PostDetailPage() {
             </h2>
             <Button
               className="bg-green-600 hover:bg-green-700 text-white text-md font-semibold rounded-xl p-6"
-              onClick={() => setAddCommentOpen(true)}
+              onClick={handleAddCommentClick}
             >
               <Icon icon="lucide:plus" className="h-4 w-4" />
               Add a comment
@@ -667,27 +723,37 @@ export default function PostDetailPage() {
                           {comment.content}
                         </p>
                         <div className="mt-2 flex items-center gap-3">
-                          <CommentFormDialog
-                            postId={post.id}
-                            parentId={comment.id}
-                            userName={comment.created_by.name}
-                            onSuccessAction={() => {
-                              // Optimistically bump the count before re-fetch
-                              setComments((prev) =>
-                                prev.map((c) =>
-                                  c.id === comment.id
-                                    ? {
-                                        ...c,
-                                        replies_count:
-                                          (c.replies_count ?? 0) + 1,
-                                      }
-                                    : c,
-                                ),
-                              );
-                              loadReplies(comment.id, 1);
-                              fetchPost();
-                            }}
-                          />
+                          {session?.user?.id ? (
+                            <CommentFormDialog
+                              postId={post.id}
+                              parentId={comment.id}
+                              userName={comment.created_by.name}
+                              onSuccessAction={() => {
+                                // Optimistically bump the count before re-fetch
+                                setComments((prev) =>
+                                  prev.map((c) =>
+                                    c.id === comment.id
+                                      ? {
+                                          ...c,
+                                          replies_count:
+                                            (c.replies_count ?? 0) + 1,
+                                        }
+                                      : c,
+                                  ),
+                                );
+                                loadReplies(comment.id, 1);
+                                fetchPost();
+                              }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => redirectToLogin(commentTargetPath)}
+                              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-[#19E619] transition-colors"
+                            >
+                              <Icon icon="lucide:message-square-reply" className="h-4 w-4" />
+                              Reply
+                            </button>
+                          )}
                           {hasReplies && (
                             <button
                               onClick={() => toggleReplies(comment.id)}

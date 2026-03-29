@@ -768,6 +768,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                     mode={"single"}
                                                                     className={cn(
                                                                         "w-full",
+                                                                        "w-full",
                                                                         fieldState.error && "border-destructive"
                                                                     )}
                                                                 />

@@ -142,7 +142,7 @@ export default function AllPostPage() {
         if (!session?.user?.id) {
             e.preventDefault();
             toast.error("You must be logged in to create a post.");
-            router.push("/login?callbackUrl=/explore/posts");
+            router.push("/login");
         }
     };
 

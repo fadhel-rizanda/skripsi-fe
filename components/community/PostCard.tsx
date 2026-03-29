@@ -44,27 +44,27 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
         router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
     };
 
-    const handleLikeClick = () => {
-        if (!session?.user?.id) {
-            redirectToLogin();
-            return;
-        }
-        onLike(post.id);
+    const withAuth = (callback: () => void, callbackUrl?: string) => {
+        return () => {
+            if (!session?.user?.id) {
+                redirectToLogin(callbackUrl);
+                return;
+            }
+            callback();
+        };
     };
 
-    const handleCommentClick = () => {
-        if (!session?.user?.id) {
-            redirectToLogin(postCommentHref);
-            return;
-        }
-        router.push(postCommentHref);
-    };
+    const handleLikeClick = withAuth(() => onLike(post.id));
 
-    const handleReportClick = () => {
-        if (!session?.user?.id) {
-            redirectToLogin(`/explore/posts/${post.id}`);
-        }
-    };
+    const handleCommentClick = withAuth(
+        () => router.push(postCommentHref),
+        postCommentHref
+    );
+
+    const handleReportClick = withAuth(
+        () => redirectToLogin(`/explore/posts/${post.id}`),
+        `/explore/posts/${post.id}`
+    );
 
     const handleDelete = async () => {
         await postService.deletePost(post.id);

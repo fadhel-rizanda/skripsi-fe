@@ -39,6 +39,16 @@ type PetFormProps = {
     petId?: string
 }
 
+const sizeComboboxOptions = sizeOptions.map((value) => ({
+    id: value,
+    name: value.charAt(0).toUpperCase() + value.slice(1),
+}))
+
+const genderComboboxOptions = genderOptions.map((value) => ({
+    id: value,
+    name: value.charAt(0).toUpperCase() + value.slice(1),
+}))
+
 export default function PetForm({mode, petId}: PetFormProps) {
     const isEditMode = mode === "edit"
 
@@ -272,16 +282,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
         [personalityTags]
     )
 
-    const sizeComboboxOptions = useMemo(
-        () => sizeOptions.map((value) => ({ id: value, name: value.charAt(0).toUpperCase() + value.slice(1) })),
-        []
-    )
-
-    const genderComboboxOptions = useMemo(
-        () => genderOptions.map((value) => ({ id: value, name: value.charAt(0).toUpperCase() + value.slice(1) })),
-        []
-    )
-
     const [existingProfilePictures, setExistingProfilePictures] = useState<
         { id: string; filename?: string; mime_type?: string }[]
     >([])
@@ -443,6 +443,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                 emptyMessage="No provinces found."
                                 mode="single"
                                 className={cn(
+                                    "w-full",
                                     fieldState.error && "border-destructive"
                                 )}
                             />
@@ -478,6 +479,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                 mode="single"
                                 disabled={!selectedProvinceId}
                                 className={cn(
+                                    "w-full",
                                     fieldState.error && "border-destructive"
                                 )}
                             />
@@ -510,6 +512,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                     mode="single"
                                     disabled={!selectedRegencyId}
                                     className={cn(
+                                        "w-full",
                                         fieldState.error && "border-destructive"
                                     )}
                                 />
@@ -685,6 +688,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                     emptyMessage="No types found."
                                                                     mode={"single"}
                                                                     className={cn(
+                                                                        "w-full",
                                                                         fieldState.error && "border-destructive"
                                                                     )}
                                                                 />
@@ -708,6 +712,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                     emptyMessage="No sizes found."
                                                                     mode={"single"}
                                                                     className={cn(
+                                                                        "w-full",
                                                                         fieldState.error && "border-destructive"
                                                                     )}
                                                                 />
@@ -762,6 +767,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                     emptyMessage="No genders found."
                                                                     mode={"single"}
                                                                     className={cn(
+                                                                        "w-full",
                                                                         fieldState.error && "border-destructive"
                                                                     )}
                                                                 />
@@ -807,6 +813,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                 emptyMessage="No physique tags found."
                                                                 mode={"multiple"}
                                                                 className={cn(
+                                                                    "w-full",
                                                                     fieldState.error && "border-destructive"
                                                                 )}
                                                             />
@@ -842,6 +849,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                 emptyMessage="No personality tags found."
                                                                 mode={"multiple"}
                                                                 className={cn(
+                                                                    "w-full",
                                                                     fieldState.error && "border-destructive"
                                                                 )}
                                                             />

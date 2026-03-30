@@ -153,7 +153,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
             setMessages(prev => prev.map(m =>
                 m.id === messageId
-                    ? {...m, content: editContent, edited: true}
+                    ? { ...m, content: editContent, updated_at: new Date().toISOString() }
                     : m
             ));
 

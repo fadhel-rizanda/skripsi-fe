@@ -19,9 +19,6 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - INTERNAL_API_URL=${INTERNAL_API_URL}
       - NEXT_PUBLIC_ALLOWED_ORIGIN=${NEXT_PUBLIC_ALLOWED_ORIGIN}
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
-    ports:
-      - "3000:3000"
     restart: unless-stopped
     networks:
       - skripsi-be_laravel

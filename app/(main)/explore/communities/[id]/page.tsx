@@ -444,7 +444,7 @@ export default function CommunityDetailPage() {
                 <Badge
                   key={tag.id}
                   variant="secondary"
-                  className="bg-white text-green-700 hover:bg-green-50 text-sm sm:text-md font-normal shadow-sm hover:cursor-default"
+                  className="bg-white text-green-700 hover:bg-green-50 text-sm sm:text-base font-normal shadow-sm hover:cursor-default"
                   style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
                 >
                   #{tag.name}

@@ -75,7 +75,6 @@ export function Navbar() {
 
       default:
         return [
-          { href: "/dashboard", label: "Dashboard" },
           { href: "/pets", label: "Find a Pet" },
           { href: "/explore/posts", label: "Community" },
         ]

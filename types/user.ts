@@ -12,6 +12,8 @@ export interface UserProfile {
     updated_at: string
     phone: string
     is_active: boolean
+    email_verified_at?: Date
+    address_street?: string
 }
 export interface UserDetail {
     id: string

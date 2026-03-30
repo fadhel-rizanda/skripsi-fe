@@ -18,7 +18,7 @@ export default function GoogleSignInButton() {
     setIsLoading(true);
     try {
       document.cookie = `selectedRole=${role}; path=/; max-age=300; SameSite=Lax`;
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/pets" });
     } catch (error) {
       console.error("Google sign-in error:", error);
       if (error instanceof AxiosError) {

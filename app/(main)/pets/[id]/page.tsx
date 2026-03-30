@@ -20,7 +20,6 @@ import {
   Heart,
   Ruler,
   PawPrint,
-  MessageCircle,
   AlertCircle,
   Edit,
   Mars,
@@ -33,7 +32,6 @@ import {
   Link2,
 } from "lucide-react";
 import { generalService } from "@/services/generalServices";
-import { userService } from "@/services/userServices";
 import ChatButton from "@/components/button/ChatButton";
 // Edit form moved to separate page; navigation used instead of dialog
 
@@ -49,8 +47,9 @@ export default function DetailPetPage() {
   // dialog state removed; navigation to edit page is used instead
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const isOwner = !!session?.user?.id && !!pet?.user_id && String(pet.user_id) === String(session.user.id);
+  const currUserRole = session?.user.role.name
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -130,8 +129,6 @@ export default function DetailPetPage() {
     try {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
-      const { channels } = await userService.userChannels();
-      await update({ channels });
       toast.success("Adoption request sent successfully!");
       router.push(`/adoptions/${response.data.id}`);
     } catch (error: unknown) {
@@ -494,7 +491,7 @@ export default function DetailPetPage() {
               )}
 
               <div className="flex flex-col xl:flex-row gap-3 pt-4 w-full border-t border-slate-100 mt-2">
-                {renderAdoptButton()}
+                {currUserRole == "adopter" && renderAdoptButton()}
                 {isOwner ? (
                   <Button
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"

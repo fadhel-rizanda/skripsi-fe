@@ -1,7 +1,7 @@
 "use client"
 
 import {useEffect, useRef} from "react"
-import { useSession } from "next-auth/react"
+import {useSession} from "next-auth/react"
 import { getEcho } from "@/lib/echo"
 import { toast } from "sonner"
 import { Icon } from "@iconify/react"
@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import {useChatStore} from "@/store/useChatStore";
 import { useNotificationStore } from "@/store/useNotificationStore"
 import {useAdoptionStore} from "@/store/useAdoptionStore";
+import {userService} from "@/services/userServices";
 
 // TODO Fix reassign channel saat adopt dan segala macam create
 export const CHANNEL_ICON_MAP: Record<string, string> = {
@@ -23,7 +24,7 @@ export const CHANNEL_ICON_MAP: Record<string, string> = {
 }
 
 export function useNotificationToast() {
-    const { data: session } = useSession()
+    const { data: session, update } = useSession()
     const pathname = usePathname();
     const pathnameRef = useRef(pathname);
     const currentUserIdRef = useRef(session?.user?.id);
@@ -80,9 +81,25 @@ export function useNotificationToast() {
             echo.private(channelName)
                 .subscribed(() => console.log("Subscribed:", channelName))
                 .error((error: any) => console.error("Error:", channelName, error))
-                .listen(`.${eventName}`, (data: any) => {
+                .listen(`.${eventName}`, async (data: any) => {
                     const messageData = data.data;
                     if (!messageData) return;
+
+                    const title = messageData.title?.toLowerCase() || '';
+
+                    if (
+                        title.includes('new') ||
+                        title.includes('create') ||
+                        title.includes('created')
+                    ) {
+                        try {
+                            const res = await userService.userChannels();
+                            const channels = res.data.channels ?? [];
+                            await update({ user: { channels } });
+                        } catch (err) {
+                            console.error('Failed to refresh channels:', err);
+                        }
+                    }
 
                     const actions = storeActionsRef.current;
                     const refreshKey = adoptionRefreshMap[messageData.reference_type as keyof typeof adoptionRefreshMap];
@@ -102,7 +119,7 @@ export function useNotificationToast() {
 
                     const iconName = CHANNEL_ICON_MAP[messageData.reference_type];
                     toast(messageData.sender?.name || messageData.title || "New Message", {
-                        description: messageData.content || messageData.message || "Sent an attachment",
+                        description: messageData.message || messageData.content || "Sent an attachment",
                         duration: 5000,
                         icon: iconName ? <Icon icon={iconName} className="opacity-50 h-4 w-4" /> : undefined,
                     });

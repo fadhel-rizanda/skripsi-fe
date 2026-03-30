@@ -15,13 +15,6 @@ import {
 } from "@/components/ui/form"
 import {Input} from "@/components/ui/input"
 import {Textarea} from "@/components/ui/textarea"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import {Checkbox} from "@/components/ui/checkbox"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Calendar} from "@/components/ui/calendar";
@@ -45,6 +38,16 @@ type PetFormProps = {
     mode: "create" | "edit"
     petId?: string
 }
+
+const sizeComboboxOptions = sizeOptions.map((value) => ({
+    id: value,
+    name: value.charAt(0).toUpperCase() + value.slice(1),
+}))
+
+const genderComboboxOptions = genderOptions.map((value) => ({
+    id: value,
+    name: value.charAt(0).toUpperCase() + value.slice(1),
+}))
 
 export default function PetForm({mode, petId}: PetFormProps) {
     const isEditMode = mode === "edit"
@@ -247,7 +250,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
         const allowedTypes = [
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
             "application/pdf",
-            "video/mp4", "video/quicktime",
+            "video/mp4", "video/quicktime", "video/webm",
         ]
         const maxSize = 10 * 1024 * 1024
 
@@ -415,7 +418,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
             <FormField
                 control={form.control}
                 name="address.province_id"
-                render={({field}) => (
+                render={({field, fieldState}) => (
                     <FormItem>
                         <FormLabel>Province *</FormLabel>
                         <FormControl>
@@ -439,6 +442,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                 placeholder="Select province..."
                                 emptyMessage="No provinces found."
                                 mode="single"
+                                className={cn(
+                                    "w-full",
+                                    fieldState.error && "border-destructive"
+                                )}
                             />
                         </FormControl>
                         <FormMessage/>
@@ -448,7 +455,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
             <FormField
                 control={form.control}
                 name="address.regency_id"
-                render={({field}) => (
+                render={({field, fieldState}) => (
                     <FormItem>
                         <FormLabel>Regency / City *</FormLabel>
                         <FormControl>
@@ -471,6 +478,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                 emptyMessage="No regencies found."
                                 mode="single"
                                 disabled={!selectedProvinceId}
+                                className={cn(
+                                    "w-full",
+                                    fieldState.error && "border-destructive"
+                                )}
                             />
                         </FormControl>
                         <FormMessage/>
@@ -481,7 +492,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                 <FormField
                     control={form.control}
                     name="address.district_id"
-                    render={({field}) => (
+                    render={({field, fieldState}) => (
                         <FormItem>
                             <FormLabel>District *</FormLabel>
                             <FormControl>
@@ -500,6 +511,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                     emptyMessage="No districts found."
                                     mode="single"
                                     disabled={!selectedRegencyId}
+                                    className={cn(
+                                        "w-full",
+                                        fieldState.error && "border-destructive"
+                                    )}
                                 />
                             </FormControl>
                             <FormMessage/>
@@ -657,7 +672,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="type_of_animal_id"
-                                                    render={({field}) => (
+                                                    render={({field, fieldState}) => (
                                                         <FormItem>
                                                             <FormLabel>Type *</FormLabel>
                                                             <FormControl>
@@ -672,6 +687,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                     placeholder="Select type..."
                                                                     emptyMessage="No types found."
                                                                     mode={"single"}
+                                                                    className={cn(
+                                                                        "w-full",
+                                                                        fieldState.error && "border-destructive"
+                                                                    )}
                                                                 />
                                                             </FormControl>
                                                             <FormMessage/>
@@ -681,20 +700,23 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="size"
-                                                    render={({field}) => (
+                                                    render={({field, fieldState}) => (
                                                         <FormItem>
                                                             <FormLabel>Size *</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl className="w-full">
-                                                                    <SelectTrigger><SelectValue placeholder="Select"/></SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    <SelectItem value="small">Small</SelectItem>
-                                                                    <SelectItem value="medium">Medium</SelectItem>
-                                                                    <SelectItem value="large">Large</SelectItem>
-                                                                    <SelectItem value="extra large">Extra Large</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
+                                                            <FormControl>
+                                                                <SearchableCombobox
+                                                                    options={sizeComboboxOptions}
+                                                                    selectedValues={field.value ? [field.value] : []}
+                                                                    onSelect={(value) => field.onChange(value)}
+                                                                    placeholder="Select size..."
+                                                                    emptyMessage="No sizes found."
+                                                                    mode={"single"}
+                                                                    className={cn(
+                                                                        "w-full",
+                                                                        fieldState.error && "border-destructive"
+                                                                    )}
+                                                                />
+                                                            </FormControl>
                                                             <FormMessage/>
                                                         </FormItem>
                                                     )}
@@ -733,18 +755,24 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <FormField
                                                     control={form.control}
                                                     name="gender"
-                                                    render={({field}) => (
+                                                    render={({field, fieldState}) => (
                                                         <FormItem>
                                                             <FormLabel>Gender *</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl className="w-full">
-                                                                    <SelectTrigger><SelectValue placeholder="Select"/></SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    <SelectItem value="male">Male</SelectItem>
-                                                                    <SelectItem value="female">Female</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
+                                                            <FormControl>
+                                                                <SearchableCombobox
+                                                                    options={genderComboboxOptions}
+                                                                    selectedValues={field.value ? [field.value] : []}
+                                                                    onSelect={(value) => field.onChange(value)}
+                                                                    placeholder="Select gender..."
+                                                                    emptyMessage="No genders found."
+                                                                    mode={"single"}
+                                                                    className={cn(
+                                                                        "w-full",
+                                                                        "w-full",
+                                                                        fieldState.error && "border-destructive"
+                                                                    )}
+                                                                />
+                                                            </FormControl>
                                                             <FormMessage/>
                                                         </FormItem>
                                                     )}
@@ -768,7 +796,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="physique_ids"
-                                                render={({field}) => (
+                                                render={({field, fieldState}) => (
                                                     <FormItem>
                                                         <FormLabel>Physique *</FormLabel>
                                                         <FormControl>
@@ -785,6 +813,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                 placeholder="Select physique tags..."
                                                                 emptyMessage="No physique tags found."
                                                                 mode={"multiple"}
+                                                                className={cn(
+                                                                    "w-full",
+                                                                    fieldState.error && "border-destructive"
+                                                                )}
                                                             />
                                                         </FormControl>
                                                         <FormMessage/>
@@ -800,7 +832,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="personality_ids"
-                                                render={({field}) => (
+                                                render={({field, fieldState}) => (
                                                     <FormItem>
                                                         <FormLabel>Personality *</FormLabel>
                                                         <FormControl>
@@ -817,6 +849,10 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                                 placeholder="Select personality tags..."
                                                                 emptyMessage="No personality tags found."
                                                                 mode={"multiple"}
+                                                                className={cn(
+                                                                    "w-full",
+                                                                    fieldState.error && "border-destructive"
+                                                                )}
                                                             />
                                                         </FormControl>
                                                         <FormMessage/>
@@ -839,7 +875,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
                                                     <Icon icon="ph:camera" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px)</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px, MAX. 5mb)</p>
                                                     <label htmlFor="profile-upload">
                                                         <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Select File</span>
@@ -881,7 +917,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                                 <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
                                                     <Icon icon="ph:cloud-arrow-up" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Click to upload or drag and drop</p>
-                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records</p>
+                                                    <p className="text-xs text-[#757575] mb-4 mt-1">Photos, videos, or medical records (MAX. 10mb)</p>
                                                     <label htmlFor="additional-upload">
                                                         <Button type="button" variant="outline" className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer" asChild>
                                                             <span>Upload Files</span>

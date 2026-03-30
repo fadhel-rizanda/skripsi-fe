@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -22,6 +22,7 @@ import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { PostCard } from "@/components/community/PostCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,11 +40,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {userService} from "@/services/userServices";
 
 export default function CommunityDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   const [community, setCommunity] = useState<Community | null>(null);
   const [communityLoading, setCommunityLoading] = useState(true);
@@ -184,7 +186,26 @@ export default function CommunityDetailPage() {
     } catch (error: any) {
       toast.error(error?.response?.data?.message ?? "Failed to update membership.");
     } finally {
+      const res = await userService.userChannels();
+      const channels = res.data.channels ?? [];
+      await update({ user: { channels } });
       setJoining(false);
+    }
+  };
+
+  const handleAuthRedirect = (message: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    toast.error(message);
+    router.push(`/login?callbackUrl=/explore/communities/${id}`);
+  };
+
+  const handleReportCommunityClick = () => {
+    handleAuthRedirect("You must be logged in to report a community.");
+  };
+
+  const handleCreatePostClick = (e: React.MouseEvent) => {
+    if (!session?.user?.id) {
+      handleAuthRedirect("You must be logged in to create a post.", e);
     }
   };
 
@@ -233,13 +254,6 @@ export default function CommunityDetailPage() {
     community && isValidUrl(community.image_url || community.attachment?.public_url || "")
       ? community.image_url || community.attachment?.public_url
       : undefined;
-
-  const joinButtonText = useMemo(() => {
-    if (!community) return "Join Community";
-    if (community.is_admin) return "You are Admin";
-    if (community.is_member) return "Joined";
-    return "Join Community";
-  }, [community]);
 
   if (communityLoading) {
     return (
@@ -340,29 +354,30 @@ export default function CommunityDetailPage() {
           </a>
         )}
 
-        <Button
-          className={`w-full mt-5 text-black font-semibold ${community.is_member ? 'bg-white hover:bg-accent border' : 'bg-[#19E619] hover:bg-green-500'}`}
-          onClick={handleJoinToggle}
-          disabled={joining || community.is_admin}
-        >
-          <Icon icon="lucide:link" className="h-4 w-4" />
-          {joining ? "Updating..." : joinButtonText}
-        </Button>
-
-        {!community.is_admin && (
-          <ReportDialog
-            referenceType="community"
-            referenceId={community.id}
-            trigger={
-              <Button
-                variant="outline"
-                className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
-              >
-                <Icon icon="lucide:flag" className="h-4 w-4" />
-                Report Community
-              </Button>
-            }
-          />
+        {community.is_admin ? (
+          <p className="w-full mt-5 text-sm font-semibold text-gray-600">You are Admin</p>
+        ) : community.is_member ? (
+          <div className="w-full mt-5 space-y-2">
+            <p className="text-sm font-semibold text-green-700">Joined</p>
+            <Button
+              variant="outline"
+              className="w-full font-semibold"
+              onClick={handleJoinToggle}
+              disabled={joining}
+            >
+              <Icon icon="lucide:unlink" className="h-4 w-4" />
+              {joining ? "Updating..." : "Unfollow"}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-full mt-5 bg-[#19E619] hover:bg-green-500 text-black font-semibold"
+            onClick={handleJoinToggle}
+            disabled={joining}
+          >
+            <Icon icon="lucide:link" className="h-4 w-4" />
+            {joining ? "Updating..." : "Join Community"}
+          </Button>
         )}
 
         {(community.is_member || community.is_admin) && (
@@ -371,12 +386,39 @@ export default function CommunityDetailPage() {
             communityId={community.id}
             onSuccessAction={() => setRefreshKey((prev) => prev + 1)}
             trigger={
-              <Button className="w-full mt-3 bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2">
+              <Button className="w-full mt-3 bg-[#19E619] hover:bg-green-500 text-black font-bold gap-2" onClick={handleCreatePostClick}>
                 <Icon icon="ph:plus-circle-bold" className="w-5 h-5" />
                 Create Post
               </Button>
             }
           />
+        )}
+
+        {!community.is_admin && (
+          session?.user?.id ? (
+            <ReportDialog
+              referenceType="community"
+              referenceId={community.id}
+              trigger={
+                <Button
+                  variant="outline"
+                  className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
+                >
+                  <Icon icon="lucide:flag" className="h-4 w-4" />
+                  Report Community
+                </Button>
+              }
+            />
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full mt-3 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-600 font-semibold"
+              onClick={handleReportCommunityClick}
+            >
+              <Icon icon="lucide:flag" className="h-4 w-4" />
+              Report Community
+            </Button>
+          )
         )}
       </div>
     </Card>
@@ -396,6 +438,20 @@ export default function CommunityDetailPage() {
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{community.name}</h1>
           <p className="text-gray-600 mt-1">{community.description}</p>
+          {community.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {community.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="bg-white text-green-700 hover:bg-green-50 text-sm sm:text-base font-normal shadow-sm hover:cursor-default"
+                  style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
+                >
+                  #{tag.name}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="xl:hidden">{communityProfileCard}</div>
@@ -443,7 +499,7 @@ export default function CommunityDetailPage() {
                   placeholder="Tags"
                   emptyMessage="No tags found."
                   mode="single"
-                  className="bg-white border-gray-200 h-11"
+                  className="w-full bg-white border-gray-200 h-11"
                 />
               </div>
             </Card>

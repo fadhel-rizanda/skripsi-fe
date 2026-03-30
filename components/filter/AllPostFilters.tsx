@@ -34,7 +34,7 @@ export function PostFilters({
         setSearch: setTagSearch,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags
-    } = useTagsOptions(TAG_TYPE.GENERAL.TYPE_OF_ANIMAL);
+    } = useTagsOptions(TAG_TYPE.POST);
 
     return (
         <div className="w-full flex flex-col space-y-3 items-center">

@@ -101,6 +101,8 @@ export const authOptions: AuthOptions = {
                         updated_at: user.updated_at,
                         is_active: user.is_active,
                         role_name: role?.name,
+                        email_verified_at: user.email_verified_at,
+                        address_street: user.address_street,
                     }
                 } catch (error: unknown) {
                     console.error("Login error:", error)
@@ -155,6 +157,8 @@ export const authOptions: AuthOptions = {
                     user.id = userData.id
                     user.name = userData.name
                     user.email = userData.email
+                    user.email_verified_at = userData.email_verified_at
+                    user.address_street = userData.address_street
                     user.role = {
                         id: role?.id,
                         name: role?.name,
@@ -196,15 +200,17 @@ export const authOptions: AuthOptions = {
                     phone: user.phone ?? "",
                     role_name: user.role_name ?? "",
                     updated_at: user.updated_at ?? "",
+                    email_verified_at: user.email_verified_at,
+                    address_street: user.address_street,
                 }
             }
 
-            if (trigger === "update" && session?.channels) {
+            if (trigger === "update" && session?.user) {
                 token.user = {
                     ...token.user,
-                    channels: session.channels,
+                    ...session.user,
                 }
-                return token;
+                return token
             }
 
             if (token.error === "RefreshAccessTokenError") {

@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { userService } from "@/services/userServices";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import {
@@ -49,7 +48,6 @@ type UserGreetingFormProps = {
 
 export default function UserGreetingForm({ role }: UserGreetingFormProps) {
   const isAdopter = role === "adopter";
-  const router = useRouter();
   const { data: session, update } = useSession();
 
   const {
@@ -148,7 +146,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
               address_street: values.address.street,
           },
       })
-      router.push("/pets");
+      setTimeout(() => {
+            window.location.href = "/pets";
+        }, 100);
     } catch (error) {
       toast.error("Failed to save preferences. Please try again.");
     }

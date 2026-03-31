@@ -14,7 +14,9 @@ export const AdopterGreetingSchema = z.object({
         .max(1000, "Description is too long (max 1000 characters)")
         .optional()
         .or(z.literal("")),
-    pet_experience_tags: z.array(z.string().uuid("Invalid experience tag")).optional().default([]),
+    pet_experience_tags: z
+        .array(z.string().uuid("Invalid experience tag"))
+        .min(1, "Select at least one experience tag"),
     address: AddressSchema,
     open_to_special_needs: z.boolean(),
 });

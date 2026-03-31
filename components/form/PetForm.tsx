@@ -249,7 +249,6 @@ export default function PetForm({mode, petId}: PetFormProps) {
         if (validFiles.length > 0) {
             setProfileFiles([...profileFiles, ...validFiles])
         }
-        setIsSubmitted(true)
         e.target.value = ""
     }
 

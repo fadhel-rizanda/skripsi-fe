@@ -6,15 +6,17 @@ interface TagBadgeProps {
     label: string
     onRemove?: () => void
     disabled?: boolean
+    className?: string
 }
 
-export const TagBadge = ({label, onRemove, disabled = false}: TagBadgeProps) => (
+export const TagBadge = ({label, onRemove, disabled = false, className}: TagBadgeProps) => (
     <Badge
         variant="secondary"
         className={cn(
             "bg-[#E7F3E7] text-[#4CAF50] px-3 py-1.5 rounded-xl flex gap-2 items-center font-medium text-sm border-0 transition-colors",
             !disabled && "hover:bg-[#D7E8D7]",
-            disabled && "opacity-50 cursor-not-allowed"
+            disabled && "opacity-50 cursor-not-allowed",
+            className
         )}
     >
         {label}

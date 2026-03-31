@@ -34,7 +34,7 @@ export const CreateMeetNGreetSchema = z.object({
         return !isNaN(date.getTime()) && date > new Date();
     }),
     address: z.object({
-        street: z.string().min(10, "Street address must be at least 10 characters"),
+        street: z.string(),
         province_id: z.string().min(1, "Please select a province"),
         regency_id:  z.string().min(1, "Please select a regency / city"),
         district_id: z.string().min(1, "Please select a district"),
@@ -50,6 +50,24 @@ export const CreateMeetNGreetSchema = z.object({
             address.province_id === "1" &&
             address.regency_id  === "1" &&
             address.district_id === "1"
+
+        const streetValue = address.street?.trim() ?? ""
+
+        if (isOnline) {
+            if (streetValue.length === 0) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ["street"],
+                    message: "Meeting title is required",
+                })
+            }
+        } else if (streetValue.length < 10) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["street"],
+                message: "Street address must be at least 10 characters",
+            })
+        }
 
         if (isOnline && (!address.link || address.link.trim() === "")) {
             ctx.addIssue({

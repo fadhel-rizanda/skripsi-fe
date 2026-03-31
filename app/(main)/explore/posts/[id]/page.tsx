@@ -620,7 +620,7 @@ export default function PostDetailPage() {
               onClick={handleAddCommentClick}
             >
               <Icon icon="lucide:plus" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline sm:inline">Add a comment</span>
+              <span className="hidden sm:inline">Add a comment</span>
               <span className="sm:hidden">Comment</span>
             </Button>
           </div>

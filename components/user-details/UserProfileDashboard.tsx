@@ -418,10 +418,17 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                     control={form.control}
                     name="name"
                     render={({ field }) => (
-                      <FormItem className="hidden">
+                      <FormItem>
+                        <FormLabel className="text-xs sm:text-sm">Username</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            placeholder="Enter your username"
+                            readOnly={!isEditing}
+                            className="text-xs sm:text-sm h-9 sm:h-10"
+                            {...field}
+                          />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -679,7 +686,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                 />
               </SectionCard>
 
-              {/* Adopter-only: Pet Experience, Personality, Pet Preferences */}
+              {/* Adopter-only: Pet Experience, Personality */}
               {isAdopter && (
                 <>
                   <SectionCard
@@ -717,6 +724,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                 <TagBadge
                                   key={tagId}
                                   label={personalityTagsMap.get(tagId) || tagId}
+                                  className="bg-green-100 text-green-700 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm"
                                   onRemove={
                                     isEditing
                                       ? () =>
@@ -794,6 +802,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                                   label={
                                     petExperienceTagsMap.get(tagId) || tagId
                                   }
+                                  className="bg-green-100 text-green-700 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm"
                                   onRemove={
                                     isEditing
                                       ? () =>

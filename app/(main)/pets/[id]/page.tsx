@@ -193,7 +193,7 @@ export default function DetailPetPage() {
         }
       }
 
-      const errorMessage = /creatign/i.test(rawErrorMessage)
+      const errorMessage = /creating/i.test(rawErrorMessage)
         ? "Failed to create adoption application"
         : rawErrorMessage;
 

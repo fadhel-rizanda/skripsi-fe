@@ -1,6 +1,7 @@
 "use client"
 
 import {ChangeEvent, useEffect, useMemo, useRef, useState} from "react"
+import {toast} from "sonner"
 import {useForm} from "react-hook-form"
 import {format} from "date-fns"
 import {Card, CardContent} from "@/components/ui/card"
@@ -227,18 +228,27 @@ export default function PetForm({mode, petId}: PetFormProps) {
         const maxSize = 5 * 1024 * 1024
         const maxFiles = 10
 
-        const validFiles = Array.from(files).filter(file => {
-            if (!allowedTypes.includes(file.type)) return false
-            return file.size <= maxSize;
+        const allFiles = Array.from(files)
+        const typeRejected = allFiles.filter(f => !allowedTypes.includes(f.type))
+        const sizeRejected = allFiles.filter(f => allowedTypes.includes(f.type) && f.size > maxSize)
+        const validFiles = allFiles.filter(f => allowedTypes.includes(f.type) && f.size <= maxSize)
 
-        })
+        if (typeRejected.length > 0) {
+            toast.error(`${typeRejected.length} file(s) rejected: only JPEG, PNG, GIF, or WebP images are allowed.`)
+        }
+        if (sizeRejected.length > 0) {
+            toast.error(`${sizeRejected.length} file(s) rejected: each file must be under 5MB.`)
+        }
 
-        if (profileFiles.length + validFiles.length > maxFiles) {
-            alert("Maximum 10 profile pictures allowed")
+        if (profileFiles.length + existingProfilePictures.length + validFiles.length > maxFiles) {
+            toast.error("Maximum 10 profile pictures allowed.")
+            e.target.value = ""
             return
         }
 
-        setProfileFiles([...profileFiles, ...validFiles])
+        if (validFiles.length > 0) {
+            setProfileFiles([...profileFiles, ...validFiles])
+        }
         setIsSubmitted(true)
         e.target.value = ""
     }
@@ -628,6 +638,7 @@ export default function PetForm({mode, petId}: PetFormProps) {
                             <Form {...form}>
                                 <form 
                                   onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                                      setIsSubmitted(true)
                                       if (useOwnerAddress) {
                                           const nonAddressErrors = Object.keys(errors).filter(k => k !== "address")
                                           if (nonAddressErrors.length === 0) {
@@ -872,7 +883,11 @@ export default function PetForm({mode, petId}: PetFormProps) {
                                         <div className="space-y-8">
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Profile Picture*</h3>
-                                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center">
+                                                <div className={`border-2 border-dashed rounded-lg p-4 sm:p-8 flex flex-col items-center justify-center text-center ${
+                                                    isSubmitted && profileFiles.length + existingProfilePictures.length === 0
+                                                        ? "border-destructive bg-red-50"
+                                                        : "border-[#E0E0E0]"
+                                                }`}>
                                                     <Icon icon="ph:camera" className="w-10 h-10 sm:w-12 sm:h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
                                                     <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF (MAX. 800x800px, MAX. 5mb)</p>

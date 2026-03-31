@@ -128,7 +128,7 @@ export default function PostDetailPage() {
     setCommentIntentHandled(false);
   }, [id]);
 
-    useEffect(() => {
+  useEffect(() => {
     fetchComments(commentsPagination.current_page, commentsPagination.per_page);
   }, [fetchComments, commentsPagination.current_page, commentsPagination.per_page]);
 
@@ -191,12 +191,12 @@ export default function PostDetailPage() {
         setPost((prev) =>
           prev
             ? {
-                ...prev,
-                likes_count: isLiked
-                  ? prev.likes_count + 1
-                  : Math.max(0, prev.likes_count - 1),
-                is_liked: isLiked,
-              }
+              ...prev,
+              likes_count: isLiked
+                ? prev.likes_count + 1
+                : Math.max(0, prev.likes_count - 1),
+              is_liked: isLiked,
+            }
             : prev,
         );
       }
@@ -411,20 +411,20 @@ export default function PostDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-4">
+    <div className="min-h-screen bg-[#E7F3E7] p-3 sm:p-4 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
         {/* Back link */}
         <Link
           href="/explore/posts"
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-md font-semibold w-fit"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm sm:text-md font-semibold w-fit"
         >
           <Icon icon="lucide:arrow-left" className="h-4 w-4" />
           Back to Community
         </Link>
 
         {/* Post Card */}
-        <Card className="rounded-2xl border-0 shadow-sm overflow-hidden p-6 flex flex-col gap-3">
-          <div className="flex gap-4">
+        <Card className="rounded-2xl border-0 shadow-sm overflow-hidden p-3 sm:p-6 flex flex-col gap-2 sm:gap-3">
+          <div className="flex gap-2 sm:gap-4">
             {/* Avatar */}
             <div className="shrink-0">
               <Link
@@ -454,7 +454,7 @@ export default function PostDetailPage() {
                   >
                     {post.created_by.name}
                   </Link>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-xs sm:text-sm text-gray-500">
                     • {formatRelativeTime(post.created_at)}
                   </span>
                 </div>
@@ -517,35 +517,37 @@ export default function PostDetailPage() {
 
               {/* Title & Body */}
               {post.title && (
-                <h1 className="font-bold text-gray-900 text-xl md:text-2xl mb-2">
+                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2">
                   {post.title}
                 </h1>
               )}
-              <p className="text-gray-700 leading-relaxed text-sm md:text-base whitespace-pre-line">
+              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base whitespace-pre-line">
                 {post.content}
               </p>
 
               {/* Attachment Image */}
               {safeAttachmentUrl && (
-                <div className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 mt-4">
-                  <Image
-                    src={safeAttachmentUrl}
-                    alt={post.title || "Post attachment"}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                <div className="pr-12 mt-3 sm:mt-4">
+                  <div className="relative w-full h-48 sm:h-64 md:h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                    <Image
+                      src={safeAttachmentUrl}
+                      alt={post.title || "Post attachment"}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                 </div>
               )}
 
               {/* Tags */}
               {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-2 mt-4 flex-wrap">
+                <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4 flex-wrap">
                   {post.tags.map((tag) => (
                     <Badge
                       key={tag.id}
                       variant="secondary"
-                      className="bg-green-50 text-green-700 hover:bg-green-100 text-sm font-normal"
+                      className="bg-green-50 text-green-700 hover:bg-green-100 text-xs sm:text-sm font-normal"
                       style={{
                         backgroundColor: tag.color_code
                           ? `${tag.color_code}20`
@@ -561,18 +563,17 @@ export default function PostDetailPage() {
           </div>
 
           {/* Actions Row */}
-          <div className="flex flex-wrap justify-between items-center pt-3 border-t border-gray-300">
-            <div className="flex flex-wrap gap-4 md:gap-6">
+          <div className="flex flex-wrap justify-between items-center pt-2 sm:pt-3 border-t border-gray-300">
+            <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-6">
               <Button
                 variant="ghost"
                 size="sm"
-                className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${
-                  post.is_liked ? "text-green-600 bg-green-50" : ""
-                }`}
+                className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? "text-green-600 bg-green-50" : ""
+                  }`}
                 onClick={handleLike}
               >
-                <Icon icon="lucide:thumbs-up" className="h-5 w-5" />
-                <span className="text-base font-medium">
+                <Icon icon="lucide:thumbs-up" className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-xs sm:text-sm md:text-base font-medium">
                   {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
                 </span>
               </Button>
@@ -582,8 +583,8 @@ export default function PostDetailPage() {
                 className="text-gray-900 gap-1.5 px-2 cursor-pointer hover:text-green-600 hover:bg-green-50"
                 onClick={handleAddCommentClick}
               >
-                <Icon icon="lucide:message-square" className="h-5 w-5" />
-                <span className="text-base font-medium">
+                <Icon icon="lucide:message-square" className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-xs sm:text-sm md:text-base font-medium">
                   {commentsPagination.total} Comments
                 </span>
               </Button>
@@ -596,8 +597,8 @@ export default function PostDetailPage() {
                   className="text-red-600 gap-1.5 px-2"
                   onClick={handleReportClick}
                 >
-                  <Icon icon="lucide:flag" className="h-5 w-5" />
-                  <span className="text-base font-medium">Report</span>
+                  <Icon icon="lucide:flag" className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-xs sm:text-sm md:text-base font-medium">Report</span>
                 </Button>
               )}
             </div>
@@ -610,16 +611,17 @@ export default function PostDetailPage() {
           ref={commentsSectionRef}
           className="bg-transparent shadow-none border-0"
         >
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-lg font-bold text-gray-900">
               Comments ({commentsPagination.total})
             </h2>
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white text-md font-semibold rounded-xl p-6"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 sm:px-5 py-2 sm:py-3 h-auto"
               onClick={handleAddCommentClick}
             >
-              <Icon icon="lucide:plus" className="h-4 w-4" />
-              Add a comment
+              <Icon icon="lucide:plus" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline sm:inline">Add a comment</span>
+              <span className="sm:hidden">Comment</span>
             </Button>
           </div>
 
@@ -680,12 +682,12 @@ export default function PostDetailPage() {
                 return (
                   <div key={comment.id} className="space-y-2">
                     {/* Comment row */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3">
                       <Link
                         href={`/profile/${comment.created_by.id}`}
                         className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
                       >
-                        <Avatar className="h-9 w-9 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                        <Avatar className="h-7 w-7 sm:h-9 sm:w-9 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
                           <AvatarImage
                             src={comment.created_by.avatar || undefined}
                             alt={comment.created_by.name}
@@ -697,16 +699,16 @@ export default function PostDetailPage() {
                           </AvatarFallback>
                         </Avatar>
                       </Link>
-                      <div className="flex-1 bg-white border border-gray-100 rounded-xl px-4 py-3">
+                      <div className="flex-1 bg-white border border-gray-100 rounded-xl px-2.5 sm:px-4 py-2 sm:py-3">
                         <div className="flex items-start justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <Link
                               href={`/profile/${comment.created_by.id}`}
-                              className="font-semibold text-gray-900 text-sm hover:underline"
+                              className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline"
                             >
                               {comment.created_by.name}
                             </Link>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-[10px] sm:text-xs text-gray-400">
                               • {formatRelativeTime(comment.created_at)}
                             </span>
                           </div>
@@ -719,7 +721,7 @@ export default function PostDetailPage() {
                             })
                           )}
                         </div>
-                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
                           {comment.content}
                         </p>
                         <div className="mt-2 flex items-center gap-3">
@@ -734,10 +736,10 @@ export default function PostDetailPage() {
                                   prev.map((c) =>
                                     c.id === comment.id
                                       ? {
-                                          ...c,
-                                          replies_count:
-                                            (c.replies_count ?? 0) + 1,
-                                        }
+                                        ...c,
+                                        replies_count:
+                                          (c.replies_count ?? 0) + 1,
+                                      }
                                       : c,
                                   ),
                                 );
@@ -762,13 +764,13 @@ export default function PostDetailPage() {
                               {repState?.expanded
                                 ? "Hide replies"
                                 : (() => {
-                                    const count =
-                                      repState?.total ??
-                                      comment.replies_count ??
-                                      repState?.replies.length ??
-                                      0;
-                                    return `View ${count} ${count === 1 ? "reply" : "replies"}`;
-                                  })()}
+                                  const count =
+                                    repState?.total ??
+                                    comment.replies_count ??
+                                    repState?.replies.length ??
+                                    0;
+                                  return `View ${count} ${count === 1 ? "reply" : "replies"}`;
+                                })()}
                             </button>
                           )}
                         </div>
@@ -777,7 +779,7 @@ export default function PostDetailPage() {
 
                     {/* Nested replies */}
                     {repState?.expanded && (
-                      <div className="ml-12 space-y-2">
+                      <div className="ml-8 sm:ml-12 space-y-2">
                         {repState.loading && repState.replies.length === 0 && (
                           <div className="flex justify-center py-3">
                             <Icon
@@ -787,12 +789,12 @@ export default function PostDetailPage() {
                           </div>
                         )}
                         {repState.replies.map((reply) => (
-                          <div key={reply.id} className="flex gap-3">
+                          <div key={reply.id} className="flex gap-2 sm:gap-3">
                             <Link
                               href={`/profile/${reply.created_by.id}`}
                               className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
                             >
-                              <Avatar className="h-8 w-8 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                              <Avatar className="h-6 w-6 sm:h-8 sm:w-8 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
                                 <AvatarImage
                                   src={reply.created_by.avatar || undefined}
                                   alt={reply.created_by.name}
@@ -809,11 +811,11 @@ export default function PostDetailPage() {
                                 <div className="flex items-center gap-2">
                                   <Link
                                     href={`/profile/${reply.created_by.id}`}
-                                    className="font-semibold text-gray-900 text-sm hover:underline"
+                                    className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline"
                                   >
                                     {reply.created_by.name}
                                   </Link>
-                                  <span className="text-xs text-gray-400">
+                                  <span className="text-[10px] sm:text-xs text-gray-400">
                                     • {formatRelativeTime(reply.created_at)}
                                   </span>
                                 </div>

@@ -35,7 +35,7 @@ export function CommunityFilters({
         setSearch: setTagSearch,
         loadMore: loadMoreTags,
         hasMore: hasMoreTags
-    } = useTagsOptions(TAG_TYPE.POST);
+    } = useTagsOptions(TAG_TYPE.COMMUNITY);
 
     return (
         <div className="w-full flex flex-col space-y-3 items-center">

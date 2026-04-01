@@ -154,7 +154,12 @@ export default function DetailPetPage() {
   }, []);
 
   const handleAdoption = async () => {
-    if (!pet || adoptionLoading || checkingRelatedAdoption) return;
+    if (!pet) {
+      throw new Error("Pet data is unavailable");
+    }
+    if (adoptionLoading || checkingRelatedAdoption) {
+      throw new Error("Adoption request is currently being processed");
+    }
     try {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
@@ -209,8 +214,8 @@ export default function DetailPetPage() {
         ? "Failed to create adoption application"
         : rawErrorMessage;
 
-      toast.error(errorMessage);
       console.error(error);
+      throw new Error(errorMessage);
     } finally {
       setAdoptionLoading(false);
     }

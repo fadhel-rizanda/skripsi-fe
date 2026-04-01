@@ -365,10 +365,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                 hasMore={hasMoreProvinces}
                                 placeholder="Select province..."
                                 emptyMessage="No provinces found."
-                                className={
-                                    "w-full h-9 sm:h-10 text-xs sm:text-sm " +
-                                    (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
-                                }
+                                className={cn(
+                                    "w-full h-9 sm:h-10 text-xs sm:text-sm",
+                                    fieldState.invalid && "border border-red-500 focus:ring-red-500"
+                                )}
                                 mode="single"
                             />
                         </FormControl>

@@ -10,7 +10,6 @@ export async function proxy(request: NextRequest) {
         '/forgot-password',
         '/login',
         '/register',
-        '/verify-otp',
         '/pets',
         '/explore',
     ]

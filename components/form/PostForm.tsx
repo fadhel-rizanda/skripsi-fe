@@ -198,7 +198,7 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                             <FormControl>
                                 <Textarea
                                     placeholder="Share your thoughts..."
-                                    className="min-h-32 h-28 text-xs sm:text-sm px-3"
+                                    className="min-h-32 text-xs sm:text-sm px-3"
                                     {...field}
                                 />
                             </FormControl>

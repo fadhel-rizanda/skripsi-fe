@@ -193,6 +193,11 @@ export default function DetailPetPage() {
           }
           // Existing adoption was rejected — allow a fresh request to proceed
           // by re-running adoptPet (backend conflict should not occur now).
+          setCheckingRelatedAdoption(false);
+          const retryResponse = await petService.adoptPet(petId!);
+          toast.success("Adoption request sent successfully!");
+          router.push(`/adoptions/${retryResponse.data.id}`);
+          return;
         } catch (lookupError) {
           console.error("Failed to find related adoption after conflict:", lookupError);
         } finally {

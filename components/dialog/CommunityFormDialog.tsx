@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode, useState } from "react"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import CommunityForm from "@/components/form/CommunityForm"
 import { Icon } from "@iconify/react";
@@ -46,6 +46,9 @@ export default function CommunityFormDialog({
                 </DialogTrigger>
             )}
             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto scrollbar-hide p-0 rounded-xl">
+                <DialogTitle className="sr-only">
+                    {mode === "create" ? "Create Community" : "Edit Community"}
+                </DialogTitle>
                 <CommunityForm mode={mode} communityId={communityId} />
             </DialogContent>
         </Dialog>

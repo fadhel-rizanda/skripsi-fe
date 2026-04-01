@@ -174,15 +174,15 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(() => setDialogOpen(true))} className="space-y-6">
+            <form onSubmit={form.handleSubmit(() => setDialogOpen(true))} className="space-y-5">
                 <FormField
                     control={form.control}
                     name="title"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Title *</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Title *</FormLabel>
                             <FormControl>
-                                <Input placeholder="What's on your mind?" {...field} />
+                                <Input placeholder="What's on your mind?" {...field} className="h-9 text-xs sm:text-sm px-3" />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -194,11 +194,11 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                     name="content"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Content *</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Content *</FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder="Share your thoughts..."
-                                    className="min-h-50"
+                                    className="min-h-32 text-xs sm:text-sm px-3"
                                     {...field}
                                 />
                             </FormControl>
@@ -210,9 +210,9 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                 <FormField
                     control={form.control}
                     name="tag_ids"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                         <FormItem>
-                            <FormLabel>Tags*</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Tags*</FormLabel>
                             <FormControl>
                                 <SearchableCombobox
                                     options={postTags}
@@ -230,6 +230,10 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                                     isLoading={isLoadingTags}
                                     hasMore={hasMoreTags}
                                     mode="multiple"
+                                    className={
+                                        `w-full h-9 text-xs sm:text-sm px-3 ` +
+                                        (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                    }
                                 />
                             </FormControl>
                             <FormMessage />
@@ -254,17 +258,17 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                     name="attachment_id"
                     render={() => (
                         <FormItem>
-                            <FormLabel>Attachment</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Attachment</FormLabel>
                             <FormControl>
-                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-6 flex flex-col items-center justify-center">
-                                    <Icon icon="ph:image" className="w-10 h-10 text-[#BDBDBD] mb-2" />
-                                    <p className="font-medium text-[#424242] text-sm">Upload an Image</p>
-                                    <p className="text-xs text-[#757575] mb-4 mt-1">PNG, JPG, GIF, WebP (MAX. 5MB)</p>
+                                <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center">
+                                    <Icon icon="ph:image" className="w-8 h-8 sm:w-10 sm:h-10 text-[#BDBDBD] mb-2" />
+                                    <p className="font-medium text-[#424242] text-xs sm:text-sm">Upload an Image</p>
+                                    <p className="text-xs text-[#757575] mb-2 mt-1">PNG, JPG, GIF, WebP (MAX. 5MB)</p>
                                     <label htmlFor="post-attachment-upload">
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            className="px-6 h-9 rounded-md border-[#E0E0E0] text-sm cursor-pointer"
+                                            className="px-3 sm:px-6 h-9 rounded-md border-[#E0E0E0] text-xs sm:text-sm cursor-pointer"
                                             asChild
                                         >
                                             <span>Select File</span>
@@ -322,10 +326,10 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                     )}
                 />
 
-                <div className="flex justify-end pt-4 border-t">
+                <div className="flex justify-end pt-3 border-t">
                     <Button
                         type="submit"
-                        className="bg-[#19E619] hover:bg-green-500 text-black font-bold"
+                        className="bg-[#19E619] hover:bg-green-500 text-black font-bold h-9 text-xs sm:text-sm px-4"
                     >
                         {isEditMode ? "Update Post" : "Post Now"}
                     </Button>

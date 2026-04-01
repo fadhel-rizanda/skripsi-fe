@@ -34,6 +34,7 @@ import {
 import { generalService } from "@/services/generalServices";
 import { adoptionServices } from "@/services/adoptionServices";
 import ChatButton from "@/components/button/ChatButton";
+import { ActionDialog } from "@/components/dialog/ActionDialog";
 // Edit form moved to separate page; navigation used instead of dialog
 
 export default function DetailPetPage() {
@@ -46,6 +47,7 @@ export default function DetailPetPage() {
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [checkingRelatedAdoption, setCheckingRelatedAdoption] = useState(false);
+  const [adoptConfirmOpen, setAdoptConfirmOpen] = useState(false);
   // dialog state removed; navigation to edit page is used instead
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
 
@@ -67,10 +69,12 @@ export default function DetailPetPage() {
 
     const adoptions = Array.isArray(response.data) ? response.data : [];
 
+    // Exclude rejected adoptions — the adopter should be able to re-apply after rejection.
     const existing = adoptions.find(
       (adoption) =>
         String(adoption.pet?.id) === String(petId) &&
-        String(adoption.adopter?.id) === String(session.user.id),
+        String(adoption.adopter?.id) === String(session.user.id) &&
+        adoption.stage_tag?.name?.toLowerCase() !== "rejected",
     );
 
     return existing ?? null;
@@ -150,7 +154,12 @@ export default function DetailPetPage() {
   }, []);
 
   const handleAdoption = async () => {
-    if (!pet || adoptionLoading || checkingRelatedAdoption) return;
+    if (!pet) {
+      throw new Error("Pet data is unavailable");
+    }
+    if (adoptionLoading || checkingRelatedAdoption) {
+      throw new Error("Adoption request is currently being processed");
+    }
     try {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
@@ -182,12 +191,20 @@ export default function DetailPetPage() {
           setCheckingRelatedAdoption(true);
           const existing = await findRelatedAdoption();
           if (existing?.id) {
-            toast.info("You already have an adoption request for this pet.");
+            // Non-rejected active adoption already exists — redirect to it.
+            toast.info("You already have an active adoption request for this pet.");
             router.push(`/adoptions/${existing.id}`);
             return;
           }
+          // Existing adoption was rejected — allow a fresh request to proceed
+          // by re-running adoptPet (backend conflict should not occur now).
+          const retryResponse = await petService.adoptPet(petId!);
+          toast.success("Adoption request sent successfully!");
+          router.push(`/adoptions/${retryResponse.data.id}`);
+          return;
         } catch (lookupError) {
           console.error("Failed to find related adoption after conflict:", lookupError);
+          throw lookupError;
         } finally {
           setCheckingRelatedAdoption(false);
         }
@@ -197,8 +214,8 @@ export default function DetailPetPage() {
         ? "Failed to create adoption application"
         : rawErrorMessage;
 
-      toast.error(errorMessage);
       console.error(error);
+      throw new Error(errorMessage);
     } finally {
       setAdoptionLoading(false);
     }
@@ -254,7 +271,7 @@ export default function DetailPetPage() {
     return (
       <Button
         className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
-        onClick={handleAdoption}
+        onClick={() => isAvailable && setAdoptConfirmOpen(true)}
         disabled={adoptionLoading || checkingRelatedAdoption || !isAvailable}
       >
         <Heart className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-black shrink-0" />
@@ -570,6 +587,19 @@ export default function DetailPetPage() {
         </div>
       </div>
 
+      {/* Adopt Me confirmation dialog */}
+      <ActionDialog
+        open={adoptConfirmOpen}
+        onOpenChange={setAdoptConfirmOpen}
+        title={`Adopt ${pet.name}?`}
+        description={`You are about to submit an adoption request for ${pet.name}. The provider will review your application and get in touch with you.`}
+        confirmText="Submit Request"
+        confirmVariant="default"
+        successTitle="Request Submitted!"
+        successDescription={`Your adoption request for ${pet.name} has been sent successfully. You will be redirected to the adoption progress page.`}
+        onConfirm={handleAdoption}
+        onContinue={() => { /* navigation handled inside handleAdoption */ }}
+      />
     </div>
   );
 }

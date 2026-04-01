@@ -200,6 +200,7 @@ export default function DetailPetPage() {
           return;
         } catch (lookupError) {
           console.error("Failed to find related adoption after conflict:", lookupError);
+          throw lookupError;
         } finally {
           setCheckingRelatedAdoption(false);
         }

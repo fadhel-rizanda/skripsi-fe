@@ -23,11 +23,7 @@ export type RegisterFormData = z.infer<typeof registerSchema>
 
 export const otpSchema = z.object({
     token: z.string()
-        .transform((val) => val.trim().toUpperCase())
-        .pipe(
-            z.string()
-                .regex(/^[A-Z0-9]{8}$/, "Token must be exactly 8 characters")
-        ),
+        .min(1, "Verification code is required"),
 })
 
 export type OtpFormInput = z.infer<typeof otpSchema>

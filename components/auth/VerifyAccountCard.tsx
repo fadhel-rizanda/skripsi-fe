@@ -13,8 +13,8 @@ import {
   Form, FormControl, FormField, FormItem, FormMessage,
 } from "@/components/ui/form"
 import { Loader2, AlertCircle } from "lucide-react"
-import { verifyOtp, resendOtp } from "@/actions/auth"
 import { otpSchema, OtpFormInput } from "@/schemas/auth.schema"
+import {authServices} from "@/services/authServices";
 
 export default function OtpVerificationCard() {
   const router = useRouter()
@@ -33,60 +33,43 @@ export default function OtpVerificationCard() {
     setError("")
     setSuccessMessage("")
 
+    const result = await authServices.verifyOtp(values.token);
+
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+
     try {
-      const accessToken = session?.accessToken
-      if (!accessToken) {
-        setError("You must be logged in to verify")
-        return
-      }
-
-      const result = await verifyOtp(values.token, accessToken)
-
-      if (!result.success) {
-        setError(result.error || "Verification failed")
-        return
-      }
-
       await update({
         ...session,
         user: {
           ...session?.user,
           email_verified_at: new Date().toISOString(),
         },
-      })
+      });
 
-      router.push("/greeting?verified=true")
+      router.push("/greeting?verified=true");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
     }
   }
 
   const handleResend = async () => {
-    setError("")
-    setSuccessMessage("")
-    setResending(true)
+    setError("");
+    setSuccessMessage("");
+    setResending(true);
 
-    try {
-      const accessToken = session?.accessToken
-      if (!accessToken) {
-        setError("You must be logged in to resend code")
-        return
-      }
+    const result = await authServices.resendOtp();
 
-      const result = await resendOtp(accessToken)
-
-      if (!result.success) {
-        setError(result.error || "Failed to resend OTP")
-        return
-      }
-
+    if (!result.success) {
+      setError(result.error);
+    } else {
       setSuccessMessage("OTP has been resent to your email")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
-    } finally {
-      setResending(false)
     }
-  }
+
+    setResending(false);
+  };
 
   return (
     <div className="w-full max-w-lg flex items-center justify-center">
@@ -122,11 +105,10 @@ export default function OtpVerificationCard() {
                       <Input
                         {...field}
                         placeholder="XXXXXXXX"
-                        maxLength={8}
-                        className="h-12 text-center text-lg tracking-widest uppercase"
+                        className="h-12 text-center text-lg tracking-[0.3em] font-mono"
                         disabled={form.formState.isSubmitting}
                         onChange={(e) => {
-                          field.onChange(e.target.value.toUpperCase())
+                          field.onChange(e)
                         }}
                       />
                     </FormControl>

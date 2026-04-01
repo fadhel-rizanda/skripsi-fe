@@ -13,8 +13,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
-import { sendForgotPasswordEmail } from "@/actions/forgot-password"
 import Link from "next/link";
+import {authServices} from "@/services/authServices";
+import {toast} from "sonner";
 
 interface Props {
   onSuccess: (email: string) => void
@@ -29,20 +30,21 @@ export default function SendEmailCard({ onSuccess }: Props) {
     setError("")
     setLoading(true)
 
-    try {
-      const result = await sendForgotPasswordEmail(email)
-      
-      if (!result.success) {
-        setError(result.error || "Failed to send reset email")
-        return
+      if (!email) {
+          setError("Email is required")
+          setLoading(false)
+          return
       }
 
+      const result = await authServices.sendForgotPasswordEmail(email)
+      if (!result.success) {
+          setError(result.error || "Failed to send reset email")
+          setLoading(false)
+          return
+      }
+
+      toast.success("Verification code sent to your email!")
       onSuccess(email)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
-    } finally {
-      setLoading(false)
-    }
   }
 
   return (

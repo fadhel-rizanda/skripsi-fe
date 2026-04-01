@@ -25,13 +25,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import {
@@ -425,8 +419,8 @@ export default function CommunityDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#E7F3E7] p-4 md:p-8">
-      <div className="max-w-8xl mx-auto space-y-5">
+    <div className="min-h-screen bg-[#E7F3E7] p-3 sm:p-4 md:p-8">
+      <div className="max-w-8xl mx-auto space-y-4 sm:space-y-5">
         <Link
           href="/explore/communities"
           className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-semibold"
@@ -436,15 +430,15 @@ export default function CommunityDetailPage() {
         </Link>
 
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{community.name}</h1>
-          <p className="text-gray-600 mt-1">{community.description}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{community.name}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{community.description}</p>
           {community.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {community.tags.map((tag) => (
                 <Badge
                   key={tag.id}
                   variant="secondary"
-                  className="bg-white text-green-700 hover:bg-green-50 text-sm sm:text-base font-normal shadow-sm hover:cursor-default"
+                  className="bg-white text-green-700 hover:bg-green-50 text-xs sm:text-sm font-normal shadow-sm hover:cursor-default"
                   style={{ backgroundColor: tag.color_code ? `${tag.color_code}20` : undefined }}
                 >
                   #{tag.name}
@@ -458,8 +452,8 @@ export default function CommunityDetailPage() {
 
         <div className="xl:grid xl:grid-cols-[minmax(0,1.4fr)_17.5rem] xl:gap-6 xl:items-start">
           <div className="min-w-0 w-full space-y-4">
-            <Card className="rounded-xl border-0 shadow-sm p-4 bg-[#f4f7f4]">
-              <div className="grid grid-cols-1 md:grid-cols-[1.6fr_0.9fr_0.9fr] gap-3">
+            <Card className="rounded-xl border-0 shadow-sm p-3 sm:p-4 bg-[#f4f7f4]">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] md:grid-cols-[1.6fr_0.9fr_0.9fr] gap-2 sm:gap-3">
                 <div className="relative">
                   <Icon
                     icon="lucide:search"
@@ -469,19 +463,23 @@ export default function CommunityDetailPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by name..."
-                    className="pl-9 bg-white border-gray-200 h-11"
+                    className="pl-9 bg-white border-gray-200 h-9 sm:h-11 text-xs sm:text-sm"
                   />
                 </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger size="lg" className="w-full bg-white border-gray-200">
-                    <SelectValue placeholder="Sort By" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="oldest">Oldest</SelectItem>
-                    <SelectItem value="popular">Popular</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 sm:grid-cols-none sm:flex sm:gap-3 gap-2 md:contents">
+                <SearchableCombobox
+                  options={[
+                    { id: "newest", name: "Newest" },
+                    { id: "oldest", name: "Oldest" },
+                    { id: "popular", name: "Popular" },
+                  ]}
+                  selectedValues={sortBy ? [sortBy] : []}
+                  onSelect={(value) => setSortBy(value)}
+                  placeholder="Sort By"
+                  emptyMessage="No options."
+                  mode="single"
+                  className="w-full bg-white border-gray-200 h-9 sm:h-11 text-xs sm:text-sm"
+                />
                 <SearchableCombobox
                   options={tags}
                   selectedValues={[filterTag].filter(Boolean)}
@@ -499,8 +497,9 @@ export default function CommunityDetailPage() {
                   placeholder="Tags"
                   emptyMessage="No tags found."
                   mode="single"
-                  className="w-full bg-white border-gray-200 h-11"
+                  className="w-full bg-white border-gray-200 h-9 sm:h-11 text-xs sm:text-sm"
                 />
+                </div>
               </div>
             </Card>
 

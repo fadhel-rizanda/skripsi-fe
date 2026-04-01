@@ -414,6 +414,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                   title="Personal Information"
                   description="Update your photo and personal details here."
                 >
+                  <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -432,7 +433,6 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                       </FormItem>
                     )}
                   />
-                  <div className="space-y-4">
                     <div>
                       <FormLabel className="text-xs sm:text-sm font-medium">
                         Email address

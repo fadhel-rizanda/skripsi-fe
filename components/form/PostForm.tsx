@@ -210,7 +210,7 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                 <FormField
                     control={form.control}
                     name="tag_ids"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                         <FormItem>
                             <FormLabel className="text-xs sm:text-sm">Tags*</FormLabel>
                             <FormControl>
@@ -230,7 +230,10 @@ export default function PostForm({ mode, postId, communityId, onSuccessAction }:
                                     isLoading={isLoadingTags}
                                     hasMore={hasMoreTags}
                                     mode="multiple"
-                                    className="w-full h-9 text-xs sm:text-sm px-3"
+                                    className={
+                                        `w-full h-9 text-xs sm:text-sm px-3 ` +
+                                        (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                    }
                                 />
                             </FormControl>
                             <FormMessage />

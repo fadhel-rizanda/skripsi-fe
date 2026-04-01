@@ -342,7 +342,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
             <FormField
                 control={form.control}
                 name="address.province_id"
-                render={({field}) => (
+                render={({field, fieldState}) => (
                     <FormItem>
                         <FormLabel className="text-xs sm:text-sm">Province *</FormLabel>
                         <FormControl>
@@ -365,7 +365,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                 hasMore={hasMoreProvinces}
                                 placeholder="Select province..."
                                 emptyMessage="No provinces found."
-                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
+                                className={
+                                    "w-full h-9 sm:h-10 text-xs sm:text-sm " +
+                                    (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                }
                                 mode="single"
                             />
                         </FormControl>
@@ -376,7 +379,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
             <FormField
                 control={form.control}
                 name="address.regency_id"
-                render={({field}) => (
+                render={({field, fieldState}) => (
                     <FormItem>
                         <FormLabel className="text-xs sm:text-sm">Regency / City *</FormLabel>
                         <FormControl>
@@ -397,7 +400,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                 hasMore={hasMoreRegencies}
                                 placeholder={selectedProvinceId ? "Select regency/city..." : "Select a province first"}
                                 emptyMessage="No regencies found."
-                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
+                                className={
+                                    "w-full h-9 sm:h-10 text-xs sm:text-sm " +
+                                    (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                }
                                 mode="single"
                                 disabled={!selectedProvinceId}
                             />
@@ -410,7 +416,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 <FormField
                     control={form.control}
                     name="address.district_id"
-                    render={({field}) => (
+                    render={({field, fieldState}) => (
                         <FormItem>
                             <FormLabel className="text-xs sm:text-sm">District *</FormLabel>
                             <FormControl>
@@ -427,7 +433,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                     hasMore={hasMoreDistricts}
                                     placeholder={selectedRegencyId ? "Select district..." : "Select a regency first"}
                                     emptyMessage="No districts found."
-                                    className="w-full h-9 sm:h-10 text-xs sm:text-sm"
+                                    className={
+                                        "w-full h-9 sm:h-10 text-xs sm:text-sm " +
+                                        (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                    }
                                     mode="single"
                                     disabled={!selectedRegencyId}
                                 />
@@ -602,7 +611,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                             <FormField
                                                 control={form.control}
                                                 name="tag_ids"
-                                                render={({field}) => (
+                                                render={({field, fieldState}) => (
                                                     <FormItem>
                                                         <FormLabel className="text-xs sm:text-sm">Tags *</FormLabel>
                                                         <FormControl>
@@ -620,7 +629,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                                 hasMore={hasMoreCommunityTags}
                                                                 placeholder="Select tags..."
                                                                 emptyMessage="No tags found."
-                                                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
+                                                                className={
+                                                                    "w-full h-9 sm:h-10 text-xs sm:text-sm " +
+                                                                    (fieldState.invalid ? 'border border-red-500 focus:ring-red-500' : '')
+                                                                }
                                                                 mode={"multiple"}
                                                             />
                                                         </FormControl>

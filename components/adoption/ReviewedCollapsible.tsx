@@ -190,19 +190,19 @@ export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCol
                 type="single"
                 collapsible
                 defaultValue="item-1"
-                className={`w-full max-w-4xl border rounded-2xl px-4 bg-white transition-opacity ${
+        className={`w-full max-w-4xl border rounded-xl sm:rounded-2xl px-3 sm:px-4 bg-white transition-opacity ${
                     stageState === "inactive" ? "opacity-50 pointer-events-none" : ""
                 }`}
             >
                 <AccordionItem value="item-1" className="border-none">
-                    <AccordionTrigger className="hover:no-underline py-3">
-                        <div className="flex items-center gap-3">
-                            <div className={`h-4 w-4 rounded-full ${dotColor}`}/>
-                            <span className="text-base font-bold text-slate-900">Application Reviewed</span>
+                    <AccordionTrigger className="hover:no-underline py-2.5 sm:py-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <div className={`h-3 w-3 sm:h-4 sm:w-4 rounded-full ${dotColor} shrink-0`}/>
+                            <span className="text-sm sm:text-base font-bold text-slate-900 text-left shrink-0">Application Review</span>
                             {headerBadge && (
                                 <Badge
                                     variant="outline"
-                                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium border ${headerBadge.className}`}
+                                    className={`flex items-center gap-1 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-medium border ${headerBadge.className}`}
                                 >
                                     {headerBadge.label}
                                 </Badge>
@@ -210,7 +210,7 @@ export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCol
                         </div>
                     </AccordionTrigger>
 
-                    <AccordionContent className="pt-0 pb-4 text-sm">
+                    <AccordionContent className="pt-0 pb-3 sm:pb-4 text-xs sm:text-sm">
                         <p className="text-slate-500 mb-4">
                             Our team has reviewed your initial application. To proceed, we require some
                             additional documents. Please upload the following items for our review.

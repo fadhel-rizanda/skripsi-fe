@@ -331,9 +331,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 name="address.street"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Street *</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Street *</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g. Jl. Pawsitive No. 123" {...field} />
+                            <Input className="h-9 sm:h-10 text-xs sm:text-sm" placeholder="e.g. Jl. Pawsitive No. 123" {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -344,7 +344,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 name="address.province_id"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Province *</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Province *</FormLabel>
                         <FormControl>
                             <SearchableCombobox
                                 options={[
@@ -365,6 +365,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                 hasMore={hasMoreProvinces}
                                 placeholder="Select province..."
                                 emptyMessage="No provinces found."
+                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                                 mode="single"
                             />
                         </FormControl>
@@ -377,7 +378,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 name="address.regency_id"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Regency / City *</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Regency / City *</FormLabel>
                         <FormControl>
                             <SearchableCombobox
                                 options={[
@@ -396,6 +397,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                 hasMore={hasMoreRegencies}
                                 placeholder={selectedProvinceId ? "Select regency/city..." : "Select a province first"}
                                 emptyMessage="No regencies found."
+                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                                 mode="single"
                                 disabled={!selectedProvinceId}
                             />
@@ -410,7 +412,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                     name="address.district_id"
                     render={({field}) => (
                         <FormItem>
-                            <FormLabel>District *</FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">District *</FormLabel>
                             <FormControl>
                                 <SearchableCombobox
                                     options={[
@@ -425,6 +427,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                     hasMore={hasMoreDistricts}
                                     placeholder={selectedRegencyId ? "Select district..." : "Select a regency first"}
                                     emptyMessage="No districts found."
+                                    className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                                     mode="single"
                                     disabled={!selectedRegencyId}
                                 />
@@ -438,9 +441,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                     name="address.zip_code"
                     render={({field}) => (
                         <FormItem>
-                            <FormLabel>Zip Code <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                            <FormLabel className="text-xs sm:text-sm">Zip Code <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g. 62704" {...field} />
+                                <Input className="h-9 sm:h-10 text-xs sm:text-sm" placeholder="e.g. 62704" {...field} />
                             </FormControl>
                             <FormMessage/>
                         </FormItem>
@@ -452,9 +455,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 name="address.link"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Maps Link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Maps Link <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g. https://maps.google.com/..." {...field} />
+                            <Input className="h-9 sm:h-10 text-xs sm:text-sm" placeholder="e.g. https://maps.google.com/..." {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -465,9 +468,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 name="address.notes"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Notes <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Notes <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                         <FormControl>
-                            <Textarea placeholder="Describe the address in more detail..." className="min-h-30" {...field} />
+                            <Textarea placeholder="Describe the address in more detail..." className="min-h-24 sm:min-h-30 text-xs sm:text-sm" {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -533,7 +536,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
             <div>
                 <div className="max-w-6xl mx-auto">
                     <Card className="rounded-2xl shadow-xl p-0 m-0">
-                        <CardContent className="p-10">
+                        <CardContent className="p-4 sm:p-10">
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
                                     if (useOwnerAddress) {
@@ -543,10 +546,10 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                         }
                                     }
                                 })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
                                         {/* LEFT COLUMN */}
-                                        <div className="space-y-6">
-                                            <h3 className="text-xl font-semibold mb-6 border-b pb-2">
+                                        <div className="space-y-5 sm:space-y-6">
+                                            <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">
                                                 {isEditMode ? "Edit Community Information" : "Community Information"}
                                             </h3>
 
@@ -555,9 +558,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 name="name"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Name *</FormLabel>
+                                                        <FormLabel className="text-xs sm:text-sm">Name *</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g. Pawsitive Community" {...field} />
+                                                            <Input className="h-9 sm:h-10 text-xs sm:text-sm" placeholder="e.g. Pawsitive Community" {...field} />
                                                         </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
@@ -569,9 +572,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 name="website"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Website</FormLabel>
+                                                        <FormLabel className="text-xs sm:text-sm">Website</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g. https://pawsite.com" {...field} />
+                                                            <Input className="h-9 sm:h-10 text-xs sm:text-sm" placeholder="e.g. https://pawsite.com" {...field} />
                                                         </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
@@ -583,11 +586,11 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 name="description"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Description *</FormLabel>
+                                                        <FormLabel className="text-xs sm:text-sm">Description *</FormLabel>
                                                         <FormControl>
                                                             <Textarea
                                                                 placeholder="Describe the community, its mission, and what makes it unique..."
-                                                                className="min-h-30"
+                                                                className="min-h-24 sm:min-h-30 text-xs sm:text-sm"
                                                                 {...field}
                                                             />
                                                         </FormControl>
@@ -601,7 +604,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                 name="tag_ids"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Tags *</FormLabel>
+                                                        <FormLabel className="text-xs sm:text-sm">Tags *</FormLabel>
                                                         <FormControl>
                                                             <SearchableCombobox
                                                                 options={communityTags}
@@ -617,6 +620,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                                 hasMore={hasMoreCommunityTags}
                                                                 placeholder="Select tags..."
                                                                 emptyMessage="No tags found."
+                                                                className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                                                                 mode={"multiple"}
                                                             />
                                                         </FormControl>
@@ -638,9 +642,9 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                         </div>
 
                                         {/* RIGHT COLUMN */}
-                                        <div className="space-y-8">
+                                        <div className="space-y-6 sm:space-y-8">
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Profile Picture</h3>
+                                                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Profile Picture</h3>
                                                 <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg p-8 flex flex-col items-center justify-center">
                                                     <Icon icon="ph:camera" className="w-12 h-12 text-[#BDBDBD] mb-3"/>
                                                     <p className="font-medium text-[#424242] text-sm">Upload Profile Picture</p>
@@ -700,7 +704,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                             </div>
 
                                             <div>
-                                                <h3 className="text-xl font-semibold mb-6 border-b pb-2">Community Admin</h3>
+                                                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Community Admin</h3>
                                                 <FormField
                                                     control={form.control}
                                                     name="admin_ids"
@@ -721,6 +725,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                                                     hasMore={hasMoreUsersOptions}
                                                                     placeholder="Select admins..."
                                                                     emptyMessage="No users found."
+                                                                    className="w-full h-9 sm:h-10 text-xs sm:text-sm"
                                                                     mode={"multiple"}
                                                                 />
                                                             </FormControl>
@@ -745,7 +750,7 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                                         </div>
                                     </div>
 
-                                    <div className="mt-10 space-y-4 flex flex-wrap justify-end border-t pt-6">
+                                    <div className="mt-6 sm:mt-10 space-y-4 flex flex-wrap justify-end border-t pt-4 sm:pt-6">
                                         <Button type="submit" className="mt-4 bg-green-600 hover:bg-green-700 text-white">
                                             {isEditMode ? "Update Community Profile" : "Submit new community profile"}
                                         </Button>

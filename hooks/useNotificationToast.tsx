@@ -89,6 +89,8 @@ export function useNotificationToast() {
 
                     if (
                         title.includes('new') ||
+                        title.includes('cancelled') ||
+                        title.includes('rejected') ||
                         title.includes('create') ||
                         title.includes('created')
                     ) {

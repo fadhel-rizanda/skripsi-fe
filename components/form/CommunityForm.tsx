@@ -39,9 +39,10 @@ import {TAG_TYPE} from "@/constant/tag-type";
 type CommunityFormProps = {
     mode: "create" | "edit"
     communityId?: string
+    onSuccess?: () => void
 }
 
-export default function CommunityForm({mode, communityId}: CommunityFormProps) {
+export default function CommunityForm({mode, communityId, onSuccess}: CommunityFormProps) {
     const isEditMode = mode === "edit"
     const {data: session} = useSession()
 
@@ -777,13 +778,15 @@ export default function CommunityForm({mode, communityId}: CommunityFormProps) {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 onConfirm={handleFinalSubmit}
-                onContinue={() =>
+                onContinue={() => {
+                    onSuccess?.();
+
                     router.push(
                         currentCommunityId
                             ? `/explore/communities/${currentCommunityId}`
                             : "/explore/communities",
-                    )
-                }
+                    );
+                }}
                 title={isEditMode ? "Update Community Profile?" : "Create Community Profile?"}
                 description="Please review the community's information before continuing."
                 successTitle={isEditMode ? "Community Profile Updated Successfully" : "Community Profile Created Successfully"}

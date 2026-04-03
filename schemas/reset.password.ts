@@ -5,6 +5,7 @@ export const resetPasswordSchema = z.object({
         .min(1, "Verification code is required"),
     password: z.string()
         .min(8, "Password must be at least 8 characters")
+        .max(255, "Password must be less than 255 characters")
         .regex(/[A-Z]/, "Include at least one uppercase letter")
         .regex(/[a-z]/, "Include at least one lowercase letter")
         .regex(/[0-9]/, "Include at least one number")

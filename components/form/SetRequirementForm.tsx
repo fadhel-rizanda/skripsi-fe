@@ -68,9 +68,11 @@ export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: 
                                     <button
                                         type="button"
                                         onClick={() => remove(index)}
+                                        aria-label={`Remove requirement ${index + 1}`}
+                                        title={`Remove requirement ${index + 1}`}
                                         className="absolute top-3 right-3 sm:top-4 sm:right-4 text-red-400 hover:text-red-600 transition-colors"
                                     >
-                                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        <X className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
                                     </button>
                                 )}
 

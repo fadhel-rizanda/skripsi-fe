@@ -36,7 +36,7 @@ export default function UpdateRequirementDialog({
 
             <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto rounded-2xl p-5 sm:p-6">
                 <DialogHeader className="text-center sm:text-center border-b pb-4 mb-4 sm:mb-5">
-                    <DialogTitle className="text-center text-lg sm:text-xl font-bold">Set Requirement</DialogTitle>
+                    <DialogTitle className="text-center text-lg sm:text-xl font-bold">Update Requirement</DialogTitle>
                 </DialogHeader>
                 <div className="py-2">
                     <UpdateRequirementForm

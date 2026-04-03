@@ -34,9 +34,9 @@ export function CreateMeetNGreetDialog({
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg rounded-2xl overflow-y-auto max-h-[90vh]">
-                <DialogHeader>
-                    <DialogTitle className="text-xl font-bold">Schedule Meet & Greet</DialogTitle>
+            <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] rounded-2xl overflow-y-auto max-h-[90vh] p-5 sm:p-6">
+                <DialogHeader className="text-center sm:text-center border-b pb-4 mb-4 sm:mb-5">
+                    <DialogTitle className="text-center text-lg sm:text-xl font-bold">Schedule Meet & Greet</DialogTitle>
                 </DialogHeader>
                 <div className="py-2">
                     <MeetNGreetForm

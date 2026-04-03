@@ -134,9 +134,6 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
             } else {
                 await meetNGreetServices.createMeetNGreet(adoptionId, data)
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to schedule")
-            throw error
         } finally {
             triggerAdoptionRefresh()
         }
@@ -159,15 +156,16 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
 
     const confirmText = isUpdate ? "Send Proposal" : "Schedule Now"
 
-    const dialogErrorTitle = isUpdate
-        ? "Failed to Send Proposal"
-        : "Failed to Schedule"
-
+    const dialogErrorTitle = "Process Failed"
     const dialogErrorDescription = "Please check your input and try again."
 
-    const dialogSuccess = isHandover
+    const dialogSuccessTitle = isHandover
         ? (isUpdate ? "New Handover Schedule Proposed!" : "Handover Day Scheduled!")
         : (isUpdate ? "New Schedule Proposed!" : "Meeting Scheduled!")
+
+    const dialogSuccessDescription = isUpdate
+        ? "Your proposed schedule has been sent successfully."
+        : "The schedule has been successfully set."
 
     return (
         <>
@@ -491,8 +489,8 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                 title={dialogTitle}
                 description={dialogDescription}
                 confirmText={confirmText}
-                successTitle={dialogSuccess}
-                successDescription="The schedule has been successfully set."
+                successTitle={dialogSuccessTitle}
+                successDescription={dialogSuccessDescription}
                 errorTitle={dialogErrorTitle}
                 errorDescription={dialogErrorDescription}
             />

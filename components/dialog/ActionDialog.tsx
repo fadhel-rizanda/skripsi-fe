@@ -160,19 +160,17 @@ export function ActionDialog({
                                 </AlertDialogAction>
                             </>
                         ) : (
-                            <>
-                                <AlertDialogAction
-                                    onClick={handleFinalAction}
-                                    className={cn(
-                                        "mx-auto h-10 w-full rounded-lg text-sm font-semibold sm:h-11",
-                                        isSuccess
-                                            ? "max-w-[12rem] bg-green-500! text-white! hover:bg-green-600!"
-                                            : "max-w-[15rem] border-2! border-red-500! bg-white! text-red-500! hover:bg-gray-50!"
-                                    )}
-                                >
-                                    Continue
-                                </AlertDialogAction>
-                            </>
+                            <AlertDialogAction
+                                onClick={handleFinalAction}
+                                className={cn(
+                                    "mx-auto h-10 w-full rounded-lg text-sm font-semibold sm:h-11",
+                                    isSuccess
+                                        ? "max-w-[12rem] bg-green-500! text-white! hover:bg-green-600!"
+                                        : "max-w-[15rem] border-2! border-red-500! bg-white! text-red-500! hover:bg-gray-50!"
+                                )}
+                            >
+                                Continue
+                            </AlertDialogAction>
                         )}
                     </AlertDialogFooter>
                 )}

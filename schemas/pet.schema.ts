@@ -9,7 +9,7 @@ export const CreatePetSchema = z.object({
         .min(new Date("1900-01-01"), "Date of Birth is required")
         .max(new Date(), "Date of Birth cannot be in the future"),
     gender: z.enum(["male", "female"], { message: "Gender is required" }),
-    about: z.string().min(10, "Please provide more details (min 10 characters)"),
+    about: z.string().min(10, "Please provide more details (min 10 characters)").max(1000, "Description is too long"),
     special_needs: z.boolean().default(false),
     type_of_animal_id: z.string().uuid("Invalid animal type"),
     physique_ids: z.array(z.string().uuid()).min(1, "Select at least one physique tag"),

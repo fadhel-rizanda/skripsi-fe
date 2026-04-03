@@ -324,12 +324,12 @@ export default function CommunityDetailPage() {
           </AvatarFallback>
         </Avatar>
 
-        <h2 className="text-xl font-bold text-gray-900 mt-4">{community.name}</h2>
+        <h2 className="text-xl font-bold text-gray-900 mt-4 max-w-72 md:max-w-xl lg:max-w-3xl xl:max-w-52 wrap-break-word whitespace-pre-line">{community.name}</h2>
         <p className="text-sm text-gray-500 mt-1">
           {community.members_count.toLocaleString()} Members
         </p>
 
-        <p className="text-sm text-gray-600 mt-4 leading-relaxed">
+        <p className="text-sm text-gray-600 mt-4 leading-relaxed max-w-72 md:max-w-xl lg:max-w-3xl xl:max-w-52 wrap-break-word whitespace-pre-line">
           {community.description}
         </p>
 
@@ -430,8 +430,8 @@ export default function CommunityDetailPage() {
         </Link>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">{community.name}</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">{community.description}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 sm:max-w-8xl wrap-break-word whitespace-pre-line">{community.name}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:max-w-8xl wrap-break-word whitespace-pre-line">{community.description}</p>
           {community.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {community.tags.map((tag) => (

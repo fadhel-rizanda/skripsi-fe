@@ -90,7 +90,7 @@ export function ActionDialog({
         <AlertDialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
             <AlertDialogContent
                 size="sm"
-                className="w-[calc(100%-2rem)] max-w-[22rem] rounded-xl sm:rounded-2xl p-5 sm:p-6 gap-3 sm:gap-4"
+                className="w-[calc(100%-2rem)] max-w-88 rounded-xl sm:rounded-2xl p-5 sm:p-6 gap-3 sm:gap-4"
             >
                 <AlertDialogHeader>
                     <div className="items-center flex flex-col gap-3 sm:gap-4">
@@ -113,7 +113,7 @@ export function ActionDialog({
                         )}
 
                         {/* Title */}
-                        <AlertDialogTitle className="text-center text-base sm:text-xl font-semibold leading-snug">
+                        <AlertDialogTitle className="text-center text-base font-semibold leading-snug">
                             {isIdle && title}
                             {isLoading && "Processing..."}
                             {isSuccess && successTitle}
@@ -121,7 +121,7 @@ export function ActionDialog({
                         </AlertDialogTitle>
 
                         {/* Description */}
-                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 max-w-xs sm:max-w-sm">
+                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 max-w-xs">
                             <div>
                                 {isIdle && description}
                                 {isLoading && "Please wait while we process your request."}
@@ -139,7 +139,7 @@ export function ActionDialog({
                             "mt-1 sm:mt-2",
                             isIdle
                                 ? "flex-col gap-2 sm:flex-row sm:items-center sm:justify-center"
-                                : "!grid !grid-cols-1 place-items-center"
+                                : "grid! grid-cols-1! place-items-center"
                         )}
                     >
                         {isIdle ? (
@@ -165,8 +165,8 @@ export function ActionDialog({
                                 className={cn(
                                     "mx-auto h-10 w-full rounded-lg text-sm font-semibold sm:h-11",
                                     isSuccess
-                                        ? "max-w-[12rem] bg-green-500! text-white! hover:bg-green-600!"
-                                        : "max-w-[15rem] border-2! border-red-500! bg-white! text-red-500! hover:bg-gray-50!"
+                                        ? "max-w-48 bg-green-500! text-white! hover:bg-green-600!"
+                                        : "max-w-60 border-2! border-red-500! bg-white! text-red-500! hover:bg-gray-50!"
                                 )}
                             >
                                 Continue

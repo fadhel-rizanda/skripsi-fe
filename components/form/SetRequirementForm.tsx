@@ -151,7 +151,7 @@ export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: 
                     onClick={() => append({ name: "", notes: "", tag_id: "" })}
                     className="w-full bg-green-100 hover:bg-green-200 text-green-700 text-xs sm:text-sm font-semibold rounded-xl h-9 sm:h-10 gap-2 mt-1 sm:mt-2"
                 >
-                    <PlusCircle className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <PlusCircle className="w-4 h-4" />
                     Add More
                 </Button>
 

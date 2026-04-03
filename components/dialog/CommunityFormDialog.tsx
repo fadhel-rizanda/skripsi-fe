@@ -32,6 +32,10 @@ export default function CommunityFormDialog({
         onOpenChangeAction?.(nextOpen)
     }
 
+    const handleSuccess = () => {
+        handleOpenChange(false);
+    }
+
     const resolvedTrigger = trigger ?? (!isControlled ? (
             <Button className="bg-[#19E619] hover:bg-green-500 text-black p-5! font-bold">
                 <Icon icon="ph:users-three" /> {mode === "create" ? "Create Community" : "Edit Community"}
@@ -49,7 +53,11 @@ export default function CommunityFormDialog({
                 <DialogTitle className="sr-only">
                     {mode === "create" ? "Create Community" : "Edit Community"}
                 </DialogTitle>
-                <CommunityForm mode={mode} communityId={communityId} />
+                <CommunityForm
+                    mode={mode}
+                    communityId={communityId}
+                    onSuccess={handleSuccess}
+                />
             </DialogContent>
         </Dialog>
     )

@@ -34,7 +34,6 @@ interface Props {
 
 export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overrideSubmit}: Props) {
     const [confirmOpen, setConfirmOpen] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [calendarOpen, setCalendarOpen] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
     const [selectedTime, setSelectedTime] = useState("09:00")
@@ -126,7 +125,6 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
     const onSubmit = () => setConfirmOpen(true)
 
     const handleFinalSubmit = async () => {
-        setIsSubmitting(true)
         try {
             const data = form.getValues()
             if (overrideSubmit) {
@@ -136,12 +134,8 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
             } else {
                 await meetNGreetServices.createMeetNGreet(adoptionId, data)
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to schedule")
-            throw error
         } finally {
             triggerAdoptionRefresh()
-            setIsSubmitting(false)
         }
     }
 
@@ -156,16 +150,29 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
         ? (isUpdate ? "Propose New Handover Schedule?" : "Schedule Handover Day?")
         : (isUpdate ? "Propose New Schedule?" : "Schedule Meet & Greet?")
 
-    const dialogSuccess = isHandover
+    const dialogDescription = isUpdate
+        ? "This will send your proposed schedule to the other party for review."
+        : "This will notify the other party about the schedule."
+
+    const confirmText = isUpdate ? "Send Proposal" : "Schedule Now"
+
+    const dialogErrorTitle = "Process Failed"
+    const dialogErrorDescription = "Please check your input and try again."
+
+    const dialogSuccessTitle = isHandover
         ? (isUpdate ? "New Handover Schedule Proposed!" : "Handover Day Scheduled!")
         : (isUpdate ? "New Schedule Proposed!" : "Meeting Scheduled!")
+
+    const dialogSuccessDescription = isUpdate
+        ? "Your proposed schedule has been sent successfully."
+        : "The schedule has been successfully set."
 
     return (
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
-                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground sm:text-sm">
                         <CalendarClock className="h-4 w-4"/>
                         Schedule Time
                     </div>
@@ -173,17 +180,20 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                     <FormField
                         control={form.control}
                         name="scheduled_time"
-                        render={() => (
+                        render={({fieldState}) => (
                             <FormItem>
-                                <FormLabel>Date & Time</FormLabel>
-                                <div className="flex gap-2">
+                                <FormLabel className="text-xs sm:text-sm">
+                                    Date & Time <span className="text-red-500">*</span>
+                                </FormLabel>
+                                <div className="flex flex-col gap-2 sm:flex-row">
                                     <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant="outline"
                                                 className={cn(
-                                                    "flex-1 justify-start text-left font-normal rounded-xl",
-                                                    !selectedDate && "text-muted-foreground"
+                                                    "h-9 flex-1 justify-start rounded-xl text-left text-xs font-normal sm:h-10 sm:text-sm",
+                                                    !selectedDate && "text-muted-foreground",
+                                                    fieldState.invalid && "border-red-500 text-red-600 focus-visible:ring-red-500"
                                                 )}
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4"/>
@@ -206,7 +216,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                         type="time"
                                         value={selectedTime}
                                         onChange={(e) => handleTimeChange(e.target.value)}
-                                        className="w-32 rounded-xl"
+                                        className={cn(
+                                            "h-9 w-full rounded-xl text-xs sm:h-10 sm:w-32 sm:text-sm",
+                                            fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
+                                        )}
                                     />
                                 </div>
                                 <FormMessage/>
@@ -216,19 +229,19 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
 
                     <hr/>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                    <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground sm:text-sm">
                             <MapPin className="h-4 w-4"/>
                             Location
                         </div>
 
                         {isMeetNGreet && (
-                            <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+                            <div className="flex w-full items-center gap-1 rounded-lg bg-slate-100 p-0.5 sm:w-auto">
                                 <button
                                     type="button"
                                     onClick={() => handleToggleOnline(false)}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                        "flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-all sm:flex-none sm:gap-1.5 sm:px-3 sm:text-xs",
                                         !isOnline
                                             ? "bg-white shadow-sm text-slate-800"
                                             : "text-slate-500 hover:text-slate-700"
@@ -241,7 +254,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                     type="button"
                                     onClick={() => handleToggleOnline(true)}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all",
+                                        "flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-all sm:flex-none sm:gap-1.5 sm:px-3 sm:text-xs",
                                         isOnline
                                             ? "bg-white shadow-sm text-slate-800"
                                             : "text-slate-500 hover:text-slate-700"
@@ -254,15 +267,15 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-2.5 sm:gap-3 xl:grid-cols-2">
 
                         <FormField
                             control={form.control}
                             name="address.street"
-                            render={({field}) => (
+                            render={({field, fieldState}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>
-                                        {isOnline ? "Meeting Title / Platform" : "Street Address"}
+                                    <FormLabel className="text-xs sm:text-sm">
+                                        {isOnline ? "Meeting Title / Platform" : "Street Address"} <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <Input
@@ -271,7 +284,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                 : "Jl. Pawsitive No. 123"
                                             }
                                             {...field}
-                                            className="rounded-xl"
+                                            className={cn(
+                                                "h-9 rounded-xl text-xs sm:h-10 sm:text-sm",
+                                                fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
+                                            )}
                                         />
                                     </FormControl>
                                     <FormMessage/>
@@ -284,9 +300,11 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                 <FormField
                                     control={form.control}
                                     name="address.province_id"
-                                    render={({field}) => (
+                                    render={({field, fieldState}) => (
                                         <FormItem className="col-span-2">
-                                            <FormLabel>Province</FormLabel>
+                                            <FormLabel className="text-xs sm:text-sm">
+                                                Province <span className="text-red-500">*</span>
+                                            </FormLabel>
                                             <FormControl>
                                                 <SearchableCombobox
                                                     options={provinces}
@@ -303,6 +321,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                     placeholder="Select province..."
                                                     emptyMessage="No provinces found."
                                                     mode="single"
+                                                    className={cn(
+                                                        "h-9 w-full rounded-xl text-xs sm:h-10 sm:text-sm",
+                                                        fieldState.invalid && "border-red-500 text-red-600 focus-visible:ring-red-500"
+                                                    )}
                                                 />
                                             </FormControl>
                                             <FormMessage/>
@@ -313,9 +335,11 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                 <FormField
                                     control={form.control}
                                     name="address.regency_id"
-                                    render={({field}) => (
+                                    render={({field, fieldState}) => (
                                         <FormItem className="col-span-2">
-                                            <FormLabel>Regency / City</FormLabel>
+                                            <FormLabel className="text-xs sm:text-sm">
+                                                Regency / City <span className="text-red-500">*</span>
+                                            </FormLabel>
                                             <FormControl>
                                                 <SearchableCombobox
                                                     options={regencies}
@@ -332,6 +356,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                     emptyMessage="No regencies found."
                                                     mode="single"
                                                     disabled={!selectedProvinceId}
+                                                    className={cn(
+                                                        "h-9 w-full rounded-xl text-xs sm:h-10 sm:text-sm",
+                                                        fieldState.invalid && "border-red-500 text-red-600 focus-visible:ring-red-500"
+                                                    )}
                                                 />
                                             </FormControl>
                                             <FormMessage/>
@@ -342,9 +370,11 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                 <FormField
                                     control={form.control}
                                     name="address.district_id"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>District</FormLabel>
+                                    render={({field, fieldState}) => (
+                                        <FormItem className="col-span-2 min-w-0">
+                                            <FormLabel className="text-xs sm:text-sm">
+                                                District <span className="text-red-500">*</span>
+                                            </FormLabel>
                                             <FormControl>
                                                 <SearchableCombobox
                                                     options={districts}
@@ -358,6 +388,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                     emptyMessage="No districts found."
                                                     mode="single"
                                                     disabled={!selectedRegencyId}
+                                                    className={cn(
+                                                        "h-9 w-full rounded-xl text-xs sm:h-10 sm:text-sm",
+                                                        fieldState.invalid && "border-red-500 text-red-600 focus-visible:ring-red-500"
+                                                    )}
                                                 />
                                             </FormControl>
                                             <FormMessage/>
@@ -369,13 +403,13 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                     control={form.control}
                                     name="address.zip_code"
                                     render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>
+                                        <FormItem className="col-span-2 min-w-0">
+                                            <FormLabel className="text-xs sm:text-sm">
                                                 Zip Code{" "}
                                                 <span className="text-muted-foreground font-normal">(optional)</span>
                                             </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="17148" {...field} className="rounded-xl"/>
+                                                <Input placeholder="17148" {...field} className="h-9 rounded-xl text-xs sm:h-10 sm:text-sm"/>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
@@ -387,12 +421,14 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                         <FormField
                             control={form.control}
                             name="address.link"
-                            render={({field}) => (
+                            render={({field, fieldState}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>
-                                        {isOnline ? "Meeting Link" : "Maps Link"}{" "}
-                                        {!isOnline && (
-                                            <span className="text-muted-foreground font-normal">(optional)</span>
+                                    <FormLabel className="text-xs sm:text-sm">
+                                        {isOnline ? "Meeting Link" : "Maps Link"}
+                                        {isOnline ? (
+                                            <span className="text-red-500"> *</span>
+                                        ) : (
+                                            <span className="text-muted-foreground font-normal"> (optional)</span>
                                         )}
                                     </FormLabel>
                                     <FormControl>
@@ -402,7 +438,10 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                 : "https://maps.google.com/..."
                                             }
                                             {...field}
-                                            className="rounded-xl"
+                                            className={cn(
+                                                "h-9 rounded-xl text-xs sm:h-10 sm:text-sm",
+                                                fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
+                                            )}
                                         />
                                     </FormControl>
                                     <FormMessage/>
@@ -415,7 +454,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                             name="address.notes"
                             render={({field}) => (
                                 <FormItem className="col-span-2">
-                                    <FormLabel>
+                                    <FormLabel className="text-xs sm:text-sm">
                                         Notes{" "}
                                         <span className="text-muted-foreground font-normal">(optional)</span>
                                     </FormLabel>
@@ -425,7 +464,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                                                 ? "e.g. We'll use Google Meet, link will be sent 10 minutes before"
                                                 : "e.g. Near the orange gate, ring the bell twice"
                                             }
-                                            className="rounded-xl resize-none"
+                                            className="rounded-xl resize-none text-xs sm:text-sm"
                                             rows={3}
                                             {...field}
                                         />
@@ -436,7 +475,7 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                         />
                     </div>
 
-                    <Button type="submit" className="w-full rounded-lg bg-[#19E619] hover:bg-green-500 text-black mt-2">
+                    <Button type="submit" className="mt-2 h-9 w-full rounded-lg bg-[#19E619] text-xs font-semibold text-black hover:bg-green-500 sm:h-10 sm:text-sm">
                         {buttonText}
                     </Button>
                 </form>
@@ -448,10 +487,12 @@ export function MeetNGreetForm({adoptionId, existing, onSuccess, context, overri
                 onConfirm={handleFinalSubmit}
                 onContinue={onSuccess}
                 title={dialogTitle}
-                description="This will notify the other party about the schedule."
-                confirmText={isUpdate ? "Propose Now" : "Schedule Now"}
-                successTitle={dialogSuccess}
-                successDescription="The schedule has been successfully set."
+                description={dialogDescription}
+                confirmText={confirmText}
+                successTitle={dialogSuccessTitle}
+                successDescription={dialogSuccessDescription}
+                errorTitle={dialogErrorTitle}
+                errorDescription={dialogErrorDescription}
             />
         </>
     )

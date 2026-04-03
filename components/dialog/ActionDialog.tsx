@@ -88,7 +88,10 @@ export function ActionDialog({
 
     return (
         <AlertDialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
-            <AlertDialogContent className="w-[calc(100%-2rem)] max-w-sm sm:max-w-md rounded-xl sm:rounded-2xl p-5 sm:p-6 gap-3 sm:gap-4">
+            <AlertDialogContent
+                size="sm"
+                className="w-[calc(100%-2rem)] max-w-88 rounded-xl sm:rounded-2xl p-5 sm:p-6 gap-3 sm:gap-4"
+            >
                 <AlertDialogHeader>
                     <div className="items-center flex flex-col gap-3 sm:gap-4">
                         {/* Icon */}
@@ -110,7 +113,7 @@ export function ActionDialog({
                         )}
 
                         {/* Title */}
-                        <AlertDialogTitle className="text-center text-base sm:text-xl font-semibold leading-snug">
+                        <AlertDialogTitle className="text-center text-base font-semibold leading-snug">
                             {isIdle && title}
                             {isLoading && "Processing..."}
                             {isSuccess && successTitle}
@@ -118,7 +121,7 @@ export function ActionDialog({
                         </AlertDialogTitle>
 
                         {/* Description */}
-                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 max-w-xs sm:max-w-sm">
+                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 max-w-xs">
                             <div>
                                 {isIdle && description}
                                 {isLoading && "Please wait while we process your request."}
@@ -131,7 +134,14 @@ export function ActionDialog({
 
                 {/* Footer Buttons */}
                 {!isLoading && (
-                    <AlertDialogFooter className="flex-col sm:flex-row sm:justify-center gap-2 mt-1 sm:mt-2">
+                    <AlertDialogFooter
+                        className={cn(
+                            "mt-1 sm:mt-2",
+                            isIdle
+                                ? "flex-col gap-2 sm:flex-row sm:items-center sm:justify-center"
+                                : "grid! grid-cols-1! place-items-center"
+                        )}
+                    >
                         {isIdle ? (
                             <>
                                 <AlertDialogCancel className="w-full sm:w-32 h-10 sm:h-10 text-sm border-red-500! text-red-500! hover:bg-red-50! order-2 sm:order-1">
@@ -153,13 +163,13 @@ export function ActionDialog({
                             <AlertDialogAction
                                 onClick={handleFinalAction}
                                 className={cn(
-                                    "w-full h-10 sm:h-12 font-semibold text-sm sm:text-base rounded-lg",
+                                    "mx-auto h-10 w-full rounded-lg text-sm font-semibold sm:h-11",
                                     isSuccess
-                                        ? "bg-green-500! hover:bg-green-600! text-white!"
-                                        : "bg-white! hover:bg-gray-50! text-red-500! border-2! border-red-500!"
+                                        ? "max-w-48 bg-green-500! text-white! hover:bg-green-600!"
+                                        : "max-w-60 border-2! border-red-500! bg-white! text-red-500! hover:bg-gray-50!"
                                 )}
                             >
-                                {isSuccess ? "Continue" : "Continue"}
+                                Continue
                             </AlertDialogAction>
                         )}
                     </AlertDialogFooter>

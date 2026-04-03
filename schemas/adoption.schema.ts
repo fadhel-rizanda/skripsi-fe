@@ -4,8 +4,8 @@ import { z } from "zod";
 export const CreateRequirementSchema = z.object({
     requirements: z.array(
         z.object({
-            name: z.string().min(1, "Name is required"),
-            notes: z.string().optional().or(z.literal("")),
+            name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
+            notes: z.string().max(1000, "Notes must be under 1000 characters").optional().or(z.literal("")),
             tag_id: z.uuid(),
         })
     ).min(1, "At least one requirement is required"),
@@ -14,8 +14,8 @@ export const CreateRequirementSchema = z.object({
 export type CreateRequirementInput = z.infer<typeof CreateRequirementSchema>;
 
 export const UpdateRequirementSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    notes: z.string().optional().or(z.literal("")),
+    name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
+    notes: z.string().max(1000, "Notes must be under 1000 characters").optional().or(z.literal("")),
     tag_id: z.uuid(),
 });
 
@@ -34,7 +34,7 @@ export const CreateMeetNGreetSchema = z.object({
         return !isNaN(date.getTime()) && date > new Date();
     }),
     address: z.object({
-        street: z.string(),
+        street: z.string().max(255, "Street address must be less than 255 characters"),
         province_id: z.string().min(1, "Please select a province"),
         regency_id:  z.string().min(1, "Please select a regency / city"),
         district_id: z.string().min(1, "Please select a district"),
@@ -44,7 +44,7 @@ export const CreateMeetNGreetSchema = z.object({
             .optional()
             .or(z.literal("")),
         notes: z.string().max(1000, "Notes must be under 1000 characters").optional(),
-        link: z.url("Please enter a valid URL").optional().or(z.literal("")),
+        link: z.url("Please enter a valid URL").max(255, "Link address must be less than 255 characters").optional().or(z.literal("")),
     }).superRefine((address, ctx) => {
         const isOnline =
             address.province_id === "1" &&

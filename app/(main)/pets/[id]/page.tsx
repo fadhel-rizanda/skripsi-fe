@@ -32,7 +32,6 @@ import {
   Link2,
 } from "lucide-react";
 import { generalService } from "@/services/generalServices";
-import { adoptionServices } from "@/services/adoptionServices";
 import ChatButton from "@/components/button/ChatButton";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
 // Edit form moved to separate page; navigation used instead of dialog
@@ -41,12 +40,12 @@ export default function DetailPetPage() {
   const params = useParams();
   const router = useRouter();
   const petId = params.id as string;
+  const [adoptionId, setAdoptionId] = useState<string | null>(null);
 
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [adoptionLoading, setAdoptionLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [checkingRelatedAdoption, setCheckingRelatedAdoption] = useState(false);
   const [adoptConfirmOpen, setAdoptConfirmOpen] = useState(false);
   // dialog state removed; navigation to edit page is used instead
   const [animalTypes, setAnimalTypes] = useState<AnimalTag[]>([]);
@@ -54,31 +53,6 @@ export default function DetailPetPage() {
   const { data: session } = useSession();
   const isOwner = !!session?.user?.id && !!pet?.user_id && String(pet.user_id) === String(session.user.id);
   const currUserRole = session?.user.role.name
-
-  const findRelatedAdoption = useCallback(async () => {
-    if (!session?.user?.id) return null;
-
-    const response = await adoptionServices.getAllAdoptions({
-      page: 1,
-      per_page: 100,
-      sort_by: "created_at",
-      sort_order: "desc",
-      // Backend supports these filters even when not in the TS interface yet.
-      ...( { pet_id: petId, adopter_id: session.user.id } as Record<string, string> ),
-    });
-
-    const adoptions = Array.isArray(response.data) ? response.data : [];
-
-    // Exclude rejected adoptions — the adopter should be able to re-apply after rejection.
-    const existing = adoptions.find(
-      (adoption) =>
-        String(adoption.pet?.id) === String(petId) &&
-        String(adoption.adopter?.id) === String(session.user.id) &&
-        adoption.stage_tag?.name?.toLowerCase() !== "rejected",
-    );
-
-    return existing ?? null;
-  }, [petId, session?.user?.id]);
 
   // Handler download khusus untuk additional record
   const handleDownload = async (attachment: Attachment) => {
@@ -157,23 +131,18 @@ export default function DetailPetPage() {
     if (!pet) {
       throw new Error("Pet data is unavailable");
     }
-    if (adoptionLoading || checkingRelatedAdoption) {
+    if (adoptionLoading) {
       throw new Error("Adoption request is currently being processed");
     }
     try {
       setAdoptionLoading(true);
       const response = await petService.adoptPet(petId!);
       toast.success("Adoption request sent successfully!");
-      router.push(`/adoptions/${response.data.id}`);
+      setAdoptionId(response.data.id);
     } catch (error: unknown) {
       type ErrorWithResponse = {
         response?: { status?: number; data?: { message?: string } };
       };
-
-      const responseStatus =
-        typeof error === "object" && error && "response" in error
-          ? (error as ErrorWithResponse).response?.status
-          : undefined;
 
       const rawErrorMessage =
         (typeof error === "object" &&
@@ -181,34 +150,6 @@ export default function DetailPetPage() {
           "response" in error &&
           (error as ErrorWithResponse).response?.data?.message) ||
         "Failed to send adoption request";
-
-      const isConflictLikeError =
-        responseStatus === 409 ||
-        /already exists|duplicate|adoption application/i.test(rawErrorMessage);
-
-      if (isConflictLikeError) {
-        try {
-          setCheckingRelatedAdoption(true);
-          const existing = await findRelatedAdoption();
-          if (existing?.id) {
-            // Non-rejected active adoption already exists — redirect to it.
-            toast.info("You already have an active adoption request for this pet.");
-            router.push(`/adoptions/${existing.id}`);
-            return;
-          }
-          // Existing adoption was rejected — allow a fresh request to proceed
-          // by re-running adoptPet (backend conflict should not occur now).
-          const retryResponse = await petService.adoptPet(petId!);
-          toast.success("Adoption request sent successfully!");
-          router.push(`/adoptions/${retryResponse.data.id}`);
-          return;
-        } catch (lookupError) {
-          console.error("Failed to find related adoption after conflict:", lookupError);
-          throw lookupError;
-        } finally {
-          setCheckingRelatedAdoption(false);
-        }
-      }
 
       const errorMessage = /creating/i.test(rawErrorMessage)
         ? "Failed to create adoption application"
@@ -272,10 +213,10 @@ export default function DetailPetPage() {
       <Button
         className="bg-[#19E619] hover:bg-green-500 text-black shadow-md disabled:opacity-60 disabled:cursor-not-allowed w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
         onClick={() => isAvailable && setAdoptConfirmOpen(true)}
-        disabled={adoptionLoading || checkingRelatedAdoption || !isAvailable}
+        disabled={adoptionLoading || !isAvailable}
       >
         <Heart className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-black shrink-0" />
-        <span className="truncate">{adoptionLoading || checkingRelatedAdoption ? "Sending..." : adoptLabel}</span>
+        <span className="truncate">{adoptionLoading ? "Sending..." : adoptLabel}</span>
       </Button>
     );
   };
@@ -387,18 +328,18 @@ export default function DetailPetPage() {
               {renderStatusBadge(pet.status)}
 
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-[48px] font-bold text-slate-900 mt-6 sm:mt-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-6 max-w-4xl wrap-break-word whitespace-pre-line">
                   {pet.name}
                 </h1>
                 {pet.about && (
-                  <p className="text-slate-600 mt-4 leading-relaxed">
+                  <p className="text-slate-600 mt-4 leading-relaxed max-w-4xl wrap-break-word whitespace-pre-line">
                     {pet.about}
                   </p>
                 )}
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-base font-semibold text-slate-900">
+                <h3 className="text-base font-semibold text-slate-900 wrap-break-word whitespace-pre-line">
                   About {pet.name}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -424,7 +365,7 @@ export default function DetailPetPage() {
                     <span className="p-2 rounded-lg bg-green-100">
                       <Tag className="h-4 w-4 text-green-600" />
                     </span>
-                    <span>Breed: {pet.breed}</span>
+                    <span className="max-w-48 wrap-break-word whitespace-pre-line">Breed: {pet.breed}</span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <span className="p-2 rounded-lg bg-green-100">
@@ -598,7 +539,13 @@ export default function DetailPetPage() {
         successTitle="Request Submitted!"
         successDescription={`Your adoption request for ${pet.name} has been sent successfully. You will be redirected to the adoption progress page.`}
         onConfirm={handleAdoption}
-        onContinue={() => { /* navigation handled inside handleAdoption */ }}
+        onContinue={() => {
+          if (adoptionId) {
+            router.push(`/adoptions/${adoptionId}`);
+          } else {
+            router.push('/adoptions');
+          }
+        }}
       />
     </div>
   );

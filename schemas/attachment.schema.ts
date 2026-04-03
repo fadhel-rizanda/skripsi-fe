@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const PresignedUrlSchema = z.object({
-    filename: z.string().min(1, "Filename is required"),
+    filename: z.string().min(1, "Filename is required").max(255, "Filename must be less than 255 characters"),
     mime_type: z.string().min(1, "Mime type is required"),
     file_size: z.number()
         .int()

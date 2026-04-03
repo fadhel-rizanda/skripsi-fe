@@ -37,12 +37,11 @@ export function RejectDialog({open, onOpenChange, onConfirm, requirementName}: R
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md rounded-2xl p-6">
-                <DialogHeader className="space-y-1">
-                    <DialogTitle className="text-lg font-semibold">Reject Requirement</DialogTitle>
-                    <DialogDescription className="text-sm">
-                        Please provide a reason for rejecting <strong>{requirementName}</strong>. This will be sent to
-                        the adopter.
+            <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] rounded-2xl p-5 sm:p-6">
+                <DialogHeader className="space-y-2 text-center sm:text-center border-b pb-4 mb-4 sm:mb-5">
+                    <DialogTitle className="text-center text-lg sm:text-xl font-bold">Reject Requirement</DialogTitle>
+                    <DialogDescription className="text-center text-sm">
+                        Please provide a reason for rejecting <strong>{requirementName}</strong>. This will be sent to the adopter.
                     </DialogDescription>
                 </DialogHeader>
 

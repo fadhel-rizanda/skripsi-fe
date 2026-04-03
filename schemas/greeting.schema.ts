@@ -7,7 +7,7 @@ export const AdopterGreetingSchema = z.object({
         .min(1, "Select at least one personality trait"),
     personality: z
         .string()
-        .max(500, "Description is too long (max 500 characters)")
+        .max(1000, "Description is too long (max 1000 characters)")
         .optional(),
     pet_experience: z
         .string()

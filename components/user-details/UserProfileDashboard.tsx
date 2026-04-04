@@ -377,7 +377,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
               )}
             </div>
             <div className="flex-1 text-center sm:text-left mt-2 sm:mt-0">
-              <h1 className="text-xl sm:text-2xl font-bold">{profile.name}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold max-w-md wrap-break-word whitespace-pre-line">{profile.name}</h1>
               {isAdopter ? (
                 <p className="text-green-600 font-semibold mt-0.5 text-sm sm:text-base">Adopter</p>
               ) : (

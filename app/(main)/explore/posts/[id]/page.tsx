@@ -517,11 +517,11 @@ export default function PostDetailPage() {
 
               {/* Title & Body */}
               {post.title && (
-                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2  max-w-4xl wrap-break-word whitespace-pre-line">
+                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2 max-w-4xl break-words whitespace-pre-line">
                   {post.title}
                 </h1>
               )}
-              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base max-w-4xl wrap-break-word whitespace-pre-line">
+              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base max-w-4xl break-words whitespace-pre-line">
                 {post.content}
               </p>
 
@@ -721,7 +721,7 @@ export default function PostDetailPage() {
                             })
                           )}
                         </div>
-                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed max-w-xl md:max-w-2xl lg:max-w-4xl wrap-break-word whitespace-pre-line">
+                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed max-w-xl md:max-w-2xl lg:max-w-4xl break-words whitespace-pre-line">
                           {comment.content}
                         </p>
                         <div className="mt-2 flex items-center gap-3">

@@ -38,7 +38,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
                         <h3 className="font-bold text-gray-900 text-base sm:text-lg max-w-32 sm:max-w-48 md:max-w-52 truncate">{community.name}</h3>
                     </div>
 
-                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm mt-1.5 line-clamp-3 max-w-32 sm:max-w-48 md:max-w-52 truncate">
+                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm mt-1.5 line-clamp-3 max-w-32 sm:max-w-48 md:max-w-52">
                         {community.description}
                     </p>
 

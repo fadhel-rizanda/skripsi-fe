@@ -53,7 +53,7 @@ import { Pet } from "@/types/pet";
 import ChatButton from "@/components/button/ChatButton";
 
 export default function UserProfileDashboard({ userId }: { userId: string }) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const setAvatarUrl = useProfileStore((s) => s.setAvatarUrl);
   const [profile, setProfile] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -248,6 +248,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
       setAvatarFile(undefined);
       setAvatarPreviewUrl(null);
       setIsEditing(false);
+      await update({ ...session, user: { ...session?.user, avatar: refreshed.avatar } });
       toast.success("Profile updated successfully!");
     } catch (err) {
       console.error(err);
@@ -377,7 +378,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
               )}
             </div>
             <div className="flex-1 text-center sm:text-left mt-2 sm:mt-0">
-              <h1 className="text-xl sm:text-2xl font-bold">{profile.name}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold max-w-md break-words whitespace-pre-line">{profile.name}</h1>
               {isAdopter ? (
                 <p className="text-green-600 font-semibold mt-0.5 text-sm sm:text-base">Adopter</p>
               ) : (

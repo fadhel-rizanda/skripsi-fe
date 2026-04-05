@@ -353,7 +353,7 @@ export default function PostDetailPage() {
           size="icon"
           className="h-7 w-7 text-gray-500 hover:text-gray-900"
         >
-          <Icon icon="lucide:more-vertical" className="h-4 w-4"/>
+          <Icon icon="lucide:more-vertical" className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-full">

@@ -157,7 +157,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         {post.title && (
                             <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1 max-w-32 sm:max-w-48 md:max-w-3xl truncate">{post.title}</h3>
                         )}
-                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base line-clamp-3 max-w-32 sm:max-w-48 md:max-w-3xl">
+                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base line-clamp-3 max-w-full md:max-w-3xl truncate">
                             {post.content}
                         </p>
                     </Link>

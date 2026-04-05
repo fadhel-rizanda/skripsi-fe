@@ -15,23 +15,21 @@ export function UserCard({ user }: UserCardProps) {
     const safeAvatarUrl = isValidUrl(user.avatar ?? '') ? user.avatar : undefined;
 
     return (
-        <Card className="rounded-[16px] border-0 shadow-sm hover:shadow-md transition-shadow p-4 sm:p-6 bg-white">
+        <Card className="rounded-3xl border-0 shadow-sm hover:shadow-md transition-shadow p-4 sm:p-6 bg-white">
             <div className="flex justify-between items-start">
                 <div className="flex gap-5">
                     <Avatar className="h-12 w-12 sm:h-16 sm:w-16 border border-gray-100 rounded-full bg-[#E6E0D2]">
                         {safeAvatarUrl ? (
                             <AvatarImage src={safeAvatarUrl} alt={user.name} className="object-cover" />
                         ) : (
-                            <AvatarFallback className="bg-[#E6E0D2] text-[10px] leading-[12px] font-medium text-gray-500 flex flex-col items-center justify-center rounded-full w-full h-full border border-transparent">
-                                <span>PAWS</span>
-                                <span>&</span>
-                                <span>whiskers</span>
+                            <AvatarFallback className="rounded-full bg-pink-100 text-amber-700 font-semibold text-base sm:text-xl">
+                                {user.name.substring(0,1).toUpperCase()}
                             </AvatarFallback>
                         )}
                     </Avatar>
 
                     <div className="flex flex-col pt-1">
-                        <h3 className="font-bold text-gray-900 text-base sm:text-[18px] leading-tight mb-1">{user.name}</h3>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-[18px] leading-tight mb-1 max-w-32 sm:max-w-48 md:max-w-52 truncate">{user.name}</h3>
                         <p className="text-gray-500 text-xs sm:text-[15px] mb-2 sm:mb-3">Joined in {joinedYear}</p>
                         <Link
                             href={`/profile/${user.id}`}

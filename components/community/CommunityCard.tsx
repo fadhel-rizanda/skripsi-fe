@@ -35,10 +35,10 @@ export function CommunityCard({ community }: CommunityCardProps) {
                 {/* Content Section */}
                 <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">{community.name}</h3>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg max-w-full truncate">{community.name}</h3>
                     </div>
 
-                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm mt-1.5 line-clamp-3">
+                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm mt-1.5 line-clamp-3 max-w-full md:max-w-full truncate">
                         {community.description}
                     </p>
 

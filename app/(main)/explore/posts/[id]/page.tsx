@@ -42,6 +42,7 @@ import PostFormDialog from "@/components/dialog/PostFormDialog";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
+import {toast} from "sonner";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -200,8 +201,8 @@ export default function PostDetailPage() {
             : prev,
         );
       }
-    } catch (error) {
-      console.error("Failed to like post:", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to like post");
     }
   };
 
@@ -353,7 +354,7 @@ export default function PostDetailPage() {
           size="icon"
           className="h-7 w-7 text-gray-500 hover:text-gray-900"
         >
-          <Icon icon="lucide:ellipsis-vertical" className="h-4 w-4" />
+          <Icon icon="lucide:more-vertical" className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-full">
@@ -450,7 +451,7 @@ export default function PostDetailPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/profile/${post.created_by.id}`}
-                    className="font-bold text-gray-900 text-sm md:text-base hover:underline"
+                    className="font-bold text-gray-900 text-sm md:text-base hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
                   >
                     {post.created_by.name}
                   </Link>
@@ -517,11 +518,11 @@ export default function PostDetailPage() {
 
               {/* Title & Body */}
               {post.title && (
-                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2">
+                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2 max-w-4xl break-words whitespace-pre-line">
                   {post.title}
                 </h1>
               )}
-              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base whitespace-pre-line">
+              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base max-w-4xl break-words whitespace-pre-line">
                 {post.content}
               </p>
 
@@ -704,7 +705,7 @@ export default function PostDetailPage() {
                           <div className="flex items-center gap-2">
                             <Link
                               href={`/profile/${comment.created_by.id}`}
-                              className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline"
+                              className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
                             >
                               {comment.created_by.name}
                             </Link>
@@ -721,7 +722,7 @@ export default function PostDetailPage() {
                             })
                           )}
                         </div>
-                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
+                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed max-w-xl md:max-w-2xl lg:max-w-4xl break-words whitespace-pre-line">
                           {comment.content}
                         </p>
                         <div className="mt-2 flex items-center gap-3">

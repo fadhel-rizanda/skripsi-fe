@@ -94,7 +94,7 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                         <div className="flex items-center gap-2">
                             <Link
                                 href={authorProfileHref}
-                                className="font-bold text-gray-900 text-xs sm:text-sm md:text-base hover:underline"
+                                className="font-bold text-gray-900 text-xs sm:text-sm md:text-base hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
                             >
                                 {post.created_by.name}
                             </Link>
@@ -155,9 +155,9 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     <Link href={`/explore/posts/${post.id}`}
                         className="block hover:opacity-80 transition-opacity mb-3">
                         {post.title && (
-                            <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1">{post.title}</h3>
+                            <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1 max-w-32 sm:max-w-48 md:max-w-3xl truncate">{post.title}</h3>
                         )}
-                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base line-clamp-3">
+                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base line-clamp-3 max-w-full md:max-w-3xl truncate">
                             {post.content}
                         </p>
                     </Link>

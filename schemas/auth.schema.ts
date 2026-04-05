@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const registerSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(255, "Name must be less than 255 characters"),
+    name: z.string().min(4, "Name must be at least 4 characters").max(255, "Name must be less than 255 characters"),
     email: z.string().email("Invalid email address").max(255, "Email must be less than 255 characters"),
     role: z.enum(["adopter", "provider"]),
     password: z.string()

@@ -2,7 +2,7 @@ import {z} from "zod";
 import {AddressSchema} from "@/schemas/address.schema";
 
 export const CreatePetSchema = z.object({
-    name: z.string().min(1, "Name is required").max(50, "Name is too long"),
+    name: z.string().min(4, "Name must be at least 4 characters").max(50, "Name is too long"),
     breed: z.string().min(1, "Breed is required").max(255),
     size: z.enum(["small", "medium", "large", "extra large"], { message: "Size is required" }),
     date_of_birth: z.date()

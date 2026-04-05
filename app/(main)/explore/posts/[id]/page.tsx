@@ -42,6 +42,7 @@ import PostFormDialog from "@/components/dialog/PostFormDialog";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
+import {toast} from "sonner";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -200,8 +201,8 @@ export default function PostDetailPage() {
             : prev,
         );
       }
-    } catch (error) {
-      console.error("Failed to like post:", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to like post");
     }
   };
 

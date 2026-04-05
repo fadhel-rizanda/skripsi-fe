@@ -6,7 +6,7 @@ const optionalString = (max: number) =>
 
 // Shared base fields for both adopter & provider
 const baseProfileFields = {
-    name: z.string().min(1, "Name is required").max(255, "Name is too long"),
+    name: z.string().min(4, "Name must be at least 4 characters").max(255, "Name is too long"),
     phone: optionalString(20),
     about_me: optionalString(1000),
     address: AddressSchema,

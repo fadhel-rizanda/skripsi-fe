@@ -2,7 +2,7 @@ import {z} from "zod";
 import {AddressSchema} from "@/schemas/address.schema";
 
 export const CreateCommunitySchema = z.object({
-    name: z.string().min(1, "Name is required").max(50, "Name is too long"),
+    name: z.string().min(4, "Name must be at least 4 characters").max(50, "Name is too long"),
     website: z.url("Invalid URL").max(255, "Website URL must be less than 255 characters").optional().or(z.literal("")),
     attachment_id: z.uuid().optional(),
     description: z.string().min(10, "Please provide more details (min 10 characters)").max(1000, "Description is too long"),

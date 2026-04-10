@@ -35,7 +35,7 @@ export default function GoogleSignInButton() {
       <Button
         type="button"
         variant="outline"
-        className="w-full flex items-center gap-3"
+        className="w-full flex items-center gap-3 h-9 sm:h-10 text-xs sm:text-sm"
         onClick={() => setOpen(true)}
       >
         <Icon icon="logos:google-icon" width={20} height={20} />

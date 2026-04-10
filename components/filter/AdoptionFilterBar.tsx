@@ -67,7 +67,7 @@ export function AdoptionFilterBar({onFilterChange}: AdoptionFilterBarProps) {
                     className="w-full md:flex-1"
                 />
 
-                <div className="flex flex-row flex-nowrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 w-full md:flex-1 overflow-x-hidden">
+                <div className="flex flex-row flex-wrap md:flex-nowrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 w-full md:flex-1">
                 <SearchableCombobox
                     options={stageTags}
                     selectedValues={[stageTagId].filter(Boolean)}

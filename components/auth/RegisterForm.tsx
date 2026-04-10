@@ -98,7 +98,7 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10">
+    <div className="w-full max-w-full sm:max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-5 sm:p-8 md:p-10">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
 
@@ -115,11 +115,12 @@ export function RegisterForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel className="text-xs sm:text-sm">Full Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="ex: budy"
                     disabled={isPending}
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -134,12 +135,13 @@ export function RegisterForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email address</FormLabel>
+                <FormLabel className="text-xs sm:text-sm">Email Address</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="you@example.com"
                     disabled={isPending}
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -155,14 +157,14 @@ export function RegisterForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">Password</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="Create a password"
                         disabled={isPending}
-                        className="pr-10"
+                        className="pr-10 h-9 sm:h-10 text-xs sm:text-sm"
                         {...field}
                       />
                     </FormControl>
@@ -196,14 +198,14 @@ export function RegisterForm() {
               name="password_confirmation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">Confirm Password</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="Confirm your password"
                         disabled={isPending}
-                        className="pr-10"
+                        className="pr-10 h-9 sm:h-10 text-xs sm:text-sm"
                         {...field}
                       />
                     </FormControl>
@@ -240,9 +242,9 @@ export function RegisterForm() {
           </label>
 
           {/* Submit */}
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full mt-4 h-9 sm:h-10 text-xs sm:text-sm" disabled={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Continue
+            {isPending ? "Creating account..." : "Continue"}
           </Button>
 
 

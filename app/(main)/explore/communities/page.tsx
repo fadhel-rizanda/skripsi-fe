@@ -112,14 +112,14 @@ export default function AllCommunityPage() {
                 />
                 <div className="flex justify-end pt-4 sm:pt-6 w-full max-w-3xl">
                     <CommunityFormDialog mode="create" trigger={
-                        <button
+                        <Button
                             type="button"
                             className="inline-flex items-center justify-center gap-2 bg-[#19E619] hover:bg-green-500 text-black font-bold text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-md transition-colors"
                             onClick={handleCreateCommunity}
                         >
                             <Icon icon="ph:users-three-bold" className="w-4 h-4 sm:w-5 sm:h-5" />
                             Create Community
-                        </button>
+                        </Button>
                     } />
                 </div>
             </CommunityPageLayout>

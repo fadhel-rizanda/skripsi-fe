@@ -156,14 +156,14 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                 {/* ── Attachment Image ── full width, tidak terpotong */}
                 {safeAttachmentUrl && (
                     <div
-                        className="w-full rounded-xl border border-gray-100 bg-gray-50 cursor-zoom-in overflow-hidden flex items-center justify-center"
+                        className="relative w-full h-72 rounded-xl border border-gray-100 bg-gray-50 cursor-zoom-in overflow-hidden"
                         onClick={() => setLightboxOpen(true)}
                     >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                             src={safeAttachmentUrl}
                             alt={post.title || "Post attachment"}
-                            className="w-full max-h-72 object-contain hover:scale-[1.02] transition-transform duration-300"
+                            fill
+                            className="object-contain hover:scale-[1.02] transition-transform duration-300"
                         />
                     </div>
                 )}

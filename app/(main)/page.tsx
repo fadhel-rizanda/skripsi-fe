@@ -37,7 +37,7 @@ export default function Home() {
                             className="text-base md:text-lg bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-full px-6 py-6 md:px-8 md:py-7 shadow-lg shadow-orange-500/30 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                             asChild
                         >
-                            <Link href="/adoptions">Browse Pets Now</Link>
+                            <Link href="/pets">Browse Pets Now</Link>
                         </Button>
                         
                         {/* Floating Glassmorphism Badge */}

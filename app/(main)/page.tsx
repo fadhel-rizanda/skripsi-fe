@@ -24,18 +24,47 @@ export default function Home() {
 
                     {/* Content */}
                     <div className="relative h-full flex flex-col items-center justify-center text-center px-6">
-                        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 max-w-4xl">
-                            Find Your Perfect Companion
+                        <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 max-w-4xl tracking-tight leading-tight">
+                            Find Your Perfect <br className="hidden md:block" />
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 to-yellow-300">
+                                Companion
+                            </span>
                         </h1>
-                        <p className="text-lg md:text-xl text-white mb-8 max-w-3xl">
+                        <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl font-light">
                             Browse thousands of adoptable pets and start your journey to a lifetime of love and companionship.
                         </p>
                         <Button
-                            className="text-lg bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-full px-8 py-6"
+                            className="text-lg bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-full px-8 py-7 shadow-lg shadow-orange-500/30 hover:scale-105 transition-all duration-300"
                             asChild
                         >
-                            <Link href="/pets">Browse Pets Now</Link>
+                            <Link href="/adoptions">Browse Pets Now</Link>
                         </Button>
+                        
+                        {/* Floating Glassmorphism Badge */}
+                        <div className="absolute bottom-24 right-8 md:right-16 hidden lg:flex items-center gap-4 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-2xl animate-bounce" style={{animationDuration: '3s'}}>
+                            <div className="bg-green-500 text-white p-3 rounded-full shadow-lg shadow-green-500/30">
+                                <Icon icon="mdi:paw" className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-white font-bold text-xl">1,000+</p>
+                                <p className="text-white/80 text-sm">Happy Adoptions</p>
+                            </div>
+                        </div>
+                        
+                        {/* Secondary Floating Element */}
+                        <div className="absolute top-32 left-8 md:left-16 hidden lg:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-full shadow-xl animate-pulse" style={{animationDuration: '4s'}}>
+                            <div className="bg-red-400 text-white p-2.5 rounded-full">
+                                <Icon icon="mdi:heart" className="w-5 h-5" />
+                            </div>
+                            <p className="text-white font-semibold pr-3">Save a life today</p>
+                        </div>
+                    </div>
+
+                    {/* SVG Wave Divider at the bottom of hero */}
+                    <div className="absolute bottom-0 w-full overflow-hidden leading-[0]">
+                        <svg className="relative block w-[calc(100%+1.3px)] h-[50px] sm:h-[80px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.5,192.71,105.7,238.16,95.53,281.32,73.49,321.39,56.44Z" className="fill-gray-50"></path>
+                        </svg>
                     </div>
                 </section>
 
@@ -53,8 +82,8 @@ export default function Home() {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Card 1: Save a Life */}
-                            <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
+                            <div className="bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 duration-300 border border-gray-100 group">
+                                <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 mb-6 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" style={{ borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%' }}>
                                     <Icon icon="mdi:heart" className="w-10 h-10 text-green-600" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Save a Life</h3>
@@ -64,9 +93,9 @@ export default function Home() {
                             </div>
 
                             {/* Card 2: Find Your Best Friend */}
-                            <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-                                    <Icon icon="mdi:paw" className="w-10 h-10 text-green-600" />
+                            <div className="bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 duration-300 border border-gray-100 group">
+                                <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-100 mb-6 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" style={{ borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%' }}>
+                                    <Icon icon="mdi:paw" className="w-10 h-10 text-orange-600" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Find Your Best Friend</h3>
                                 <p className="text-gray-600 leading-relaxed">
@@ -75,9 +104,9 @@ export default function Home() {
                             </div>
 
                             {/* Card 3: Join a Community */}
-                            <div className="bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
-                                <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-                                    <Icon icon="mdi:account-group" className="w-10 h-10 text-green-600" />
+                            <div className="bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 duration-300 border border-gray-100 group">
+                                <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 mb-6 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" style={{ borderRadius: '50% 50% 70% 30% / 30% 70% 30% 70%' }}>
+                                    <Icon icon="mdi:account-group" className="w-10 h-10 text-blue-600" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Join a Community</h3>
                                 <p className="text-gray-600 leading-relaxed">
@@ -106,34 +135,34 @@ export default function Home() {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                                 {/* Step 1: Browse Pets */}
-                                <div className="text-center">
-                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 rounded-full mb-6 z-10">
-                                        <span className="text-5xl font-bold text-white">1</span>
+                                <div className="text-center group cursor-default">
+                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 group-hover:bg-orange-500 rounded-full mb-6 z-10 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-orange-500/40">
+                                        <span className="text-5xl font-bold text-white transition-transform duration-500 group-hover:-rotate-12">1</span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Browse Pets</h3>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-green-700 transition-colors duration-300">Browse Pets</h3>
+                                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
                                         Explore our extensive listings of adorable, adoptable pets from shelters and rescues near you.
                                     </p>
                                 </div>
 
                                 {/* Step 2: Apply to Adopt */}
-                                <div className="text-center">
-                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 rounded-full mb-6 z-10">
-                                        <span className="text-5xl font-bold text-white">2</span>
+                                <div className="text-center group cursor-default">
+                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 group-hover:bg-orange-500 rounded-full mb-6 z-10 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-orange-500/40 delay-100">
+                                        <span className="text-5xl font-bold text-white transition-transform duration-500 group-hover:-rotate-12">2</span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Apply to Adopt</h3>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-green-700 transition-colors duration-300 delay-100">Apply to Adopt</h3>
+                                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors duration-300 delay-100">
                                         Found a potential match? Fill out a simple online application to start the adoption process.
                                     </p>
                                 </div>
 
                                 {/* Step 3: Welcome Home */}
-                                <div className="text-center">
-                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 rounded-full mb-6 z-10">
-                                        <span className="text-5xl font-bold text-white">3</span>
+                                <div className="text-center group cursor-default">
+                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-green-600 group-hover:bg-orange-500 rounded-full mb-6 z-10 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-orange-500/40 delay-200">
+                                        <span className="text-5xl font-bold text-white transition-transform duration-500 group-hover:-rotate-12">3</span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Welcome Home</h3>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-green-700 transition-colors duration-300 delay-200">Welcome Home</h3>
+                                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors duration-300 delay-200">
                                         After approval, arrange a meet-and-greet and prepare to welcome your new furry family member home!
                                     </p>
                                 </div>

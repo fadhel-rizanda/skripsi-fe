@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import Link from "next/link"
+import Image from "next/image"
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -76,6 +77,19 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-xl p-6 sm:p-8">
+      {/* App Logo & Name */}
+      <div className="flex flex-col items-center gap-2 mb-6">
+        <Image
+          src="/assets/pawsitive-logo.png"
+          alt="Pawsitive Logo"
+          width={64}
+          height={64}
+          className="rounded-xl"
+        />
+        <span className="text-2xl font-extrabold tracking-tight text-gray-900">Pawsitive</span>
+        <span className="text-xs text-gray-500">Find your perfect companion</span>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 

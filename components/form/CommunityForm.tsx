@@ -652,6 +652,12 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                             />
 
                                             {renderAddressSection()}
+
+                                            {!isEditMode && (
+                                                <p className="text-xs text-muted-foreground mt-4 pt-2 border-t border-slate-100 flex items-center gap-1">
+                                                    <span>ℹ️</span> You will automatically become the admin of this community.
+                                                </p>
+                                            )}
                                         </div>
 
                                         {/* RIGHT COLUMN */}
@@ -680,15 +686,15 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                 </div>
                                                 <p className="text-xs text-[#757575] mt-3">A great profile picture helps your community stand out.</p>
 
-                                                {existingProfilePicture && !profileFile && (
+                                                {existingProfilePicture && !profileFile ? (
                                                     <div className="mt-3 flex items-center justify-between p-3 border border-[#E0E0E0] rounded-md text-sm">
                                                         <span
                                                             onClick={() => handleOpenExistingFile(existingProfilePicture as Attachment)}
                                                             className="truncate flex-1 cursor-pointer hover:underline flex items-center gap-2"
                                                         >
-                                                            {downloadingId === existingProfilePicture.id && (
-                                                                <Icon icon="ph:spinner" className="w-4 h-4 animate-spin shrink-0"/>
-                                                            )}
+                                                            {downloadingId === existingProfilePicture.id ? (
+                                                                <Icon icon="ph:spinner" className="w-4 h-4 animate-spin shrink-0" />
+                                                            ) : null}
                                                             {existingProfilePicture.filename}
                                                         </span>
                                                         <Icon
@@ -697,7 +703,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                             onClick={removeExistingProfilePicture}
                                                         />
                                                     </div>
-                                                )}
+                                                ) : null}
 
                                                 {profileFile && (
                                                     <div className="mt-3 flex items-center justify-between p-3 border border-green-300 bg-green-50 rounded-md text-sm">
@@ -716,6 +722,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                 )}
                                             </div>
 
+                                            {isEditMode && (
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Community Admin</h3>
                                                 <FormField
@@ -760,6 +767,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                     )}
                                                 />
                                             </div>
+                                            )}
                                         </div>
                                     </div>
 

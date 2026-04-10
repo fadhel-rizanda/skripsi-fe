@@ -116,6 +116,7 @@ export default function FindPetPage() {
           onPageChange={setPage}
           onDataPerPageChange={setPerPage}
           dataPerPageOptions={[15, 25, 50, 100]}
+          itemLabel="Pets"
         />
       </footer>
     </main>

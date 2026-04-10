@@ -157,6 +157,7 @@ export default function AllUserPage() {
                         onPageChange={handlePageChange}
                         onDataPerPageChange={handlePerPageChange}
                         dataPerPageOptions={[10, 15, 25, 50]}
+                        itemLabel="Users"
                     />
                 </div>
             )}

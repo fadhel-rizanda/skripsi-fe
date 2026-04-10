@@ -235,6 +235,7 @@ export default function AdminUsersPage() {
                             setPerPage(newPerPage);
                             setCurrentPage(1);
                         }}
+                        itemLabel="Users"
                     />
                 </div>
             </div>

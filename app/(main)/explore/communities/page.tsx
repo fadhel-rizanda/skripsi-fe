@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
 import { CommunityFilters } from "@/components/filter/AllCommunityFilters";
-
+import { Button } from "@/components/ui/button";
 import { CommunityPageLayout } from "../layout";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { communityService } from "@/services/communityService";

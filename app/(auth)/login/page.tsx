@@ -12,7 +12,7 @@ export default function LoginPage() {
       }}
     >
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white text-center drop-shadow-md">
-        Welcome back, animal lover!
+        Welcome to Pawsitive
       </h1>
 
       <LoginForm />

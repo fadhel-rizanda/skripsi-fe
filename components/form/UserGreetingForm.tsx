@@ -79,6 +79,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
   const form = useForm<GreetingFormInput>({
     resolver: zodResolver(isAdopter ? AdopterGreetingSchema : ProviderGreetingSchema),
     defaultValues: {
+      about_me: "",
       ...(isAdopter
         ? {
             personality_tags: [],
@@ -173,7 +174,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="personality_tags"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Personality Traits *</FormLabel>
                       <FormControl>
@@ -191,6 +192,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                           hasMore={hasMorePersonality}
                           placeholder="Search personality traits..."
                           emptyMessage="No personality traits found."
+                          className={fieldState.invalid ? "border-red-500" : ""}
                           mode="multiple"
                         />
                       </FormControl>
@@ -215,13 +217,13 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="personality"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Additional Description</FormLabel>
+                      <FormLabel>Additional Description *</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Tell us more about your personality..."
-                          className="resize-none"
+                          className={fieldState.invalid ? "resize-none border-red-500" : "resize-none"}
                           rows={3}
                           {...field}
                         />
@@ -230,6 +232,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                     </FormItem>
                   )}
                 />
+
               </CardContent>
             </Card>
 
@@ -247,7 +250,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="pet_experience_tags"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Experience Tags *</FormLabel>
                       <FormControl>
@@ -265,6 +268,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                           hasMore={hasMorePetExperience}
                           placeholder="Search experience tags..."
                           emptyMessage="No experience tags found."
+                          className={fieldState.invalid ? "border-red-500" : ""}
                           mode="multiple"
                         />
                       </FormControl>
@@ -289,13 +293,13 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="pet_experience"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Experience Description</FormLabel>
+                      <FormLabel>Experience Description *</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Describe your experience with pets..."
-                          className="resize-none"
+                          className={fieldState.invalid ? "resize-none border-red-500" : "resize-none"}
                           rows={3}
                           {...field}
                         />
@@ -322,12 +326,13 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="address.street"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Street</FormLabel>
+                      <FormLabel>Street *</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g. Jl. Pawsitive No. 123"
+                          className={fieldState.invalid ? "border-red-500" : ""}
                           {...field}
                         />
                       </FormControl>
@@ -339,9 +344,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="address.province_id"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Province</FormLabel>
+                      <FormLabel>Province *</FormLabel>
                       <FormControl>
                         <SearchableCombobox
                           options={provinces}
@@ -357,6 +362,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                           hasMore={hasMoreProvinces}
                           placeholder="Select province..."
                           emptyMessage="No provinces found."
+                          className={fieldState.invalid ? "border-red-500" : ""}
                           mode="single"
                         />
                       </FormControl>
@@ -368,9 +374,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormField
                   control={form.control}
                   name="address.regency_id"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Regency / City</FormLabel>
+                      <FormLabel>Regency / City *</FormLabel>
                       <FormControl>
                         <SearchableCombobox
                           options={regencies}
@@ -389,6 +395,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                               : "Select a province first"
                           }
                           emptyMessage="No regencies found."
+                          className={fieldState.invalid ? "border-red-500" : ""}
                           mode="single"
                           disabled={!selectedProvinceId}
                         />
@@ -402,9 +409,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                   <FormField
                     control={form.control}
                     name="address.district_id"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel>District</FormLabel>
+                        <FormLabel>District *</FormLabel>
                         <FormControl>
                           <SearchableCombobox
                             options={districts}
@@ -420,6 +427,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                                 : "Select a regency first"
                             }
                             emptyMessage="No districts found."
+                            className={fieldState.invalid ? "border-red-500" : ""}
                             mode="single"
                             disabled={!selectedRegencyId}
                           />
@@ -448,6 +456,25 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="about_me"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>About *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Share a short intro about yourself..."
+                          className={fieldState.invalid ? "resize-none border-red-500" : "resize-none"}
+                          rows={4}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -506,6 +533,7 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <FormItem className="flex items-start space-x-3 space-y-0 rounded-2xl border bg-white p-5 shadow-md">
                   <FormControl>
                     <Checkbox
+                      className="mt-0.5 transition-colors hover:border-green-500"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />

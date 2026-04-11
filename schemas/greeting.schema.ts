@@ -1,19 +1,27 @@
 import { z } from "zod";
 import {AddressSchema} from "@/schemas/address.schema";
 
+const requiredString = (max: number) =>
+    z
+        .string()
+        .trim()
+        .min(30, "About must be at least 30 characters")
+        .max(max, `Description is too long (max ${max} characters)`);
+
+const requiredMin20String = (fieldName: string, max: number) =>
+    z
+        .string()
+        .trim()
+        .min(20, `${fieldName} must be at least 20 characters`)
+        .max(max, `Description is too long (max ${max} characters)`);
+
 export const AdopterGreetingSchema = z.object({
+    about_me: requiredString(1000),
     personality_tags: z
         .array(z.string().uuid("Invalid personality tag"))
         .min(1, "Select at least one personality trait"),
-    personality: z
-        .string()
-        .max(1000, "Description is too long (max 1000 characters)")
-        .optional(),
-    pet_experience: z
-        .string()
-        .max(1000, "Description is too long (max 1000 characters)")
-        .optional()
-        .or(z.literal("")),
+    personality: requiredMin20String("Personality description", 1000),
+    pet_experience: requiredMin20String("Pet experience description", 1000),
     pet_experience_tags: z
         .array(z.string().uuid("Invalid experience tag"))
         .min(1, "Select at least one experience tag"),
@@ -22,6 +30,7 @@ export const AdopterGreetingSchema = z.object({
 });
 
 export const ProviderGreetingSchema = z.object({
+    about_me: requiredString(1000),
     address: AddressSchema,
 });
 

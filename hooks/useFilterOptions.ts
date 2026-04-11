@@ -131,9 +131,9 @@ export function useUsersOptions(fetchOnMount: boolean = true) {
                     ;
 
                 if (page === 1) {
-                    setOptions(data.map(user => ({ ...user, name: user.email })));
+                    setOptions(data.map(user => ({ ...user, name: user.name ?? user.id })));
                 } else {
-                    setOptions(prev => [...prev, ...data.map(user => ({ ...user, name: user.email }))]);
+                    setOptions(prev => [...prev, ...data.map(user => ({ ...user, name: user.name ?? user.id }))]);
                 }
 
                 setHasMore(data.length > 0);

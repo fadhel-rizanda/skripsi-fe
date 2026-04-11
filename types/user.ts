@@ -12,6 +12,7 @@ export interface UserProfile {
     updated_at: string
     phone: string
     is_active: boolean
+    is_active_member?: boolean
     email_verified_at?: Date
     address_street?: string
 }

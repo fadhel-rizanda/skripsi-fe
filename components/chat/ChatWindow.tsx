@@ -28,6 +28,9 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
+import {ActionDialog} from "@/components/dialog/ActionDialog";
+import {useChatStore} from "@/store/useChatStore";
+import ChatFormDialog from "@/components/dialog/ChatFormDialog";
 
 function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -51,6 +54,8 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
+    const isChatDisabled = chat.active_member_count < 2;
+    const { triggerRefresh } = useChatStore();
 
     const loadMore = useCallback(async () => {
         if (!hasMore || loadingMore || !cursor) return;
@@ -190,6 +195,12 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         } finally {
             setIsDeleting(false);
         }
+    };
+
+    const [deleteChatDialogOpen, setDeleteChatDialogOpen] = useState(false);
+
+    const handleDeleteChat = async () => {
+        await chatService.deleteChat(chat.id);
     };
 
     const handleDownload = async (attachment: Attachment) => {
@@ -345,104 +356,138 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#F9FAFB]">
-            {/* Header */}
-            <div
-                className="bg-white border-b px-3 md:px-6 py-3 md:py-4 font-semibold flex items-center gap-2 md:gap-3 text-gray-800">
-                {onBack && (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="md:hidden"
-                        onClick={onBack}
-                        aria-label="Back to chat list"
-                    >
-                        <Icon icon="ph:arrow-left" className="w-5 h-5"/>
-                    </Button>
-                )}
-                <Avatar className="h-8 w-8">
-                    {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
-                        <Image
-                            src={chat.users[0].avatar}
-                            alt={chat.name || "Chat Avatar"}
-                            fill
-                            priority
-                            className="rounded-full object-cover"
-                            sizes="32px"
-                            onError={(e) => {
-                                console.error("Image failed to load:", chat.users[0].avatar);
-                            }}
+        <>
+            <div className="flex flex-col h-full bg-[#F9FAFB]">
+                {/* Header */}
+                <div className="bg-white border-b px-3 md:px-6 py-3 md:py-4 font-semibold flex items-center justify-between text-gray-800">
+                    {/* LEFT SECTION */}
+                    <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                        {onBack && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="md:hidden"
+                                onClick={onBack}
+                                aria-label="Back to chat list"
+                            >
+                                <Icon icon="ph:arrow-left" className="w-5 h-5"/>
+                            </Button>
+                        )}
+                        <ChatFormDialog
+                            mode="detail"
+                            chat={chat}
+                            disabled={isChatDisabled}
+                            onSuccessAction={triggerRefresh}
+                            trigger={
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-80 transition-opacity"
+                                >
+                                    <Avatar className="h-8 w-8">
+                                        {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
+                                            <Image
+                                                src={chat.users[0].avatar}
+                                                alt={chat.name || "Chat Avatar"}
+                                                fill
+                                                priority
+                                                className="rounded-full object-cover"
+                                                sizes="32px"
+                                            />
+                                        ) : (
+                                            <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
+                                                {chat?.name?.[0] || "U"}
+                                            </AvatarFallback>
+                                        )}
+                                    </Avatar>
+                                    <span className="truncate">{chat.name}</span>
+                                </button>
+                            }
                         />
-                    ) : (
-                        <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
-                            {chat?.name?.[0] || "U"}
-                        </AvatarFallback>
-                    )}
-                </Avatar>
-                <span className="truncate">{chat.name}</span>
-            </div>
-
-            {/* Messages */}
-            <div ref={scrollRef} className="flex-1 p-3 md:p-6 space-y-4 overflow-y-auto bg-[#E9F2E9]">
-                {loadingMore && (
-                    <div className="text-center text-xs text-gray-400 py-2">
-                        Loading more messages...
                     </div>
-                )}
-                {messages.map((m) => {
-                    const isMe = m.sender.id === currentUser?.id;
 
-                    return (
-                        <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                            {/* Header: Name & Time */}
-                            <div
-                                className={`flex items-center gap-2 mb-1 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                    {/* RIGHT SECTION */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-gray-500 hover:text-gray-900"
+                            >
+                                <Icon icon="lucide:ellipsis-vertical" className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem
+                                className="text-red-600 focus:text-red-600"
+                                onClick={() => setDeleteChatDialogOpen(true)}
+                            >
+                                <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
+                                Delete chat
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                {/* Messages */}
+                <div ref={scrollRef} className="flex-1 p-3 md:p-6 space-y-4 overflow-y-auto bg-[#E9F2E9]">
+                    {loadingMore && (
+                        <div className="text-center text-xs text-gray-400 py-2">
+                            Loading more messages...
+                        </div>
+                    )}
+                    {messages.map((m) => {
+                        const isMe = m.sender.id === currentUser?.id;
+
+                        return (
+                            <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                                {/* Header: Name & Time */}
+                                <div
+                                    className={`flex items-center gap-2 mb-1 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
                                 <span className="text-xs font-semibold text-gray-700">
                                     {isMe ? "You" : m.sender.name}
                                 </span>
-                                <span className="text-[11px] text-gray-500">
+                                    <span className="text-[11px] text-gray-500">
                                     {new Date(m.created_at).toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
                                 </span>
-                                {m.created_at !== m.updated_at && (
-                                    <span
-                                        className="text-[11px] text-gray-400 italic">(edited)</span>
-                                )}
-                            </div>
-
-                            {/* Message Body */}
-                            <div className={`flex gap-2 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"} group`}>
-                                {/* Avatar */}
-                                <Avatar className="h-9 w-9 shrink-0 shadow-sm border border-gray-200">
-                                    {m.sender.avatar && isValidUrl(m.sender.avatar) ? (
-                                        <Image
-                                            src={m.sender.avatar}
-                                            alt={m.sender.name}
-                                            fill
-                                            priority
-                                            className="rounded-full object-cover"
-                                            sizes="36px"
-                                            onError={(e) => {
-                                                console.error("Image failed to load:", m.sender.avatar);
-                                            }}
-                                        />
-                                    ) : (
-                                        <AvatarFallback
-                                            className="bg-emerald-100 text-emerald-700 font-semibold text-sm">
-                                            {m.sender.name[0].toUpperCase()}
-                                        </AvatarFallback>
+                                    {m.created_at !== m.updated_at && (
+                                        <span
+                                            className="text-[11px] text-gray-400 italic">(edited)</span>
                                     )}
-                                </Avatar>
+                                </div>
 
-                                {/* Message Bubble */}
-                                <div className="flex flex-col gap-1 min-w-0 flex-1">
-                                    {editingMessageId === m.id ? (
-                                        // Edit Mode
-                                        <div
-                                            className="px-4 py-2.5 rounded-2xl shadow-sm border-2 border-emerald-500 bg-white">
+                                {/* Message Body */}
+                                <div className={`flex gap-2 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"} group`}>
+                                    {/* Avatar */}
+                                    <Avatar className="h-9 w-9 shrink-0 shadow-sm border border-gray-200">
+                                        {m.sender.avatar && isValidUrl(m.sender.avatar) ? (
+                                            <Image
+                                                src={m.sender.avatar}
+                                                alt={m.sender.name}
+                                                fill
+                                                priority
+                                                className="rounded-full object-cover"
+                                                sizes="36px"
+                                                onError={(e) => {
+                                                    console.error("Image failed to load:", m.sender.avatar);
+                                                }}
+                                            />
+                                        ) : (
+                                            <AvatarFallback
+                                                className="bg-emerald-100 text-emerald-700 font-semibold text-sm">
+                                                {m.sender.name[0].toUpperCase()}
+                                            </AvatarFallback>
+                                        )}
+                                    </Avatar>
+
+                                    {/* Message Bubble */}
+                                    <div className="flex flex-col gap-1 min-w-0 flex-1">
+                                        {editingMessageId === m.id ? (
+                                            // Edit Mode
+                                            <div
+                                                className="px-4 py-2.5 rounded-2xl shadow-sm border-2 border-emerald-500 bg-white">
                                             <textarea
                                                 value={editContent}
                                                 onChange={(e) => setEditContent(e.target.value)}
@@ -460,120 +505,191 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                     }
                                                 }}
                                             />
-                                            <div className="flex gap-2 mt-2 justify-end">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => {
-                                                        setEditingMessageId(null);
-                                                        setEditContent("");
-                                                    }}
-                                                    className="h-7 px-3 text-xs"
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => handleEditMessage(m.id)}
-                                                    disabled={!editContent.trim()}
-                                                    className="h-7 px-3 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
-                                                >
-                                                    Save
-                                                </Button>
+                                                <div className="flex gap-2 mt-2 justify-end">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => {
+                                                            setEditingMessageId(null);
+                                                            setEditContent("");
+                                                        }}
+                                                        className="h-7 px-3 text-xs"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => handleEditMessage(m.id)}
+                                                        disabled={!editContent.trim()}
+                                                        className="h-7 px-3 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        // View Mode
-                                        <div className={clsx(
-                                            "px-4 py-2.5 rounded-2xl shadow-sm",
-                                            isMe
-                                                ? "bg-emerald-500 text-white rounded-tr-sm"
-                                                : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
-                                        )}>
-                                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                                                {m.content}
-                                            </p>
+                                        ) : (
+                                            // View Mode
+                                            <div className={clsx(
+                                                "px-4 py-2.5 rounded-2xl shadow-sm",
+                                                isMe
+                                                    ? "bg-emerald-500 text-white rounded-tr-sm"
+                                                    : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
+                                            )}>
+                                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                                    {m.content}
+                                                </p>
 
-                                            {/* Attachment */}
-                                            {m.attachment && (
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className={clsx(
-                                                        "mt-2 w-full justify-start gap-2 h-auto py-2 px-3 rounded-lg transition-colors",
-                                                        isMe
-                                                            ? "bg-white/10 hover:bg-white/20 text-white border border-white/20"
-                                                            : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
-                                                    )}
-                                                    onClick={() => handleDownload(m.attachment as Attachment)}
-                                                >
-                                                    <Icon icon="ph:file-arrow-down" className="w-4 h-4 shrink-0"/>
-                                                    <span className="truncate text-xs font-medium">
+                                                {/* Attachment */}
+                                                {m.attachment && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className={clsx(
+                                                            "mt-2 w-full justify-start gap-2 h-auto py-2 px-3 rounded-lg transition-colors",
+                                                            isMe
+                                                                ? "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                                                                : "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
+                                                        )}
+                                                        onClick={() => handleDownload(m.attachment as Attachment)}
+                                                    >
+                                                        <Icon icon="ph:file-arrow-down" className="w-4 h-4 shrink-0"/>
+                                                        <span className="truncate text-xs font-medium">
                                                         {m.attachment.filename}
                                                     </span>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Dropdown Menu */}
+                                    {editingMessageId !== m.id && isMe && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
+                                                >
+                                                    <Icon icon="lucide:more-vertical" className="h-4 w-4"/>
                                                 </Button>
-                                            )}
-                                        </div>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-40">
+                                                {
+                                                    m.content?.trim() &&
+                                                    <DropdownMenuItem
+                                                        onClick={() => navigator.clipboard.writeText(m.content)}>
+                                                        <Icon icon="lucide:copy" className="h-4 w-4 mr-2"/>
+                                                        Copy text
+                                                    </DropdownMenuItem>
+                                                }
+                                                {
+                                                    m.content?.trim() &&
+                                                    canModifyMessage(m.created_at, 10) &&
+                                                    <DropdownMenuItem
+                                                        onClick={() => {
+                                                            setEditingMessageId(m.id);
+                                                            setEditContent(m.content);
+                                                        }}
+                                                    ><Icon icon="lucide:pencil" className="h-4 w-4 mr-2"/>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                }
+                                                {
+                                                    canModifyMessage(m.created_at, 15) &&
+                                                    <DropdownMenuItem
+                                                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                                        onClick={() => {
+                                                            setMessageToDelete(m.id);
+                                                            setDeleteDialogOpen(true);
+                                                        }}
+                                                    >
+                                                        <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2"/>
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                }
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     )}
                                 </div>
-
-                                {/* Dropdown Menu */}
-                                {editingMessageId !== m.id && isMe && (
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
-                                            >
-                                                <Icon icon="lucide:more-vertical" className="h-4 w-4"/>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-40">
-                                            {
-                                                m.content?.trim() &&
-                                                <DropdownMenuItem
-                                                    onClick={() => navigator.clipboard.writeText(m.content)}>
-                                                    <Icon icon="lucide:copy" className="h-4 w-4 mr-2"/>
-                                                    Copy text
-                                                </DropdownMenuItem>
-                                            }
-                                            {
-                                                m.content?.trim() &&
-                                                canModifyMessage(m.created_at, 10) &&
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setEditingMessageId(m.id);
-                                                        setEditContent(m.content);
-                                                    }}
-                                                ><Icon icon="lucide:pencil" className="h-4 w-4 mr-2"/>
-                                                    Edit
-                                                </DropdownMenuItem>
-                                            }
-                                            {
-                                                canModifyMessage(m.created_at, 15) &&
-                                               <DropdownMenuItem
-                                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                                                    onClick={() => {
-                                                        setMessageToDelete(m.id);
-                                                        setDeleteDialogOpen(true);
-                                                    }}
-                                                >
-                                                    <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2"/>
-                                                    Delete
-                                               </DropdownMenuItem>
-                                            }
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                )}
                             </div>
+                        );
+                    })}
+                </div>
+
+                {/* Input Area */}
+                <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2">
+                    {isChatDisabled && (
+                        <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
+                            <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
+                            <span>This conversation is no longer active because the other member has left. Please start a new conversation.</span>
                         </div>
-                    );
-                })}
+                    )}
+                    {file && (
+                        <div
+                            className="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg flex items-center justify-between border border-emerald-200">
+                            <div className="flex items-center gap-2">
+                                <Icon icon="ph:paperclip" className="w-4 h-4"/>
+                                <span className="font-medium truncate">{file.name}</span>
+                            </div>
+                            <button
+                                onClick={() => setFile(null)}
+                                className="text-red-500 hover:text-red-700 font-bold ml-2"
+                            >
+                                <Icon icon="ph:x" className="w-4 h-4"/>
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="Type a message..."
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage();
+                                }
+                            }}
+                            disabled={isSending || isChatDisabled}
+                            className="rounded-full focus-visible:ring-emerald-500 focus-visible:ring-2"
+                        />
+
+                        <Input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            className="hidden"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className={clsx(
+                                "rounded-full shrink-0",
+                                file && "border-emerald-500 text-emerald-500 bg-emerald-50"
+                            )}
+                            disabled={isSending || isChatDisabled}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Icon icon="ph:paperclip" className="w-5 h-5"/>
+                        </Button>
+
+                        <Button
+                            onClick={handleSendMessage}
+                            disabled={isSending || (!content.trim() && !file)}
+                            className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
+                        >
+                            <span className="hidden sm:inline">Send</span>
+                            <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4"/>
+                        </Button>
+                    </div>
+                </div>
             </div>
 
-            {/* Delete Confirmation Dialog */}
+            {/* Delete Message Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
@@ -604,69 +720,22 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 </DialogContent>
             </Dialog>
 
-            {/* Input Area */}
-            <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2">
-                {file && (
-                    <div
-                        className="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg flex items-center justify-between border border-emerald-200">
-                        <div className="flex items-center gap-2">
-                            <Icon icon="ph:paperclip" className="w-4 h-4"/>
-                            <span className="font-medium truncate">{file.name}</span>
-                        </div>
-                        <button
-                            onClick={() => setFile(null)}
-                            className="text-red-500 hover:text-red-700 font-bold ml-2"
-                        >
-                            <Icon icon="ph:x" className="w-4 h-4"/>
-                        </button>
-                    </div>
-                )}
-
-                <div className="flex gap-2">
-                    <Input
-                        placeholder="Type a message..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSendMessage();
-                            }
-                        }}
-                        disabled={isSending}
-                        className="rounded-full focus-visible:ring-emerald-500 focus-visible:ring-2"
-                    />
-
-                    <Input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={(e) => setFile(e.target.files?.[0] || null)}
-                        className="hidden"
-                    />
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className={clsx(
-                            "rounded-full shrink-0",
-                            file && "border-emerald-500 text-emerald-500 bg-emerald-50"
-                        )}
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <Icon icon="ph:paperclip" className="w-5 h-5"/>
-                    </Button>
-
-                    <Button
-                        onClick={handleSendMessage}
-                        disabled={isSending || (!content.trim() && !file)}
-                        className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
-                    >
-                        <span className="hidden sm:inline">Send</span>
-                        <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4"/>
-                    </Button>
-                </div>
-            </div>
-        </div>
+            {/* Delete Chat Confirmation Dialog */}
+            <ActionDialog
+                open={deleteChatDialogOpen}
+                onOpenChange={setDeleteChatDialogOpen}
+                onConfirm={handleDeleteChat}
+                onContinue={() => {
+                    onBack?.()
+                    triggerRefresh();
+                }}
+                confirmVariant="destructive"
+                title="Delete Chat"
+                description="Are you sure you want to delete this chat? This action cannot be undone."
+                successTitle="Chat Deleted"
+                successDescription="The conversation has been deleted successfully."
+            />
+        </>
     );
 }
 

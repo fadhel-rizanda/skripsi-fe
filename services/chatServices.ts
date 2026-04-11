@@ -37,5 +37,15 @@ export const chatService = {
     deleteMessage: async (chatId: string, messageId: string) => {
         const response = await api.delete(`/api/v1/chats/${chatId}/messages/${messageId}`);
         return response.data;
-    }
+    },
+
+    deleteChat: async (chatId: string) => {
+        const response = await api.delete(`/api/v1/chats/${chatId}`);
+        return response.data;
+    },
+
+    updateChat: async (chatId: string, data: CreateChatInput) => {
+        const response = await api.put(`/api/v1/chats/${chatId}`, data);
+        return response.data;
+    },
 };

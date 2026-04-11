@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { chatService } from "@/services/chatServices";
+import {toast} from "sonner";
 
 interface ChatButtonProps {
     targetUserId: string;
@@ -33,11 +34,13 @@ export default function ChatButton({
             const chat = await chatService.createChat({
                 type: "private",
                 user_ids: [targetUserId],
+                is_create_manually: false,
             });
 
             router.push(`/chat/${chat.data.id}`);
-        } catch (error) {
-            console.error("Failed to create chat:", error);
+        } catch (error: any) {
+            console.log("Failed to create chat:", error);
+            toast.error(error?.response?.data?.message || "Failed to create chat. Please try again later")
         } finally {
             setIsLoading(false);
         }

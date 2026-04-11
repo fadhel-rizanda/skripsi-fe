@@ -158,6 +158,42 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
   return (
     <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Card className="rounded-2xl shadow-md text-left">
+                  <CardHeader>
+                      <CardTitle className="text-xl font-semibold">
+                          About
+                      </CardTitle>
+                      <CardDescription>
+                          {isAdopter
+                              ? "Introduce yourself to potential providers so they can feel confident in your adoption request."
+                              : "Introduce your shelter or yourself to build trust with potential adopters."}
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      <FormField
+                          control={form.control}
+                          name="about_me"
+                          render={({ field, fieldState }) => (
+                              <FormItem>
+                                  <FormLabel>Bio / Description *</FormLabel>
+                                  <FormControl>
+                                      <Textarea
+                                          placeholder={isAdopter
+                                              ? "Share a short intro about yourself..."
+                                              : "Tell us about your shelter, mission, or yourself..."
+                                          }
+                                          className={fieldState.invalid ? "resize-none border-red-500" : "resize-none"}
+                                          rows={4}
+                                          {...field}
+                                      />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                  </CardContent>
+              </Card>
+
             {/* Personality & Pet Experience Cards - Adopter only */}
             {isAdopter && (
             <>
@@ -166,9 +202,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <CardTitle className="text-xl font-semibold">
                   Personality
                 </CardTitle>
-                <CardDescription>
-                  Help us understand your personality to find a suitable pet.
-                </CardDescription>
+                  <CardDescription>
+                      Share your traits to help providers understand the home environment and lifestyle you offer.
+                  </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -242,9 +278,9 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                 <CardTitle className="text-xl font-semibold">
                   Pet Experience
                 </CardTitle>
-                <CardDescription>
-                  Let us know how experienced you are with pets.
-                </CardDescription>
+                  <CardDescription>
+                      Sharing your history with pets helps providers ensure their animals are going to an experienced home.
+                  </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -317,10 +353,11 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
             <Card className="rounded-2xl shadow-md text-left">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">Address</CardTitle>
-                <CardDescription>
-                  Let us know where you live, so we can personalize the search
-                  for you.
-                </CardDescription>
+                  <CardDescription>
+                      {isAdopter
+                          ? "Provide your location to help coordinate meetups and understand the distance for pet transport."
+                          : "List your shelter's address so adopters can easily locate where to meet and pick up their new friends."}
+                  </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -456,25 +493,6 @@ export default function UserGreetingForm({ role }: UserGreetingFormProps) {
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="about_me"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>About *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Share a short intro about yourself..."
-                          className={fieldState.invalid ? "resize-none border-red-500" : "resize-none"}
-                          rows={4}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}

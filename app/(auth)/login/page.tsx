@@ -14,6 +14,9 @@ export default function LoginPage() {
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white text-center drop-shadow-md">
         Welcome to Pawsitive
       </h1>
+      <p className="text-sm sm:text-base text-white text-center drop-shadow-sm">
+        Ready to find your new best friend?
+      </p>
 
       <LoginForm />
 

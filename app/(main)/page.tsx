@@ -5,8 +5,11 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import {useSession} from "next-auth/react";
 
 export default function Home() {
+    const { data: session } = useSession()
+
     return (
         <>
             <main className="min-h-screen">
@@ -348,29 +351,33 @@ export default function Home() {
                         </div>
 
                         {/* CTA */}
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{ duration: 0.5 }}
-                            className="text-center bg-white rounded-2xl p-6 md:p-8 shadow-lg">
-                            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Ready to Join the Conversation?</h3>
-                            <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8">Create your free account to access our community forums and connect with fellow pet lovers.</p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                <Button
-                                    className="w-full sm:w-auto text-base md:text-lg bg-green-700 hover:bg-green-800 text-white font-bold rounded-full px-6 py-5 md:px-8 md:py-6"
-                                    asChild
-                                >
-                                    <Link href="/register">Sign Up Now</Link>
-                                </Button>
-                                <Button
-                                    className="w-full sm:w-auto text-base md:text-lg bg-transparent hover:bg-gray-50 text-gray-900 font-bold rounded-full px-6 py-5 md:px-8 md:py-6 border-2 border-gray-300"
-                                    asChild
-                                >
-                                    <Link href="/login">Already a Member?</Link>
-                                </Button>
-                            </div>
-                        </motion.div>
+                        {
+                            !session?.accessToken && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true, margin: "-100px" }}
+                                    transition={{ duration: 0.5 }}
+                                    className="text-center bg-white rounded-2xl p-6 md:p-8 shadow-lg">
+                                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Ready to Join the Conversation?</h3>
+                                    <p className="text-sm md:text-base text-gray-600 mb-6 md:mb-8">Create your free account to access our community forums and connect with fellow pet lovers.</p>
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                        <Button
+                                            className="w-full sm:w-auto text-base md:text-lg bg-green-700 hover:bg-green-800 text-white font-bold rounded-full px-6 py-5 md:px-8 md:py-6"
+                                            asChild
+                                        >
+                                            <Link href="/register">Sign Up Now</Link>
+                                        </Button>
+                                        <Button
+                                            className="w-full sm:w-auto text-base md:text-lg bg-transparent hover:bg-gray-50 text-gray-900 font-bold rounded-full px-6 py-5 md:px-8 md:py-6 border-2 border-gray-300"
+                                            asChild
+                                        >
+                                            <Link href="/login">Already a Member?</Link>
+                                        </Button>
+                                    </div>
+                                </motion.div>
+                            )
+                        }
                     </div>
                 </section>
 

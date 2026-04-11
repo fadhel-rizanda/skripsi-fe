@@ -115,7 +115,7 @@ export function RegisterForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs sm:text-sm">Full Name</FormLabel>
+                <FormLabel className="text-xs sm:text-sm">Username</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="ex: budy"

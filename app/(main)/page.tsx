@@ -67,8 +67,7 @@ export default function Home() {
                                 <Icon icon="mdi:paw" className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
                             <div className="text-left">
-                                <p className="text-white font-bold text-lg md:text-xl">1,000+</p>
-                                <p className="text-white/90 text-xs md:text-sm">Happy Adoptions</p>
+                                <p className="text-white font-bold text-sm md:text-base">Every match starts a new story.</p>
                             </div>
                         </motion.div>
 
@@ -81,7 +80,7 @@ export default function Home() {
                             <div className="bg-red-400 text-white p-2 rounded-full">
                                 <Icon icon="mdi:heart" className="w-4 h-4 md:w-5 md:h-5" />
                             </div>
-                            <p className="text-white font-semibold pr-2 md:pr-3 text-xs md:text-base">Save a life today</p>
+                            <p className="text-white font-semibold pr-2 md:pr-3 text-xs md:text-base">Tiny Tails, Big Futures</p>
                         </motion.div>
                     </div>
 

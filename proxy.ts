@@ -39,6 +39,10 @@ export async function proxy(request: NextRequest) {
     if (token) {
         const user = token.user
 
+        if (pathname === '/login' || pathname === '/register') {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+
         if (!user?.email_verified_at && !pathname.startsWith("/verify-otp")) {
             return NextResponse.redirect(new URL("/verify-otp", request.url))
         }

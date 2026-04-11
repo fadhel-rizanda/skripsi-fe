@@ -78,7 +78,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
         placeholder="Search by name..."
         className="w-full md:w-[220px] lg:w-[260px] shrink-0"
       />
-      <div className="flex flex-row flex-nowrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 w-full md:flex-1 overflow-x-hidden">
+      <div className="flex flex-row flex-wrap md:flex-nowrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 w-full md:flex-1">
         <SearchableCombobox
             options={animalTypes}
             selectedValues={[typeOfAnimalId].filter(Boolean)}

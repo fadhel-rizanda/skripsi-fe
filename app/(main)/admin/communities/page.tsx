@@ -272,6 +272,7 @@ export default function AdminCommunitiesPage() {
                             setPerPage(newPerPage);
                             setCurrentPage(1);
                         }}
+                        itemLabel="Communities"
                     />
                 </div>
             </div>

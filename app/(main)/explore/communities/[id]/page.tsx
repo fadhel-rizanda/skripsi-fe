@@ -541,6 +541,7 @@ export default function CommunityDetailPage() {
                   onPageChange={handlePageChange}
                   onDataPerPageChange={handlePerPageChange}
                   dataPerPageOptions={[10, 15, 25]}
+                  itemLabel="Posts"
                 />
               </div>
             )}

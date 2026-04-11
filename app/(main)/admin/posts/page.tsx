@@ -290,6 +290,7 @@ export default function AdminPostsPage() {
                             setPerPage(newPerPage);
                             setCurrentPage(1);
                         }}
+                        itemLabel="Posts"
                     />
                 </div>
             </div>

@@ -42,7 +42,7 @@ import PostFormDialog from "@/components/dialog/PostFormDialog";
 import CommentFormDialog from "@/components/dialog/CommentFormDialog";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
 import { ActionDialog } from "@/components/dialog/ActionDialog";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -424,185 +424,172 @@ export default function PostDetailPage() {
         </Link>
 
         {/* Post Card */}
-        <Card className="rounded-2xl border-0 shadow-sm overflow-hidden p-3 sm:p-6 flex flex-col gap-2 sm:gap-3">
-          <div className="flex gap-2 sm:gap-4">
-            {/* Avatar */}
-            <div className="shrink-0">
-              <Link
-                href={`/profile/${post.created_by.id}`}
-                className="group block rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
-              >
-                <Avatar className="h-10 w-10 border border-gray-300 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
-                  <AvatarImage
-                    src={post.created_by.avatar || undefined}
-                    alt={post.created_by.name}
-                  />
-                  <AvatarFallback>
-                    {post.created_by.name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            </div>
+        <Card className="rounded-2xl border-0 shadow-sm overflow-hidden px-4 pt-4 pb-3 flex flex-col gap-3">
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/profile/${post.created_by.id}`}
-                    className="font-bold text-gray-900 text-sm md:text-base hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
-                  >
-                    {post.created_by.name}
-                  </Link>
-                  <span className="text-xs sm:text-sm text-gray-500">
-                    • {formatRelativeTime(post.created_at)}
-                  </span>
-                </div>
-                {post.created_by.id === session?.user?.id && (
-                  <>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-gray-500 hover:text-gray-900"
-                        >
-                          <Icon
-                            icon="lucide:ellipsis-vertical"
-                            className="h-4 w-4"
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                          <Icon icon="lucide:pencil" className="h-4 w-4 mr-2" />
-                          Update post
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => setDeleteOpen(true)}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <Icon
-                            icon="lucide:trash-2"
-                            className="h-4 w-4 mr-2 text-black"
-                          />
-                          Delete post
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <PostFormDialog
-                      mode="edit"
-                      postId={post.id}
-                      open={editOpen}
-                      onOpenChangeAction={setEditOpen}
-                      onSuccessAction={() => {
-                        setEditOpen(false);
-                        fetchPost();
-                      }}
-                    />
-                    <ActionDialog
-                      open={deleteOpen}
-                      onOpenChange={setDeleteOpen}
-                      onConfirm={handleDelete}
-                      onContinue={() => router.push("/explore/posts")}
-                      confirmVariant="destructive"
-                      title="Delete Post"
-                      description="Are you sure you want to delete this post? This action cannot be undone."
-                      successTitle="Post Deleted"
-                      successDescription="Your post has been deleted successfully."
-                    />
-                  </>
-                )}
+          <div className="flex items-center justify-between gap-2">
+            <Link
+              href={`/profile/${post.created_by.id}`}
+              className="flex items-center gap-2.5 group min-w-0"
+            >
+              <Avatar className="h-9 w-9 shrink-0 border border-gray-200 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                <AvatarImage
+                  src={post.created_by.avatar || undefined}
+                  alt={post.created_by.name}
+                />
+                <AvatarFallback>
+                  {post.created_by.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate group-hover:underline">
+                  {post.created_by.name}
+                </span>
+                <span className="text-[11px] text-gray-400 leading-tight">
+                  {formatRelativeTime(post.created_at)}
+                </span>
               </div>
+            </Link>
 
-              {/* Title & Body */}
-              {post.title && (
-                <h1 className="font-bold text-gray-900 text-base sm:text-xl md:text-2xl mb-2 max-w-4xl break-words whitespace-pre-line">
-                  {post.title}
-                </h1>
-              )}
-              <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base max-w-4xl break-words whitespace-pre-line">
-                {post.content}
-              </p>
-
-              {/* Attachment Image */}
-              {safeAttachmentUrl && (
-                <div className="pr-12 mt-3 sm:mt-4">
-                  <div className="relative w-full h-48 sm:h-64 md:h-80 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
-                    <Image
-                      src={safeAttachmentUrl}
-                      alt={post.title || "Post attachment"}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4 flex-wrap">
-                  {post.tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="bg-green-50 text-green-700 hover:bg-green-100 text-xs sm:text-sm font-normal"
-                      style={{
-                        backgroundColor: tag.color_code
-                          ? `${tag.color_code}20`
-                          : undefined,
-                      }}
+            {post.created_by.id === session?.user?.id && (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-gray-700 shrink-0"
                     >
-                      #{tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
+                      <Icon icon="lucide:ellipsis-vertical" className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                      <Icon icon="lucide:pencil" className="h-4 w-4 mr-2" />
+                      Update post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setDeleteOpen(true)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
+                      Delete post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <PostFormDialog
+                  mode="edit"
+                  postId={post.id}
+                  open={editOpen}
+                  onOpenChangeAction={setEditOpen}
+                  onSuccessAction={() => {
+                    setEditOpen(false);
+                    fetchPost();
+                  }}
+                />
+                <ActionDialog
+                  open={deleteOpen}
+                  onOpenChange={setDeleteOpen}
+                  onConfirm={handleDelete}
+                  onContinue={() => router.push("/explore/posts")}
+                  confirmVariant="destructive"
+                  title="Delete Post"
+                  description="Are you sure you want to delete this post? This action cannot be undone."
+                  successTitle="Post Deleted"
+                  successDescription="Your post has been deleted successfully."
+                />
+              </>
+            )}
           </div>
 
-          {/* Actions Row */}
-          <div className="flex flex-wrap justify-between items-center pt-2 sm:pt-3 border-t border-gray-300">
-            <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`text-gray-900 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 ${post.is_liked ? "text-green-600 bg-green-50" : ""
-                  }`}
-                onClick={handleLike}
-              >
-                <Icon icon="lucide:thumbs-up" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-xs sm:text-sm md:text-base font-medium">
-                  {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-900 gap-1.5 px-2 cursor-pointer hover:text-green-600 hover:bg-green-50"
-                onClick={handleAddCommentClick}
-              >
-                <Icon icon="lucide:message-square" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-xs sm:text-sm md:text-base font-medium">
-                  {commentsPagination.total} Comments
-                </span>
-              </Button>
-              {session?.user?.id ? (
-                <ReportDialog referenceType="post" referenceId={post.id} />
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 gap-1.5 px-2"
-                  onClick={handleReportClick}
-                >
-                  <Icon icon="lucide:flag" className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-xs sm:text-sm md:text-base font-medium">Report</span>
-                </Button>
-              )}
+          {/* ── Post Body ── full width */}
+          <div>
+            {post.title && (
+              <h1 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1 break-words whitespace-pre-line leading-snug">
+                {post.title}
+              </h1>
+            )}
+            <p className="text-gray-600 leading-relaxed text-xs sm:text-sm break-words whitespace-pre-line">
+              {post.content}
+            </p>
+          </div>
+
+          {/* ── Attachment Image ── full width */}
+          {safeAttachmentUrl && (
+            <div className="relative w-full h-72 rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+              <Image
+                src={safeAttachmentUrl}
+                alt={post.title || "Post attachment"}
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
+          )}
+
+          {/* ── Tags ── */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {post.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="bg-green-50 text-green-700 hover:bg-green-100 text-xs font-normal"
+                  style={{
+                    backgroundColor: tag.color_code
+                      ? `${tag.color_code}20`
+                      : undefined,
+                  }}
+                >
+                  #{tag.name}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* ── Action Bar ── */}
+          <div className="grid grid-cols-3 pt-1 border-t border-gray-100">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-green-600 hover:bg-green-50 ${post.is_liked ? "text-green-600 bg-green-50" : ""}`}
+              onClick={handleLike}
+            >
+              <Icon icon="lucide:thumbs-up" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span className="text-xs font-medium truncate">
+                {post.likes_count} {post.likes_count === 1 ? "Like" : "Likes"}
+              </span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              onClick={handleAddCommentClick}
+            >
+              <Icon icon="lucide:message-square" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span className="text-xs font-medium truncate">{commentsPagination.total} Comments</span>
+            </Button>
+            {session?.user?.id ? (
+              <ReportDialog
+                referenceType="post"
+                referenceId={post.id}
+                trigger={
+                  <Button variant="ghost" size="sm" className="w-full justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-red-600 hover:bg-red-50">
+                    <Icon icon="lucide:flag" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="text-xs font-medium">Report</span>
+                  </Button>
+                }
+              />
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-red-600 hover:bg-red-50"
+                onClick={handleReportClick}
+              >
+                <Icon icon="lucide:flag" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="text-xs font-medium">Report</span>
+              </Button>
+            )}
           </div>
         </Card>
 

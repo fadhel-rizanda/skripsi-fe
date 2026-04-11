@@ -11,6 +11,7 @@ import {UserProfile} from "@/types";
 import ChatButton from "@/components/button/ChatButton";
 import {useRouter} from "next/navigation";
 import {parseColorCode} from "@/lib/color";
+import type { KeyboardEvent } from "react";
 
 interface AdoptionCardProps {
     adoption: Adoption;
@@ -56,7 +57,7 @@ function UserRow({
                 <p className="text-[10px] sm:text-xs text-gray-500 truncate">{email}</p>
             </div>
             {canChat && chatTargetId && (
-                <div className="shrink-0">
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <ChatButton targetUserId={chatTargetId} label="Chat"/>
                 </div>
             )}
@@ -70,15 +71,30 @@ export function AdoptionCard({adoption, currentUser}: AdoptionCardProps) {
     const canChatProvider = role === "adopter" || role === "admin";
     const canChatAdopter = role === "provider" || role === "admin";
     const router = useRouter();
+    const adoptionHref = `/adoptions/${adoption.id}`;
+
+    const handleCardNavigate = () => {
+        router.push(adoptionHref);
+    };
+
+    const handleCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardNavigate();
+        }
+    };
 
     return (
         <Card
-            className="group max-w-4xl w-full hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0">
+            role="link"
+            tabIndex={0}
+            aria-label={`Open adoption details for ${adoption.pet.name}`}
+            onClick={handleCardNavigate}
+            onKeyDown={handleCardKeyDown}
+            className="group max-w-4xl w-full hover:shadow-md hover:border-green-400 hover:-translate-y-0.5 cursor-pointer transition-all duration-300 border-gray-200 overflow-hidden p-0 gap-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+        >
             {/* Header */}
-            <div
-                onClick={() => router.push(`/adoptions/${adoption.id}`)}
-                className="bg-linear-to-br p-4 sm:p-6 border-b border-gray-100 cursor-pointer"
-            >
+            <div className="bg-linear-to-br p-4 sm:p-6 border-b border-gray-100 group-hover:bg-green-50/50 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-3">
                         <div className="p-2 bg-white rounded-xl shadow-sm shrink-0">

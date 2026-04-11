@@ -75,7 +75,8 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-xl p-6 sm:p-8">
+
+    <div className="w-full max-w-sm sm:max-w-md mx-auto bg-white/95 backdrop-blur rounded-2xl shadow-xl p-5 sm:p-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
@@ -92,12 +93,13 @@ export default function LoginForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-xs sm:text-sm">Email</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="you@example.com"
                     disabled={loading}
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -112,14 +114,14 @@ export default function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="text-xs sm:text-sm">Password</FormLabel>
                 <div className="relative">
                   <FormControl>
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       disabled={loading}
-                      className="pr-10"
+                      className="pr-10 h-9 sm:h-10 text-xs sm:text-sm"
                       {...field}
                     />
                   </FormControl>
@@ -164,7 +166,7 @@ export default function LoginForm() {
           </div>
 
           {/* Submit */}
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-9 sm:h-10 text-xs sm:text-sm" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {loading ? "Signing in..." : "Continue"}
           </Button>

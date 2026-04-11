@@ -517,6 +517,13 @@ export default function DetailPetPage() {
                 ) : (
                   <ChatButton
                     targetUserId={pet.user_id ?? ""}
+                    petShare={{
+                      petId: pet.id,
+                      petName: pet.name,
+                      petImageUrl:
+                        pet.profile_pictures?.[selectedImageIndex]?.public_url ??
+                        pet.profile_picture,
+                    }}
                     label="Chat with Provider"
                     className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all truncate"
                     iconClassName="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-slate-800 shrink-0"

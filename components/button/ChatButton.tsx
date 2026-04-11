@@ -6,6 +6,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { chatService } from "@/services/chatServices";
 import {toast} from "sonner";
+import { AxiosError } from "axios";
+import { ErrorResponse } from "@/types";
+
+interface ChatButtonPetShare {
+    petId: string;
+    petName: string;
+    petImageUrl?: string;
+}
 
 interface ChatButtonProps {
     targetUserId: string;
@@ -13,6 +21,7 @@ interface ChatButtonProps {
     className?: string;
     size?: "default" | "sm" | "lg" | "icon";
     iconClassName?: string;
+    petShare?: ChatButtonPetShare;
 }
 
 export default function ChatButton({
@@ -21,6 +30,7 @@ export default function ChatButton({
     className,
     size,
     iconClassName,
+    petShare,
 }: ChatButtonProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +47,36 @@ export default function ChatButton({
                 is_create_manually: false,
             });
 
-            router.push(`/chat/${chat.data.id}`);
+            const params = new URLSearchParams();
+
+            if (petShare?.petId && petShare?.petName) {
+                const shareToken = typeof crypto !== "undefined" && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+                params.set("pet_id", petShare.petId);
+                params.set("pet_name", petShare.petName);
+                params.set("pet_share_token", shareToken);
+
+                if (petShare.petImageUrl) {
+                    params.set("pet_image", petShare.petImageUrl);
+                }
+            }
+
+            const destination = params.toString()
+                ? `/chat/${chat.data.id}?${params.toString()}`
+                : `/chat/${chat.data.id}`;
+
+            router.push(destination);
         } catch (error: any) {
             console.log("Failed to create chat:", error);
-            toast.error(error?.response?.data?.message || "Failed to create chat. Please try again later")
+            if (error instanceof AxiosError) {
+                const errData = error.response?.data as ErrorResponse;
+                toast.error(errData?.message || "Failed to create chat. Please try again later");
+                return;
+            }
+
+            toast.error("Failed to create chat. Please try again later");
         } finally {
             setIsLoading(false);
         }

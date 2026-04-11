@@ -31,6 +31,9 @@ import {
 import {ActionDialog} from "@/components/dialog/ActionDialog";
 import {useChatStore} from "@/store/useChatStore";
 import ChatFormDialog from "@/components/dialog/ChatFormDialog";
+import Link from "next/link";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {createPetShareMessage, parsePetShareMessage} from "@/lib/chat-pet-share";
 
 function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -54,8 +57,41 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
+    const processedPetShareKeyRef = useRef<string | null>(null);
     const isChatDisabled = chat.active_member_count < 2;
     const { triggerRefresh } = useChatStore();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const petShareFromQuery = useCallback(() => {
+        const petId = searchParams.get("pet_id")?.trim();
+        const petName = searchParams.get("pet_name")?.trim();
+        const petImageUrl = searchParams.get("pet_image")?.trim();
+        const petShareToken = searchParams.get("pet_share_token")?.trim();
+
+        if (!petId || !petName) {
+            return null;
+        }
+
+        return {
+            petId,
+            petName,
+            petImageUrl: petImageUrl || undefined,
+            petShareToken: petShareToken || undefined,
+        };
+    }, [searchParams]);
+
+    const clearPetShareParams = useCallback(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("pet_id");
+        params.delete("pet_name");
+        params.delete("pet_image");
+        params.delete("pet_share_token");
+
+        const nextQuery = params.toString();
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
+    }, [pathname, router, searchParams]);
 
     const loadMore = useCallback(async () => {
         if (!hasMore || loadingMore || !cursor) return;
@@ -136,7 +172,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             setFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to send message", error);
             if (error instanceof AxiosError) {
                 const errData = error.response?.data as ErrorResponse;
@@ -282,29 +318,39 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
         echo.private(channelName)
             .listen('.message.sent', (response: any) => {
-                const {type, data} = response;
+                const event = response as {
+                    type?: string;
+                    data?: Record<string, unknown>;
+                };
+                const {type, data} = event;
 
                 switch (type) {
                     case 'message.sent':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string") return;
+
+                        const sentMessage = data as unknown as Message;
 
                         setMessages((prev) => {
-                            if (prev.some(m => m.id === data.id)) return prev;
-                            return [...prev, data];
+                            if (prev.some(m => m.id === sentMessage.id)) return prev;
+                            return [...prev, sentMessage];
                         });
                         shouldAutoScrollRef.current = true;
                         break;
 
                     case 'message.updated':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string" || typeof data.content !== "string" || typeof data.updated_at !== "string") return;
+
+                        const updatedMessageId = data.id;
+                        const updatedContent = data.content;
+                        const updatedAt = data.updated_at;
 
                         setMessages(prev =>
                             prev.map(m =>
-                                m.id === data.id
+                                m.id === updatedMessageId
                                     ? {
                                         ...m,
-                                        content: data.content,
-                                        updated_at: data.updated_at
+                                        content: updatedContent,
+                                        updated_at: updatedAt
                                     }
                                     : m
                             )
@@ -312,9 +358,11 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                         break;
 
                     case 'message.deleted':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string") return;
 
-                        setMessages(prev => prev.filter(m => m.id !== data.id));
+                        const deletedMessageId = data.id;
+
+                        setMessages(prev => prev.filter(m => m.id !== deletedMessageId));
                         break;
 
                     default:
@@ -327,6 +375,47 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             echo.leave(`private-${channelName}`);
         };
     }, [chat?.id, session?.accessToken]);
+
+    useEffect(() => {
+        const petShare = petShareFromQuery();
+        if (!petShare || isChatDisabled || loading) return;
+
+        const processKey = `${chat.id}:${petShare.petId}:${petShare.petShareToken ?? "default"}`;
+        if (processedPetShareKeyRef.current === processKey) {
+            return;
+        }
+
+        processedPetShareKeyRef.current = processKey;
+
+        const sharePet = async () => {
+            try {
+                const content = createPetShareMessage({
+                    petId: petShare.petId,
+                    petName: petShare.petName,
+                    petImageUrl: petShare.petImageUrl,
+                });
+                const response = await chatService.sendMessage(chat.id, {content, attachment_id: null});
+
+                setMessages((prev) => {
+                    if (prev.some((message) => message.id === response.data.id)) {
+                        return prev;
+                    }
+                    return [...prev, response.data];
+                });
+                shouldAutoScrollRef.current = true;
+            } catch (error) {
+                console.error("Failed to share pet in chat:", error);
+                if (error instanceof AxiosError) {
+                    const errData = error.response?.data as ErrorResponse;
+                    toast.error(errData?.message || "Failed to share pet details");
+                }
+            } finally {
+                clearPetShareParams();
+            }
+        };
+
+        void sharePet();
+    }, [chat.id, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
         return (
@@ -470,7 +559,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                 priority
                                                 className="rounded-full object-cover"
                                                 sizes="36px"
-                                                onError={(e) => {
+                                                onError={() => {
                                                     console.error("Image failed to load:", m.sender.avatar);
                                                 }}
                                             />
@@ -532,12 +621,82 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                             <div className={clsx(
                                                 "px-4 py-2.5 rounded-2xl shadow-sm",
                                                 isMe
-                                                    ? "bg-emerald-500 text-white rounded-tr-sm"
+                                                    ? "bg-white text-gray-800 border border-gray-200 rounded-tr-sm"
                                                     : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
                                             )}>
-                                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                                                    {m.content}
-                                                </p>
+                                                {(() => {
+                                                    const petShare = parsePetShareMessage(m.content);
+
+                                                    if (!petShare) {
+                                                        return (
+                                                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                                                {m.content}
+                                                            </p>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <Link href={`/pets/${petShare.petId}`} className="block group">
+                                                            <div className={clsx(
+                                                                "overflow-hidden rounded-2xl border transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md",
+                                                                "border-gray-200 bg-white hover:border-gray-300"
+                                                            )}>
+                                                                    <div className={clsx(
+                                                                        "flex items-center justify-between gap-2.5 px-3.5 py-2.5",
+                                                                        "border-b border-gray-100"
+                                                                    )}>
+                                                                        <div className="min-w-0">
+                                                                            <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-gray-500">
+                                                                                Pet profile
+                                                                            </p>
+                                                                            <p className={clsx(
+                                                                                "mt-0.5 text-[13px] font-semibold truncate",
+                                                                                "text-gray-900"
+                                                                            )}>
+                                                                                {petShare.petName}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className={clsx(
+                                                                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                                                                            "bg-gray-100 text-gray-700"
+                                                                        )}>
+                                                                            <Icon icon="ph:arrow-up-right" className="h-3.5 w-3.5" />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {petShare.petImageUrl && isValidUrl(petShare.petImageUrl) && (
+                                                                        <div className="px-3.5 pb-3.5">
+                                                                            <div className="relative h-20 w-full overflow-hidden rounded-xl bg-gray-50">
+                                                                                <Image
+                                                                                    src={petShare.petImageUrl}
+                                                                                    alt={petShare.petName}
+                                                                                    fill
+                                                                                    className="object-contain p-1.5"
+                                                                                    sizes="(max-width: 768px) 80vw, 320px"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="flex items-center justify-between gap-2.5 px-3.5 py-2.5">
+                                                                        <p className={clsx(
+                                                                            "text-[11px] leading-relaxed",
+                                                                            "text-gray-600"
+                                                                        )}>
+                                                                            Tap to open pet details and continue the conversation.
+                                                                        </p>
+                                                                        <span className={clsx(
+                                                                            "shrink-0 text-[10px] font-semibold",
+                                                                            "text-gray-700"
+                                                                        )}>
+                                                                            View
+                                                                        </span>
+                                                                    </div>
+                                                            </div>
+                                                        </Link>
+                                                    );
+                                                })()}
 
                                                 {/* Attachment */}
                                                 {m.attachment && (

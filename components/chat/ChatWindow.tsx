@@ -394,8 +394,17 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     petName: petShare.petName,
                     petImageUrl: petShare.petImageUrl,
                 });
-                const response = await chatService.sendMessage(chat.id, {content, attachment_id: null});
+                const parsedPayload = SendMessageSchema.safeParse({
+                    content,
+                    attachment_id: null,
+                });
 
+                if (!parsedPayload.success) {
+                    toast.error(parsedPayload.error.issues[0]?.message || "Failed to share pet details");
+                    return;
+                }
+
+                const response = await chatService.sendMessage(chat.id, parsedPayload.data);
                 setMessages((prev) => {
                     if (prev.some((message) => message.id === response.data.id)) {
                         return prev;

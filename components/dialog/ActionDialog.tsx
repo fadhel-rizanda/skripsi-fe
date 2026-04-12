@@ -89,11 +89,11 @@ export function ActionDialog({
     return (
         <AlertDialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
             <AlertDialogContent
-                size="sm"
+                size="fit"
                 className="w-[calc(100%-2rem)] max-w-88 rounded-xl sm:rounded-2xl p-5 sm:p-6 gap-3 sm:gap-4"
             >
-                <AlertDialogHeader>
-                    <div className="items-center flex flex-col gap-3 sm:gap-4">
+                <AlertDialogHeader className="w-full">
+                    <div className="items-center flex flex-col gap-3 sm:gap-4 w-full">
                         {/* Icon */}
                         {isIdle && (
                             <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-600"/>
@@ -113,7 +113,7 @@ export function ActionDialog({
                         )}
 
                         {/* Title */}
-                        <AlertDialogTitle className="text-center text-base font-semibold leading-snug">
+                        <AlertDialogTitle className="text-center text-base font-semibold leading-snug [overflow-wrap:anywhere] w-full">
                             {isIdle && title}
                             {isLoading && "Processing..."}
                             {isSuccess && successTitle}
@@ -121,7 +121,7 @@ export function ActionDialog({
                         </AlertDialogTitle>
 
                         {/* Description */}
-                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 max-w-xs">
+                        <AlertDialogDescription asChild className="text-center text-xs sm:text-sm text-gray-600 w-full [overflow-wrap:anywhere]">
                             <div>
                                 {isIdle && description}
                                 {isLoading && "Please wait while we process your request."}

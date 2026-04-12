@@ -83,7 +83,7 @@ export default function ChatButton({
                 return;
             }
 
-            toast.error(error?.response?.data?.message || "Failed to create chat. Please try again later");
+            toast.error("Failed to create chat. Please try again later");
         } finally {
             setIsLoading(false);
         }

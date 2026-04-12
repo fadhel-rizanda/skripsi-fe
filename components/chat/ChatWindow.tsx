@@ -787,7 +787,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     {isChatDisabled && (
                         <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
                             <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
-                            <span>This conversation is no longer active because the other member has left. Please start a new conversation{isDirectPrivate && ` or reactivate by click "Chat ${chat.name}" button`}.</span>
+                            <span>This conversation is no longer active because the other member has left. Please start a new conversation{isDirectPrivate && ` or reactivate by click "Chat" button in their profile`}.</span>
                         </div>
                     )}
                     {file && (

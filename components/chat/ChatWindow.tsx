@@ -122,6 +122,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [content, setContent] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [pendingPetShare, setPendingPetShare] = useState<{petId: string; petName: string; petImageUrl?: string; petShareToken?: string} | null>(null);
 
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState<string>("");
@@ -212,40 +213,66 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     }, [chat?.id, cursor, hasMore, loadingMore]);
 
     const handleSendMessage = async () => {
-        if (!content.trim() && !file) return;
+        if (!content.trim() && !file && !pendingPetShare) return;
 
         setIsSending(true);
 
         try {
-            let attachmentId: string | null = null;
+            // Send pending pet share first
+            if (pendingPetShare) {
+                const shareContent = createPetShareMessage({
+                    petId: pendingPetShare.petId,
+                    petName: pendingPetShare.petName,
+                    petImageUrl: pendingPetShare.petImageUrl,
+                });
+                const sharePayload = SendMessageSchema.safeParse({
+                    content: shareContent,
+                    attachment_id: null,
+                });
 
-            if (file) {
-                attachmentId = await uploadAttachment(file);
+                if (sharePayload.success) {
+                    const response = await chatService.sendMessage(chat.id, sharePayload.data);
+                    setMessages((prev) => {
+                        if (prev.some((message) => message.id === response.data.id)) return prev;
+                        return [...prev, response.data];
+                    });
+                    shouldAutoScrollRef.current = true;
+                }
+                setPendingPetShare(null);
             }
 
-            const messagePayload = {
-                content,
-                attachment_id: attachmentId,
-            };
+            // Send actual text or file content if exists
+            if (content.trim() || file) {
+                let attachmentId: string | null = null;
 
-            const messageValidation = SendMessageSchema.safeParse(messagePayload);
+                if (file) {
+                    attachmentId = await uploadAttachment(file);
+                }
 
-            if (!messageValidation.success) {
-                toast.error(messageValidation.error.issues[0]?.message);
-                return;
+                const messagePayload = {
+                    content,
+                    attachment_id: attachmentId,
+                };
+
+                const messageValidation = SendMessageSchema.safeParse(messagePayload);
+
+                if (!messageValidation.success) {
+                    toast.error(messageValidation.error.issues[0]?.message);
+                    return;
+                }
+
+                const response = await chatService.sendMessage(
+                    chat?.id,
+                    messageValidation.data
+                );
+
+                setMessages((prev) => [...prev, response.data]);
+                shouldAutoScrollRef.current = true;
+
+                setContent("");
+                setFile(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
             }
-
-            const response = await chatService.sendMessage(
-                chat?.id,
-                messageValidation.data
-            );
-
-            setMessages((prev) => [...prev, response.data]);
-            shouldAutoScrollRef.current = true;
-
-            setContent("");
-            setFile(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
 
         } catch (error: unknown) {
             console.error("Failed to send message", error);
@@ -461,44 +488,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         }
 
         processedPetShareKeyRef.current = processKey;
+        
+        setPendingPetShare(petShare);
+        clearPetShareParams();
 
-        const sharePet = async () => {
-            try {
-                const content = createPetShareMessage({
-                    petId: petShare.petId,
-                    petName: petShare.petName,
-                    petImageUrl: petShare.petImageUrl,
-                });
-                const parsedPayload = SendMessageSchema.safeParse({
-                    content,
-                    attachment_id: null,
-                });
-
-                if (!parsedPayload.success) {
-                    toast.error(parsedPayload.error.issues[0]?.message || "Failed to share pet details");
-                    return;
-                }
-
-                const response = await chatService.sendMessage(chat.id, parsedPayload.data);
-                setMessages((prev) => {
-                    if (prev.some((message) => message.id === response.data.id)) {
-                        return prev;
-                    }
-                    return [...prev, response.data];
-                });
-                shouldAutoScrollRef.current = true;
-            } catch (error) {
-                console.error("Failed to share pet in chat:", error);
-                if (error instanceof AxiosError) {
-                    const errData = error.response?.data as ErrorResponse;
-                    toast.error(errData?.message || "Failed to share pet details");
-                }
-            } finally {
-                clearPetShareParams();
-            }
-        };
-
-        void sharePet();
     }, [chat.id, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
@@ -813,6 +806,38 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                         </div>
                     )}
 
+                    {pendingPetShare && (
+                        <div
+                            className="bg-white border rounded-xl p-2 md:p-3 shadow-sm flex gap-3 relative mb-2 w-fit min-w-[200px] max-w-xs"
+                        >
+                            <button
+                                onClick={() => setPendingPetShare(null)}
+                                className="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-full p-1 hover:bg-red-200 transition-colors shadow-sm"
+                            >
+                                <Icon icon="ph:x" className="w-3.5 h-3.5"/>
+                            </button>
+                            {pendingPetShare.petImageUrl && (
+                                <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-gray-50 flex-shrink-0 relative overflow-hidden border">
+                                    <Image
+                                        src={pendingPetShare.petImageUrl}
+                                        alt={pendingPetShare.petName}
+                                        fill
+                                        className="object-contain p-1"
+                                        sizes="48px"
+                                    />
+                                </div>
+                            )}
+                            <div className="flex flex-col justify-center min-w-0 flex-1">
+                                <p className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">
+                                    Sharing Pet
+                                </p>
+                                <p className="text-sm font-semibold text-gray-800 truncate">
+                                    {pendingPetShare.petName}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex gap-2">
                         <Input
                             placeholder="Type a message..."
@@ -850,7 +875,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
                         <Button
                             onClick={handleSendMessage}
-                            disabled={isSending || (!content.trim() && !file)}
+                            disabled={isSending || (!content.trim() && !file && !pendingPetShare)}
                             className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
                         >
                             <span className="hidden sm:inline">Send</span>

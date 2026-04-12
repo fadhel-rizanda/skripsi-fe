@@ -9,7 +9,8 @@ const ALLOWED_PARAMS = [
   'search',
   'age',
   'type_of_animal_id',
-  'tag_personality_id'
+  'tag_personality_id',
+  'status'
 ] as const;
 
 // Server-side pet service for API routes

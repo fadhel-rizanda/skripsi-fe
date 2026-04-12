@@ -652,12 +652,6 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                             />
 
                                             {renderAddressSection()}
-
-                                            {!isEditMode && (
-                                                <p className="text-xs text-muted-foreground mt-4 pt-2 border-t border-slate-100 flex items-center gap-1">
-                                                    <span>ℹ️</span> You will automatically become the admin of this community.
-                                                </p>
-                                            )}
                                         </div>
 
                                         {/* RIGHT COLUMN */}

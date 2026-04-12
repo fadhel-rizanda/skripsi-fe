@@ -31,6 +31,83 @@ import {
 import {ActionDialog} from "@/components/dialog/ActionDialog";
 import {useChatStore} from "@/store/useChatStore";
 import ChatFormDialog from "@/components/dialog/ChatFormDialog";
+import Link from "next/link";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {createPetShareMessage, parsePetShareMessage} from "@/lib/chat-pet-share";
+
+function MessageContent({content}: { content: string }) {
+    const petShare = parsePetShareMessage(content);
+
+    if (!petShare) {
+        return (
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                {content}
+            </p>
+        );
+    }
+
+    return (
+        <Link href={`/pets/${petShare.petId}`} className="block group">
+            <div className={clsx(
+                "overflow-hidden rounded-2xl border transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md",
+                "border-gray-200 bg-white hover:border-gray-300"
+            )}>
+                <div className={clsx(
+                    "flex items-center justify-between gap-2.5 px-3.5 py-2.5",
+                    "border-b border-gray-100"
+                )}>
+                    <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-gray-500">
+                            Pet profile
+                        </p>
+                        <p className={clsx(
+                            "mt-0.5 text-[13px] font-semibold truncate",
+                            "text-gray-900"
+                        )}>
+                            {petShare.petName}
+                        </p>
+                    </div>
+
+                    <div className={clsx(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                        "bg-gray-100 text-gray-700"
+                    )}>
+                        <Icon icon="ph:arrow-up-right" className="h-3.5 w-3.5" />
+                    </div>
+                </div>
+
+                {petShare.petImageUrl && isValidUrl(petShare.petImageUrl) && (
+                    <div className="px-3.5 pb-3.5">
+                        <div className="relative h-20 w-full overflow-hidden rounded-xl bg-gray-50">
+                            <Image
+                                src={petShare.petImageUrl}
+                                alt={petShare.petName}
+                                fill
+                                className="object-contain p-1.5"
+                                sizes="(max-width: 768px) 80vw, 320px"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between gap-2.5 px-3.5 py-2.5">
+                    <p className={clsx(
+                        "text-[11px] leading-relaxed",
+                        "text-gray-600"
+                    )}>
+                        Tap to open pet details and continue the conversation.
+                    </p>
+                    <span className={clsx(
+                        "shrink-0 text-[10px] font-semibold",
+                        "text-gray-700"
+                    )}>
+                        View
+                    </span>
+                </div>
+            </div>
+        </Link>
+    );
+}
 
 function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -45,6 +122,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [content, setContent] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [pendingPetShare, setPendingPetShare] = useState<{petId: string; petName: string; petImageUrl?: string; petShareToken?: string} | null>(null);
 
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState<string>("");
@@ -54,8 +132,42 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
+    const processedPetShareKeyRef = useRef<string | null>(null);
     const isChatDisabled = chat.active_member_count < 2;
     const { triggerRefresh } = useChatStore();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const petShareFromQuery = useCallback(() => {
+        const petId = searchParams.get("pet_id")?.trim();
+        const petName = searchParams.get("pet_name")?.trim();
+        const petImageUrl = searchParams.get("pet_image")?.trim();
+        const petShareToken = searchParams.get("pet_share_token")?.trim();
+
+        if (!petId || !petName) {
+            return null;
+        }
+
+        return {
+            petId,
+            petName,
+            petImageUrl: petImageUrl || undefined,
+            petShareToken: petShareToken || undefined,
+        };
+    }, [searchParams]);
+
+    const clearPetShareParams = useCallback(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("pet_id");
+        params.delete("pet_name");
+        params.delete("pet_image");
+        params.delete("pet_share_token");
+
+        const nextQuery = params.toString();
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {scroll: false});
+    }, [pathname, router, searchParams]);
+    const isDirectPrivate = chat.type === "private" && chat.users[0].name === chat.name;
 
     const loadMore = useCallback(async () => {
         if (!hasMore || loadingMore || !cursor) return;
@@ -101,42 +213,68 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     }, [chat?.id, cursor, hasMore, loadingMore]);
 
     const handleSendMessage = async () => {
-        if (!content.trim() && !file) return;
+        if (!content.trim() && !file && !pendingPetShare) return;
 
         setIsSending(true);
 
         try {
-            let attachmentId: string | null = null;
+            // Send pending pet share first
+            if (pendingPetShare) {
+                const shareContent = createPetShareMessage({
+                    petId: pendingPetShare.petId,
+                    petName: pendingPetShare.petName,
+                    petImageUrl: pendingPetShare.petImageUrl,
+                });
+                const sharePayload = SendMessageSchema.safeParse({
+                    content: shareContent,
+                    attachment_id: null,
+                });
 
-            if (file) {
-                attachmentId = await uploadAttachment(file);
+                if (sharePayload.success) {
+                    const response = await chatService.sendMessage(chat.id, sharePayload.data);
+                    setMessages((prev) => {
+                        if (prev.some((message) => message.id === response.data.id)) return prev;
+                        return [...prev, response.data];
+                    });
+                    shouldAutoScrollRef.current = true;
+                }
+                setPendingPetShare(null);
             }
 
-            const messagePayload = {
-                content,
-                attachment_id: attachmentId,
-            };
+            // Send actual text or file content if exists
+            if (content.trim() || file) {
+                let attachmentId: string | null = null;
 
-            const messageValidation = SendMessageSchema.safeParse(messagePayload);
+                if (file) {
+                    attachmentId = await uploadAttachment(file);
+                }
 
-            if (!messageValidation.success) {
-                toast.error(messageValidation.error.issues[0]?.message);
-                return;
+                const messagePayload = {
+                    content,
+                    attachment_id: attachmentId,
+                };
+
+                const messageValidation = SendMessageSchema.safeParse(messagePayload);
+
+                if (!messageValidation.success) {
+                    toast.error(messageValidation.error.issues[0]?.message);
+                    return;
+                }
+
+                const response = await chatService.sendMessage(
+                    chat?.id,
+                    messageValidation.data
+                );
+
+                setMessages((prev) => [...prev, response.data]);
+                shouldAutoScrollRef.current = true;
+
+                setContent("");
+                setFile(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
             }
 
-            const response = await chatService.sendMessage(
-                chat?.id,
-                messageValidation.data
-            );
-
-            setMessages((prev) => [...prev, response.data]);
-            shouldAutoScrollRef.current = true;
-
-            setContent("");
-            setFile(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to send message", error);
             if (error instanceof AxiosError) {
                 const errData = error.response?.data as ErrorResponse;
@@ -282,29 +420,39 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
         echo.private(channelName)
             .listen('.message.sent', (response: any) => {
-                const {type, data} = response;
+                const event = response as {
+                    type?: string;
+                    data?: Record<string, unknown>;
+                };
+                const {type, data} = event;
 
                 switch (type) {
                     case 'message.sent':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string") return;
+
+                        const sentMessage = data as unknown as Message;
 
                         setMessages((prev) => {
-                            if (prev.some(m => m.id === data.id)) return prev;
-                            return [...prev, data];
+                            if (prev.some(m => m.id === sentMessage.id)) return prev;
+                            return [...prev, sentMessage];
                         });
                         shouldAutoScrollRef.current = true;
                         break;
 
                     case 'message.updated':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string" || typeof data.content !== "string" || typeof data.updated_at !== "string") return;
+
+                        const updatedMessageId = data.id;
+                        const updatedContent = data.content;
+                        const updatedAt = data.updated_at;
 
                         setMessages(prev =>
                             prev.map(m =>
-                                m.id === data.id
+                                m.id === updatedMessageId
                                     ? {
                                         ...m,
-                                        content: data.content,
-                                        updated_at: data.updated_at
+                                        content: updatedContent,
+                                        updated_at: updatedAt
                                     }
                                     : m
                             )
@@ -312,9 +460,11 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                         break;
 
                     case 'message.deleted':
-                        if (!data?.id) return;
+                        if (!data || typeof data.id !== "string") return;
 
-                        setMessages(prev => prev.filter(m => m.id !== data.id));
+                        const deletedMessageId = data.id;
+
+                        setMessages(prev => prev.filter(m => m.id !== deletedMessageId));
                         break;
 
                     default:
@@ -327,6 +477,22 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             echo.leave(`private-${channelName}`);
         };
     }, [chat?.id, session?.accessToken]);
+
+    useEffect(() => {
+        const petShare = petShareFromQuery();
+        if (!petShare || isChatDisabled || loading) return;
+
+        const processKey = `${chat.id}:${petShare.petId}:${petShare.petShareToken ?? "default"}`;
+        if (processedPetShareKeyRef.current === processKey) {
+            return;
+        }
+
+        processedPetShareKeyRef.current = processKey;
+        
+        setPendingPetShare(petShare);
+        clearPetShareParams();
+
+    }, [chat.id, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
         return (
@@ -423,7 +589,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                 onClick={() => setDeleteChatDialogOpen(true)}
                             >
                                 <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
-                                Delete chat
+                                {isChatDisabled ? "Delete Chat" : "Deactivate Chat"}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -470,7 +636,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                 priority
                                                 className="rounded-full object-cover"
                                                 sizes="36px"
-                                                onError={(e) => {
+                                                onError={() => {
                                                     console.error("Image failed to load:", m.sender.avatar);
                                                 }}
                                             />
@@ -532,12 +698,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                             <div className={clsx(
                                                 "px-4 py-2.5 rounded-2xl shadow-sm",
                                                 isMe
-                                                    ? "bg-emerald-500 text-white rounded-tr-sm"
+                                                    ? "bg-white text-gray-800 border border-gray-200 rounded-tr-sm"
                                                     : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
                                             )}>
-                                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                                                    {m.content}
-                                                </p>
+                                                <MessageContent content={m.content} />
 
                                                 {/* Attachment */}
                                                 {m.attachment && (
@@ -623,7 +787,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     {isChatDisabled && (
                         <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
                             <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
-                            <span>This conversation is no longer active because the other member has left. Please start a new conversation.</span>
+                            <span>This conversation is no longer active because the other member has left. Please start a new conversation{isDirectPrivate && ` or reactivate by click "Chat" button in their profile`}.</span>
                         </div>
                     )}
                     {file && (
@@ -639,6 +803,38 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                             >
                                 <Icon icon="ph:x" className="w-4 h-4"/>
                             </button>
+                        </div>
+                    )}
+
+                    {pendingPetShare && (
+                        <div
+                            className="bg-white border rounded-xl p-2 md:p-3 shadow-sm flex gap-3 relative mb-2 w-fit min-w-[200px] max-w-xs"
+                        >
+                            <button
+                                onClick={() => setPendingPetShare(null)}
+                                className="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-full p-1 hover:bg-red-200 transition-colors shadow-sm"
+                            >
+                                <Icon icon="ph:x" className="w-3.5 h-3.5"/>
+                            </button>
+                            {pendingPetShare.petImageUrl && (
+                                <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-gray-50 flex-shrink-0 relative overflow-hidden border">
+                                    <Image
+                                        src={pendingPetShare.petImageUrl}
+                                        alt={pendingPetShare.petName}
+                                        fill
+                                        className="object-contain p-1"
+                                        sizes="48px"
+                                    />
+                                </div>
+                            )}
+                            <div className="flex flex-col justify-center min-w-0 flex-1">
+                                <p className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">
+                                    Sharing Pet
+                                </p>
+                                <p className="text-sm font-semibold text-gray-800 truncate">
+                                    {pendingPetShare.petName}
+                                </p>
+                            </div>
                         </div>
                     )}
 
@@ -679,7 +875,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
 
                         <Button
                             onClick={handleSendMessage}
-                            disabled={isSending || (!content.trim() && !file)}
+                            disabled={isSending || (!content.trim() && !file && !pendingPetShare)}
                             className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
                         >
                             <span className="hidden sm:inline">Send</span>
@@ -730,15 +926,26 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     triggerRefresh();
                 }}
                 confirmVariant="destructive"
-                title="Delete Chat"
-                description="Are you sure you want to delete this chat? This action cannot be undone."
-                successTitle="Chat Deleted"
-                successDescription="The conversation has been deleted successfully."
+                title={isChatDisabled ? "Delete Chat" : "Deactivate Chat"}
+                description={
+                    isChatDisabled
+                        ? "The other member is no longer here. Delete this chat record? You won't be able to access ini these messages anymore."
+                        : `Deactivate this chat? It will be removed from your inbox${
+                            isDirectPrivate
+                                ? ", but can be reactivated if there’s a new message—unless the other member deletes it permanently."
+                                : "."
+                        }`
+                }
+                successTitle={isChatDisabled ? "Chat Deleted" : "Chat Deactivated"}
+                successDescription={isChatDisabled ? "The conversation has been deleted successfully." : "The conversation has been deactivated successfully."}
             />
         </>
     );
 }
 
 export default memo(ChatWindow, (prevProps, nextProps) => {
-    return prevProps.chat.id === nextProps.chat.id;
+    return (
+        prevProps.chat.id === nextProps.chat.id &&
+        prevProps.chat.active_member_count === nextProps.chat.active_member_count
+    );
 });

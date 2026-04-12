@@ -45,6 +45,7 @@ export const petService = {
     if (params?.type_of_animal_id) queryParams.set("type_of_animal_id", params.type_of_animal_id);
     if (params?.tag_personality_id) queryParams.set("tag_personality_id", params.tag_personality_id);
     if (params?.search) queryParams.set("search", params.search);
+    if (params?.status) queryParams.set("status", params.status);
 
     const queryString = queryParams.toString();
     const url = `/api/pet${queryString ? `?${queryString}` : ''}`;

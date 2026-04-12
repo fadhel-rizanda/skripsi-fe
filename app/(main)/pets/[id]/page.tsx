@@ -508,7 +508,7 @@ export default function DetailPetPage() {
                 {currUserRole == "adopter" && renderAdoptButton()}
                 {isOwner ? (
                   <Button
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all"
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm font-semibold transition-all"
                     onClick={() => router.push(`/pets/${pet.id}/edit`)}
                   >
                     <Edit className="mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
@@ -524,8 +524,8 @@ export default function DetailPetPage() {
                         pet.profile_pictures?.[selectedImageIndex]?.public_url ??
                         pet.profile_picture,
                     }}
-                    label="Chat with Provider"
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold transition-all truncate"
+                    label={`Chat ${pet.user?.name ?? "Provider"}`}
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 w-full xl:flex-1 h-auto py-3 text-sm font-semibold transition-all whitespace-normal break-all"
                     iconClassName="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-slate-800 shrink-0"
                   />
                 )}

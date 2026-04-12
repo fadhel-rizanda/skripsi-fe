@@ -20,6 +20,7 @@ export interface GetAllParams {
     per_page?: number
     sort_by?: string
     sort_order?: 'asc' | 'desc'
+    status?: string
 }
 
 export interface AdoptionFilterState extends GetAllParams{

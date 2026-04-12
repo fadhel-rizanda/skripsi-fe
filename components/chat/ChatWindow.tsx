@@ -166,6 +166,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         const nextQuery = params.toString();
         router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {scroll: false});
     }, [pathname, router, searchParams]);
+    const isDirectPrivate = chat.type === "private" && chat.users[0].name === chat.name;
 
     const loadMore = useCallback(async () => {
         if (!hasMore || loadingMore || !cursor) return;
@@ -595,7 +596,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                 onClick={() => setDeleteChatDialogOpen(true)}
                             >
                                 <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
-                                Delete chat
+                                {isChatDisabled ? "Delete Chat" : "Deactivate Chat"}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -793,7 +794,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     {isChatDisabled && (
                         <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
                             <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
-                            <span>This conversation is no longer active because the other member has left. Please start a new conversation.</span>
+                            <span>This conversation is no longer active because the other member has left. Please start a new conversation{isDirectPrivate && ` or reactivate by click "Chat ${chat.name}" button`}.</span>
                         </div>
                     )}
                     {file && (
@@ -900,15 +901,26 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     triggerRefresh();
                 }}
                 confirmVariant="destructive"
-                title="Delete Chat"
-                description="Are you sure you want to delete this chat? This action cannot be undone."
-                successTitle="Chat Deleted"
-                successDescription="The conversation has been deleted successfully."
+                title={isChatDisabled ? "Delete Chat" : "Deactivate Chat"}
+                description={
+                    isChatDisabled
+                        ? "The other member is no longer here. Delete this chat record? You won't be able to access ini these messages anymore."
+                        : `Deactivate this chat? It will be removed from your inbox${
+                            isDirectPrivate
+                                ? ", but can be reactivated if there’s a new message—unless the other member deletes it permanently."
+                                : "."
+                        }`
+                }
+                successTitle={isChatDisabled ? "Chat Deleted" : "Chat Deactivated"}
+                successDescription={isChatDisabled ? "The conversation has been deleted successfully." : "The conversation has been deactivated successfully."}
             />
         </>
     );
 }
 
 export default memo(ChatWindow, (prevProps, nextProps) => {
-    return prevProps.chat.id === nextProps.chat.id;
+    return (
+        prevProps.chat.id === nextProps.chat.id &&
+        prevProps.chat.active_member_count === nextProps.chat.active_member_count
+    );
 });

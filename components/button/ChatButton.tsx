@@ -8,6 +8,7 @@ import { chatService } from "@/services/chatServices";
 import {toast} from "sonner";
 import { AxiosError } from "axios";
 import { ErrorResponse } from "@/types";
+import {useChatStore} from "@/store/useChatStore";
 
 interface ChatButtonPetShare {
     petId: string;
@@ -34,6 +35,7 @@ export default function ChatButton({
 }: ChatButtonProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const { setChats } = useChatStore();
 
     const handleChat = async () => {
         if (!targetUserId) return;
@@ -67,16 +69,21 @@ export default function ChatButton({
                 ? `/chat/${chat.data.id}?${params.toString()}`
                 : `/chat/${chat.data.id}`;
 
+            setChats((prev) => {
+                const exists = prev.find((c) => c.id === chat.data.id);
+                if (exists) return prev;
+                return [chat.data, ...prev];
+            });
+
             router.push(destination);
         } catch (error: any) {
-            console.log("Failed to create chat:", error);
             if (error instanceof AxiosError) {
                 const errData = error.response?.data as ErrorResponse;
                 toast.error(errData?.message || "Failed to create chat. Please try again later");
                 return;
             }
 
-            toast.error("Failed to create chat. Please try again later");
+            toast.error(error?.response?.data?.message || "Failed to create chat. Please try again later");
         } finally {
             setIsLoading(false);
         }

@@ -30,6 +30,7 @@ export default function FindPetPage() {
         const response = await petService.getPetsPublic({
           page: page,
           per_page: perPage,
+          status: 'Available',
           ...filters
         }, abortController.signal);
         if (requestIdRef.current === currentRequestId) {

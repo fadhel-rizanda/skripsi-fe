@@ -1,5 +1,6 @@
 import type { Tag, Address, Status } from './general';
 import { Attachment } from "@/types/attachment";
+import {UserProfile} from "@/types/user";
 
 export interface Pet {
     id: string;
@@ -18,6 +19,7 @@ export interface Pet {
     special_needs?: boolean;
     created_at?: string;
     updated_at?: string;
+    user?: UserProfile;
 
     /* Detail-specific fields (merged from PetDetail) */
     profile_pictures?: Attachment[];

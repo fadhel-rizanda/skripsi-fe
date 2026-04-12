@@ -90,7 +90,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         params.delete("pet_share_token");
 
         const nextQuery = params.toString();
-        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname);
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {scroll: false});
     }, [pathname, router, searchParams]);
 
     const loadMore = useCallback(async () => {

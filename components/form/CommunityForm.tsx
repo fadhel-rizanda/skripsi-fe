@@ -687,7 +687,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                             className="truncate flex-1 cursor-pointer hover:underline flex items-center gap-2"
                                                         >
                                                             {downloadingId === existingProfilePicture.id && (
-                                                                <Icon icon="ph:spinner" className="w-4 h-4 animate-spin shrink-0"/>
+                                                                <Icon icon="ph:spinner" className="w-4 h-4 animate-spin shrink-0" />
                                                             )}
                                                             {existingProfilePicture.filename}
                                                         </span>
@@ -716,6 +716,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                 )}
                                             </div>
 
+                                            {isEditMode && (
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 border-b pb-2">Community Admin</h3>
                                                 <FormField
@@ -760,6 +761,7 @@ export default function CommunityForm({mode, communityId, onSuccess}: CommunityF
                                                     )}
                                                 />
                                             </div>
+                                            )}
                                         </div>
                                     </div>
 

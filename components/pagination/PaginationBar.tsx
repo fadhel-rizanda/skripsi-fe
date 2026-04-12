@@ -26,6 +26,7 @@ interface PaginationBarProps {
     onPageChange?: (page: number) => void;
     onDataPerPageChange?: (jumlah: number) => void;
     dataPerPageOptions?: number[];
+    itemLabel?: string;
 }
 
 export function PaginationBar({
@@ -35,6 +36,7 @@ export function PaginationBar({
     onPageChange,
     onDataPerPageChange,
     dataPerPageOptions = [10, 25, 50, 100],
+    itemLabel = "Data",
 }: PaginationBarProps) {
     // Gunakan per_page sebagai jumlah data per halaman
     const totalPages = Math.max(1, Math.ceil(total / per_page));
@@ -73,7 +75,7 @@ export function PaginationBar({
                     className="max-w-4xl lg:w-4xl flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
                     {/* Data per page selector */}
                     <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">Data per page:</span>
+                        <span className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">{itemLabel} per page:</span>
                         <Select
                             value={per_page.toString()}
                             onValueChange={v => onDataPerPageChange && onDataPerPageChange(Number(v))}

@@ -13,6 +13,7 @@ import { PaginationBar } from "@/components/pagination/PaginationBar";
 import { postService, GetPostsParams } from "@/services/postServices";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/community/PostCard";
 import { Post } from "@/types/post";
 import PostFormDialog from "@/components/dialog/PostFormDialog";
@@ -161,14 +162,14 @@ export default function AllPostPage() {
                     <PostFormDialog
                         mode={'create'}
                         trigger={
-                            <button
+                            <Button
                                 type="button"
-                                className="inline-flex items-center justify-center gap-2 bg-[#19E619] hover:bg-green-500 text-black font-bold text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-md"
+                                className="inline-flex items-center justify-center gap-2 bg-[#19E619] hover:bg-green-500 text-black font-bold text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-md transition-colors"
                                 onClick={handleCreatePost}
                             >
                                 <Icon icon="ph:plus-circle-bold" className="w-4 h-4 sm:w-5 sm:h-5" />
                                 Create Post
-                            </button>
+                            </Button>
                         }
                         onSuccessAction={() => {
                             setRefreshKey(prevState => prevState + 1)
@@ -227,6 +228,7 @@ export default function AllPostPage() {
                     onPageChange={handlePageChange}
                     onDataPerPageChange={handlePerPageChange}
                     dataPerPageOptions={[10, 15, 25, 50]}
+                    itemLabel="Posts"
                 />
             )}
         </div>

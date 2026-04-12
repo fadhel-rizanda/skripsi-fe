@@ -30,6 +30,7 @@ export default function FindPetPage() {
         const response = await petService.getPetsPublic({
           page: page,
           per_page: perPage,
+          status: 'Available',
           ...filters
         }, abortController.signal);
         if (requestIdRef.current === currentRequestId) {
@@ -116,6 +117,7 @@ export default function FindPetPage() {
           onPageChange={setPage}
           onDataPerPageChange={setPerPage}
           dataPerPageOptions={[15, 25, 50, 100]}
+          itemLabel="Pets"
         />
       </footer>
     </main>

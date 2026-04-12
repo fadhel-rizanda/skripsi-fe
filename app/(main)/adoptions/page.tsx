@@ -130,6 +130,7 @@ export default function AdoptionsPage() {
                     onPageChange={setPage}
                     onDataPerPageChange={setPerPage}
                     dataPerPageOptions={[15, 25, 50, 100]}
+                    itemLabel="Adoptions"
                 />
             </footer>
         </main>

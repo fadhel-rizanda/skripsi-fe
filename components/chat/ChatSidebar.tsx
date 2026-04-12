@@ -12,12 +12,23 @@ import {Button} from "@/components/ui/button";
 import {Icon} from "@iconify/react";
 import {useChatStore} from "@/store/useChatStore";
 import {isValidUrl} from "@/lib/utils";
+import ChatFormDialog from "@/components/dialog/ChatFormDialog";
+import {parsePetShareMessage} from "@/lib/chat-pet-share";
 
 export default function ChatSidebar() {
     const params = useParams();
     const activeId = params?.userId;
     const { chats, setChats, refreshTrigger } = useChatStore();
     const [loading, setLoading] = useState(true);
+
+    const getChatPreview = (content?: string) => {
+        const petShare = parsePetShareMessage(content);
+        if (petShare) {
+            return `Shared pet: ${petShare.petName}`;
+        }
+
+        return content || "No messages yet";
+    };
 
     const refreshChats = async () => {
         setLoading(true);
@@ -54,7 +65,7 @@ export default function ChatSidebar() {
                 setLoading(false);
             }
         };
-        fetchChats().then(r => r);
+        fetchChats();
     }, []);
 
     useEffect(() => {
@@ -75,9 +86,12 @@ export default function ChatSidebar() {
             <aside className="w-full md:w-80 md:min-w-80 border-r bg-white h-full flex flex-col">
                 <div className="p-3 md:p-4 border-b flex justify-between items-center">
                     <h2 className="text-xl font-bold">Messages</h2>
-                    <Button type="button" variant="outline" size="sm" onClick={refreshChats} disabled={loading}>
-                        <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" size="sm" disabled>
+                            <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
+                        </Button>
+                        <ChatFormDialog/>
+                    </div>
                 </div>
                 <div className="p-4 space-y-4">
                     {[1, 2, 3, 4, 5].map((i) => (
@@ -98,9 +112,12 @@ export default function ChatSidebar() {
         <aside className="w-full md:w-80 md:min-w-80 border-r bg-white h-full flex flex-col">
             <div className="p-3 md:p-4 border-b flex justify-between items-center">
                 <h2 className="text-xl font-bold">Messages</h2>
-                <Button type="button" variant="outline" size="sm" onClick={refreshChats}>
-                    <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={refreshChats}>
+                        <Icon icon="ph:arrows-counter-clockwise" className="w-6 h-6"/>
+                    </Button>
+                    <ChatFormDialog onSuccessAction={refreshChats}/>
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -151,7 +168,7 @@ export default function ChatSidebar() {
                                         "text-xs truncate flex-1 pr-2",
                                         chat.unread_count > 0 ? "text-gray-900 font-bold" : "text-gray-500"
                                     )}>
-                                        {chat.last_message?.content || "No messages yet"}
+                                        {getChatPreview(chat.last_message?.content)}
                                     </p>
 
                                     {chat.unread_count > 0 && (

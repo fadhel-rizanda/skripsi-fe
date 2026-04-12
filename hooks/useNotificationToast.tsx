@@ -92,7 +92,12 @@ export function useNotificationToast() {
                         title.includes('cancelled') ||
                         title.includes('rejected') ||
                         title.includes('create') ||
-                        title.includes('created')
+                        title.includes('created') ||
+                        title.includes('initialized') ||
+                        title.includes('reinitialized') ||
+                        title.includes('delete') ||
+                        title.includes('deleted') ||
+                        title.includes('left')
                     ) {
                         try {
                             const res = await userService.userChannels();

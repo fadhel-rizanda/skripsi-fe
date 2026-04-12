@@ -11,8 +11,10 @@ export interface Chat {
     unread_count: number;
     created_at: string;
     updated_at: string;
-    created_by: UserProfile;
-    updated_by: UserProfile;
+    created_by: UserProfile | string;
+    updated_by: UserProfile | string;
+    active_member_count: number;
+    user_ids: string[];
 }
 
 export interface Message {

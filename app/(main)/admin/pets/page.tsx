@@ -292,6 +292,7 @@ export default function AdminPetsPage() {
                             setPerPage(newPerPage);
                             setCurrentPage(1);
                         }}
+                        itemLabel="Pets"
                     />
                 </div>
             </div>

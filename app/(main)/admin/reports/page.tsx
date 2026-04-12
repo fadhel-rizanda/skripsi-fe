@@ -348,6 +348,7 @@ export default function AdminReportsPage() {
                             setPerPage(newPerPage);
                             setCurrentPage(1);
                         }}
+                        itemLabel="Reports"
                     />
                 </div>
             </div>

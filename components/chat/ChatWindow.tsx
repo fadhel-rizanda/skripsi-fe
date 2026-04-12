@@ -35,6 +35,80 @@ import Link from "next/link";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {createPetShareMessage, parsePetShareMessage} from "@/lib/chat-pet-share";
 
+function MessageContent({content}: { content: string }) {
+    const petShare = parsePetShareMessage(content);
+
+    if (!petShare) {
+        return (
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                {content}
+            </p>
+        );
+    }
+
+    return (
+        <Link href={`/pets/${petShare.petId}`} className="block group">
+            <div className={clsx(
+                "overflow-hidden rounded-2xl border transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md",
+                "border-gray-200 bg-white hover:border-gray-300"
+            )}>
+                <div className={clsx(
+                    "flex items-center justify-between gap-2.5 px-3.5 py-2.5",
+                    "border-b border-gray-100"
+                )}>
+                    <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-gray-500">
+                            Pet profile
+                        </p>
+                        <p className={clsx(
+                            "mt-0.5 text-[13px] font-semibold truncate",
+                            "text-gray-900"
+                        )}>
+                            {petShare.petName}
+                        </p>
+                    </div>
+
+                    <div className={clsx(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                        "bg-gray-100 text-gray-700"
+                    )}>
+                        <Icon icon="ph:arrow-up-right" className="h-3.5 w-3.5" />
+                    </div>
+                </div>
+
+                {petShare.petImageUrl && isValidUrl(petShare.petImageUrl) && (
+                    <div className="px-3.5 pb-3.5">
+                        <div className="relative h-20 w-full overflow-hidden rounded-xl bg-gray-50">
+                            <Image
+                                src={petShare.petImageUrl}
+                                alt={petShare.petName}
+                                fill
+                                className="object-contain p-1.5"
+                                sizes="(max-width: 768px) 80vw, 320px"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between gap-2.5 px-3.5 py-2.5">
+                    <p className={clsx(
+                        "text-[11px] leading-relaxed",
+                        "text-gray-600"
+                    )}>
+                        Tap to open pet details and continue the conversation.
+                    </p>
+                    <span className={clsx(
+                        "shrink-0 text-[10px] font-semibold",
+                        "text-gray-700"
+                    )}>
+                        View
+                    </span>
+                </div>
+            </div>
+        </Link>
+    );
+}
+
 function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
@@ -633,79 +707,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                     ? "bg-white text-gray-800 border border-gray-200 rounded-tr-sm"
                                                     : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
                                             )}>
-                                                {(() => {
-                                                    const petShare = parsePetShareMessage(m.content);
-
-                                                    if (!petShare) {
-                                                        return (
-                                                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                                                                {m.content}
-                                                            </p>
-                                                        );
-                                                    }
-
-                                                    return (
-                                                        <Link href={`/pets/${petShare.petId}`} className="block group">
-                                                            <div className={clsx(
-                                                                "overflow-hidden rounded-2xl border transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md",
-                                                                "border-gray-200 bg-white hover:border-gray-300"
-                                                            )}>
-                                                                    <div className={clsx(
-                                                                        "flex items-center justify-between gap-2.5 px-3.5 py-2.5",
-                                                                        "border-b border-gray-100"
-                                                                    )}>
-                                                                        <div className="min-w-0">
-                                                                            <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-gray-500">
-                                                                                Pet profile
-                                                                            </p>
-                                                                            <p className={clsx(
-                                                                                "mt-0.5 text-[13px] font-semibold truncate",
-                                                                                "text-gray-900"
-                                                                            )}>
-                                                                                {petShare.petName}
-                                                                            </p>
-                                                                        </div>
-
-                                                                        <div className={clsx(
-                                                                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-                                                                            "bg-gray-100 text-gray-700"
-                                                                        )}>
-                                                                            <Icon icon="ph:arrow-up-right" className="h-3.5 w-3.5" />
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {petShare.petImageUrl && isValidUrl(petShare.petImageUrl) && (
-                                                                        <div className="px-3.5 pb-3.5">
-                                                                            <div className="relative h-20 w-full overflow-hidden rounded-xl bg-gray-50">
-                                                                                <Image
-                                                                                    src={petShare.petImageUrl}
-                                                                                    alt={petShare.petName}
-                                                                                    fill
-                                                                                    className="object-contain p-1.5"
-                                                                                    sizes="(max-width: 768px) 80vw, 320px"
-                                                                                />
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-
-                                                                    <div className="flex items-center justify-between gap-2.5 px-3.5 py-2.5">
-                                                                        <p className={clsx(
-                                                                            "text-[11px] leading-relaxed",
-                                                                            "text-gray-600"
-                                                                        )}>
-                                                                            Tap to open pet details and continue the conversation.
-                                                                        </p>
-                                                                        <span className={clsx(
-                                                                            "shrink-0 text-[10px] font-semibold",
-                                                                            "text-gray-700"
-                                                                        )}>
-                                                                            View
-                                                                        </span>
-                                                                    </div>
-                                                            </div>
-                                                        </Link>
-                                                    );
-                                                })()}
+                                                <MessageContent content={m.content} />
 
                                                 {/* Attachment */}
                                                 {m.attachment && (

@@ -100,7 +100,7 @@ export default function ChatButton({
     return (
         <Button
             onClick={handleChat}
-            disabled={isLoading}
+            disabled={isLoading || !targetUserId}
             size={size}
             className={
                 className ??

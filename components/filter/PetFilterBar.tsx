@@ -93,7 +93,7 @@ export function PetFilterBar({ onFilterChange }: PetFilterBarProps) {
             onLoadMore={loadMoreTypes}
             isLoading={isLoadingTypes}
             hasMore={hasMoreTypes}
-            placeholder="Type of Animal"
+            placeholder="Animal Type"
             emptyMessage="No types found."
             mode="single"
             className="bg-[#F6F8F6] border-gray-300 h-8 px-1.5 sm:px-2.5 py-1.5 flex-1 min-w-0 text-[10px] sm:text-xs md:text-sm"

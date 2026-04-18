@@ -33,10 +33,6 @@ export default function SubmittedCollapsible({
         })
         : "N/A";
 
-    const shortId = adoption?.id
-        ? `#${adoption.id.split("-")[0].toUpperCase()}`
-        : "N/A";
-
     const isAdopter = currentUser?.role.name === "adopter";
     const role = isAdopter ? "Provider" : "Adopter";
     const otherUserId = isAdopter
@@ -96,17 +92,24 @@ export default function SubmittedCollapsible({
                         </h3>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-2.5 sm:gap-y-3 gap-x-4">
+                            <DetailItem label="Application ID" value={adoption?.id}/>
+                            <DetailItem label="Submission Date" value={date}/>
+                            <DetailItem label="Submission Time" value={time}/>
                             <DetailItem
                                 label="Animal Name"
                                 value={adoption.pet?.name || "Unknown Pet"}
+                                directUrl={`/pets/${adoption.pet?.id}`}
                             />
                             <DetailItem
                                 label="Applicant Name"
                                 value={adoption.adopter?.name || "Unknown Adopter"}
+                                directUrl={`/profile/${adoption.adopter?.id}`}
                             />
-                            <DetailItem label="Application ID" value={shortId}/>
-                            <DetailItem label="Submission Date" value={date}/>
-                            <DetailItem label="Submission Time" value={time}/>
+                            <DetailItem
+                                label="Provider Name"
+                                value={adoption.provider.name || "Unknown Provider"}
+                                directUrl={`/profile/${adoption.provider.id}`}
+                            />
                         </div>
                     </div>
 
@@ -136,11 +139,22 @@ export default function SubmittedCollapsible({
         ;
 }
 
-function DetailItem({label, value}: { label: string; value: string }) {
+function DetailItem({ label, value, directUrl }: { label: string; value: string; directUrl?: string }) {
+    const router = useRouter();
+
     return (
         <div className="flex flex-col gap-0.5">
             <span className="text-[10px] sm:text-xs font-bold text-slate-900">{label}:</span>
-            <span className="text-xs sm:text-sm text-slate-600">{value}</span>
+            <span
+                className={`text-xs sm:text-sm text-slate-600 max-w-fit truncate ${directUrl ? "cursor-pointer hover:text-blue-500 hover:underline" : ""}`}
+                onClick={() => {
+                    if (directUrl) {
+                        router.push(directUrl);
+                    }
+                }}
+            >
+                {value}
+            </span>
         </div>
     );
 }

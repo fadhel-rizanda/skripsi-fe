@@ -236,9 +236,11 @@ export default function AdminPostsPage() {
 
                                             {/* USER ID */}
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                {post.created_by?.id
-                                                    ? `${post.created_by.id}`
-                                                    : "-"}
+                                                <a href={`/profile/${post.created_by?.id}`} className="text-blue-600 hover:underline">
+                                                    {post.created_by?.id
+                                                        ? `${post.created_by.id}`
+                                                        : "-"}
+                                                </a>
                                             </td>
 
                                             {/* CREATED AT */}

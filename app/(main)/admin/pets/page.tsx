@@ -126,7 +126,7 @@ export default function AdminPetsPage() {
     }, []);
 
     const isTakedown = dialogMode === "takedown";
-
+console.log(pets)
     return (
         <div className="min-h-[calc(100vh-64px)] w-full bg-[#E7F3E7] px-4 py-6 sm:px-6 sm:py-10 md:px-12 md:py-12">
             <div className="max-w-4xl mx-auto flex flex-col gap-6">
@@ -176,8 +176,8 @@ export default function AdminPetsPage() {
                                         <tr key={pet.id} className="hover:bg-gray-50/50 transition-colors">
                                             {/* ANIMAL ID */}
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                <a href={`/pets/${pet.id}`} className="text-blue-600 hover:underline">
-                                                    {pet.id}
+                                                <a href={`/pets/${pet.animal_id}`} className="text-blue-600 hover:underline">
+                                                    {pet.animal_id}
                                                 </a>
                                             </td>
 
@@ -236,8 +236,8 @@ export default function AdminPetsPage() {
 
                                             {/* PROVIDER ID */}
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                <a href={`/users/${pet.user_id}`} className="text-blue-600 hover:underline">
-                                                    {pet.user_id ? `${pet.user_id}` : "-"}
+                                                <a href={`/users/${pet.provider_id}`} className="text-blue-600 hover:underline">
+                                                    {pet.provider_id ? `${pet.provider_id}` : "-"}
                                                 </a>
                                             </td>
 

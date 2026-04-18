@@ -5,6 +5,8 @@ import {UserProfile} from "@/types/user";
 export interface Pet {
     id: string;
     user_id?: string;
+    animal_id?: string;
+    provider_id?: string;
     name: string;
     type_of_animal_name?: string;
     type_of_animal_id?: string;

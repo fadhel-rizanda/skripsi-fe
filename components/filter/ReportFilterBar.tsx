@@ -1,16 +1,18 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useTagsOptions } from "@/hooks/useFilterOptions";
-import { SearchInput, FilterSelect, type FilterOption } from ".";
+import { SearchInput } from ".";
 import { Button } from "@/components/ui/button";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
-import {TAG_TYPE} from "@/constant/tag-type";
+import { TAG_TYPE } from "@/constant/tag-type";
 
-const MODEL_OPTIONS: FilterOption[] = [
-    { value: "user", label: "User" },
-    { value: "post", label: "Post" },
-    { value: "community", label: "Community" },
-    { value: "pets", label: "Pets" },
+const MODEL_OPTIONS = [
+    { id: "user", name: "User" },
+    { id: "post", name: "Post" },
+    { id: "community", name: "Community" },
+    { id: "pets", name: "Pets" },
 ];
 
 type ReportFilterBarProps = {
@@ -23,6 +25,7 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
     const [search, setSearch] = useState("");
     const [model, setModel] = useState("");
     const [tagId, setTagId] = useState("");
+    const [resetKey, setResetKey] = useState(0);
 
     const {
         options: tags,
@@ -50,6 +53,7 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
         setSearch("");
         setModel("");
         setTagId("");
+        setResetKey((k) => k + 1);
     };
 
     const hasActiveFilters = search || model || tagId;
@@ -64,15 +68,20 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
                 className="w-full md:w-auto bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 text-xs md:text-sm flex-1 shrink-0"
             />
             <div className="flex flex-row flex-nowrap gap-2 md:gap-2.5 lg:gap-3 overflow-x-auto scrollbar-hide md:overflow-visible md:flex-1 md:justify-start">
-                <FilterSelect
-                    name="model"
-                    value={model}
-                    onChange={setModel}
+                <SearchableCombobox
+                    key={`model-${resetKey}`}
                     options={MODEL_OPTIONS}
-                    placeholder="Model"
+                    selectedValues={[model].filter(Boolean)}
+                    onSelect={(value) => {
+                        setModel(value === model ? "" : value);
+                    }}
+                    placeholder="All Models"
+                    emptyMessage="No models found."
+                    mode="single"
                     className="bg-[#F6F8F6] border-gray-300 h-8 px-2.5 py-1.5 w-37.5 md:w-50 text-xs md:text-sm shrink-0"
                 />
                 <SearchableCombobox
+                    key={`tag-${resetKey}`}
                     options={tags}
                     selectedValues={[tagId].filter(Boolean)}
                     onSelect={(value) => {
@@ -93,4 +102,4 @@ export function ReportFilterBar({ onSearchChange, onModelChange, onTagChange }: 
             </div>
         </div>
     );
-}
+}

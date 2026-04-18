@@ -29,10 +29,10 @@ export function PostFilter({ onSearchChange, onTagChange }: PostFilterProps) {
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await generalService.getTags("type_of_animal");
+                const response = await generalService.getTags("post");
                 setTags(response);
             } catch (error) {
-                console.error("Failed to fetch tags of type 'type_of_animal':", error);
+                console.error("Failed to fetch tags of type 'post':", error);
             }
         };
 

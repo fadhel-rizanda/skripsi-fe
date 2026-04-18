@@ -9,12 +9,12 @@ import { generalService } from "@/services/generalServices";
 
 export interface PetFilterProps {
     onSearchChange?: (search: string) => void;
-    onTagChange?: (tagId: string) => void;
+    onTypeChange?: (typeId: string) => void;
 }
 
-export function PetFilter({ onSearchChange, onTagChange }: PetFilterProps) {
-    const [tags, setTags] = useState<{ id: string; name: string }[]>([]);
-    const [selectedTag, setSelectedTag] = useState<string>("all");
+export function PetFilter({ onSearchChange, onTypeChange }: PetFilterProps) {
+    const [animalTypes, setAnimalTypes] = useState<{ id: string; name: string }[]>([]);
+    const [selectedType, setSelectedType] = useState<string>("all");
     const [search, setSearch] = useState("");
 
     // Debounce search 500ms
@@ -27,16 +27,16 @@ export function PetFilter({ onSearchChange, onTagChange }: PetFilterProps) {
     }, [search, onSearchChange]);
 
     useEffect(() => {
-        const fetchTags = async () => {
+        const fetchAnimalTypes = async () => {
             try {
                 const response = await generalService.getTags("type_of_animal");
-                setTags(response);
+                setAnimalTypes(response);
             } catch (error) {
-                console.error("Failed to fetch tags of type 'type_of_animal':", error);
+                console.error("Failed to fetch animal types:", error);
             }
         };
 
-        fetchTags();
+        fetchAnimalTypes();
     }, []);
 
     return (
@@ -55,18 +55,18 @@ export function PetFilter({ onSearchChange, onTagChange }: PetFilterProps) {
 
             <SearchableCombobox
                 options={[
-                    { id: "all", name: "All Tags" },
-                    ...tags.map((tag) => ({
-                        id: tag.id,
-                        name: tag.name.charAt(0).toUpperCase() + tag.name.slice(1),
+                    { id: "all", name: "All Types" },
+                    ...animalTypes.map((type) => ({
+                        id: type.id,
+                        name: type.name.charAt(0).toUpperCase() + type.name.slice(1),
                     })),
                 ]}
-                selectedValues={selectedTag ? [selectedTag] : []}
+                selectedValues={selectedType ? [selectedType] : []}
                 onSelect={(value) => {
-                    setSelectedTag(value);
-                    onTagChange?.(value === "all" ? "" : value);
+                    setSelectedType(value);
+                    onTypeChange?.(value === "all" ? "" : value);
                 }}
-                placeholder="Tag"
+                placeholder="Animal Type"
                 mode="single"
                 className="w-full sm:w-37.5 h-9 sm:h-11 bg-white border-gray-200 text-gray-600 text-sm sm:text-base"
             />

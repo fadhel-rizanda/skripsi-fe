@@ -184,7 +184,8 @@ export default function AdminAdoptionsPage() {
                             <thead className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 border-b border-gray-100">
                             <tr>
                                 <th className="px-4 py-3">APPLICATION ID</th>
-                                <th className="px-4 py-3">USER</th>
+                                <th className="px-4 py-3">ADOPTER</th>
+                                <th className="px-4 py-3">PROVIDER</th>
                                 <th className="px-4 py-3">ANIMAL</th>
                                 <th className="px-4 py-3">STATUS</th>
                                 <th className="px-4 py-3">CURRENT PROCESS</th>
@@ -211,18 +212,27 @@ export default function AdminAdoptionsPage() {
                                         {/* APPLICATION ID */}
                                         <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
                                             <a href={`/adoptions/${adoption.id}`} className="text-blue-600 hover:underline">
-                                                #{adoption.id.slice(0, 8)}
+                                                {adoption.id}
                                             </a>
                                         </td>
 
                                         {/* USER (adopter) */}
                                         <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">
-                                            {adoption.adopter.name}
+                                            <a href={`/profile/${adoption.adopter.id}`} className="text-blue-600 hover:underline">
+                                                {adoption.adopter.name}
+                                            </a>
+                                        </td>
+
+                                        {/* USER (PROVIDER) */}
+                                        <td className="px-4 py-3 text-xs text-gray-800 whitespace-nowrap">
+                                            <a href={`/profile/${adoption.provider.id}`} className="text-blue-600 hover:underline">
+                                                {adoption.provider.name}
+                                            </a>
                                         </td>
 
                                         {/* ANIMAL */}
                                         <td className="px-4 py-3 text-xs text-gray-800">
-                                            <span className="whitespace-nowrap">{animalLabel(adoption)}</span>
+                                            <a href={`/pets/${adoption.pet.id}`}  className="text-blue-600 hover:underline">{animalLabel(adoption)}</a>
                                         </td>
 
                                         {/* STATUS */}

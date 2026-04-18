@@ -31,7 +31,7 @@ export default function AdminPetsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedTag, setSelectedTag] = useState("");
+    const [selectedTypeId, setSelectedTypeId] = useState("");
 
     const [pets, setPets] = useState<Pet[]>([]);
     const [totalPets, setTotalPets] = useState(0);
@@ -51,20 +51,20 @@ export default function AdminPetsPage() {
     const fetchPets = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await petService.getPetsPublic({
+            const response = await petService.getPets({
                 page: currentPage,
                 per_page: perPage,
                 search: searchQuery || undefined,
-                tag_id: selectedTag || undefined,
+                type_of_animal_id: selectedTypeId || undefined,
             });
             setPets(response.data);
             setTotalPets(response.total || response.data.length);
         } catch (error) {
-            console.error("Failed to fetch pets with current parameters:", { currentPage, perPage, searchQuery, selectedTag, error });
+            console.error("Failed to fetch pets with current parameters:", { currentPage, perPage, searchQuery, selectedTypeId, error });
         } finally {
             setIsLoading(false);
         }
-    }, [currentPage, perPage, searchQuery, selectedTag]);
+    }, [currentPage, perPage, searchQuery, selectedTypeId]);
 
     useEffect(() => {
         fetchPets();
@@ -120,8 +120,8 @@ export default function AdminPetsPage() {
         setCurrentPage(1);
     }, []);
 
-    const handleTagChange = useCallback((tagId: string) => {
-        setSelectedTag(tagId);
+    const handleTypeChange = useCallback((typeId: string) => {
+        setSelectedTypeId(typeId);
         setCurrentPage(1);
     }, []);
 
@@ -137,7 +137,7 @@ export default function AdminPetsPage() {
 
                 <PetFilter
                     onSearchChange={handleSearchChange}
-                    onTagChange={handleTagChange}
+                    onTypeChange={handleTypeChange}
                 />
 
                 <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white py-2 flex flex-col">

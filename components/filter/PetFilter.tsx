@@ -9,10 +9,10 @@ import { generalService } from "@/services/generalServices";
 
 export interface PetFilterProps {
     onSearchChange?: (search: string) => void;
-    onTagChange?: (tagId: string) => void;
+    onTypeChange?: (typeId: string) => void;
 }
 
-export function PetFilter({ onSearchChange, onTagChange }: PetFilterProps) {
+export function PetFilter({ onSearchChange, onTypeChange }: PetFilterProps) {
     const [tags, setTags] = useState<{ id: string; name: string }[]>([]);
     const [selectedTag, setSelectedTag] = useState<string>("all");
     const [search, setSearch] = useState("");
@@ -64,7 +64,7 @@ export function PetFilter({ onSearchChange, onTagChange }: PetFilterProps) {
                 selectedValues={selectedTag ? [selectedTag] : []}
                 onSelect={(value) => {
                     setSelectedTag(value);
-                    onTagChange?.(value === "all" ? "" : value);
+                    onTypeChange?.(value === "all" ? "" : value);
                 }}
                 placeholder="Tag"
                 mode="single"

@@ -126,7 +126,7 @@ export default function AdminPetsPage() {
     }, []);
 
     const isTakedown = dialogMode === "takedown";
-console.log(pets)
+
     return (
         <div className="min-h-[calc(100vh-64px)] w-full bg-[#E7F3E7] px-4 py-6 sm:px-6 sm:py-10 md:px-12 md:py-12">
             <div className="max-w-4xl mx-auto flex flex-col gap-6">

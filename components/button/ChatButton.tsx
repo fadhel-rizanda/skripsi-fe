@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { chatService } from "@/services/chatServices";
 import {toast} from "sonner";
 import { AxiosError } from "axios";
@@ -34,10 +35,17 @@ export default function ChatButton({
     petShare,
 }: ChatButtonProps) {
     const router = useRouter();
+    const { data: session } = useSession();
     const [isLoading, setIsLoading] = useState(false);
     const { setChats } = useChatStore();
 
     const handleChat = async () => {
+        // Jika belum login, arahkan ke halaman login
+        if (!session) {
+            router.push("/login");
+            return;
+        }
+
         if (!targetUserId) return;
 
         try {

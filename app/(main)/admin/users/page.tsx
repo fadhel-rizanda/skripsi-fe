@@ -172,8 +172,8 @@ export default function AdminUsersPage() {
                                     return (
                                         <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-4 py-3 text-gray-800 whitespace-nowrap text-xs font-mono">
-                                                <a href={`/users/${user.id}`} className="text-blue-600 hover:underline">
-                                                    #{user.id}
+                                                <a href={`/profile/${user.id}`} className="text-blue-600 hover:underline">
+                                                    {user.id}
                                                 </a>
                                             </td>
                                             <td className="px-4 py-3 text-xs text-gray-800 whitespace-normal leading-snug">

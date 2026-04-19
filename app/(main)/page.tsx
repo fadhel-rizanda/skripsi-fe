@@ -6,9 +6,67 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import {useSession} from "next-auth/react";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 
 export default function Home() {
     const { data: session } = useSession()
+    const faqData = [
+        // General
+        {
+            q: "What is Pawsitive?",
+            a: "Pawsitive is a platform that connects adopters and providers to ensure a safe, transparent, and structured pet adoption process, while also offering a community space for pet lovers."
+        },
+        {
+            q: "Who can use this platform?",
+            a: "Anyone can use Pawsitive — adopters, providers, and admins — each with different roles in managing and completing the adoption process."
+        },
+        {
+            q: "Is Pawsitive free to use?",
+            a: "Yes, creating an account and browsing pets on Pawsitive is completely free. There are no hidden fees for adopters going through the adoption process."
+        },
+
+        // Adoption Process
+        {
+            q: "How does the adoption process work?",
+            a: "The process includes applying for adoption, scheduling and completing a meet & greet, submitting and approving requirements, scheduling handover, uploading evidence, and final approval by all parties until the adoption is completed."
+        },
+        {
+            q: "What do I need to start adopting?",
+            a: "You need to create and verify an account, choose a pet, submit an adoption request and wait for the provider to continue next process."
+        },
+        {
+            q: "Can I apply for multiple pets at the same time?",
+            a: "Yes, adopters can apply for multiple pets simultaneously. Each adoption process is independent and managed separately."
+        },
+        {
+            q: "Can the adoption process be canceled or rejected?",
+            a: "Yes, depending on the stage, either party can cancel the process. Open communication between both sides is always encouraged."
+        },
+        {
+            q: "What happens after adoption is completed?",
+            a: "The pet's status will be marked as adopted, ownership is transferred, and both parties can continue engaging in the community."
+        },
+
+        // Safety & Trust
+        {
+            q: "How is safety ensured during adoption?",
+            a: "Pawsitive uses a structured multi-step process including verification, requirement validation, mutual approvals, and admin oversight to ensure every adoption is safe and responsible."
+        },
+        {
+            q: "Will I get updates during the process?",
+            a: "Yes, you will receive notifications for all important actions such as approvals, requirement updates, scheduling, and finalization."
+        },
+
+        // Support & Reporting
+        {
+            q: "How can I get support if I have issues?",
+            a: "You can reach our support team anytime at pawsitivehub.site@gmail.com. We aim to respond as quickly as possible."
+        },
+        {
+            q: "How can I report content on Pawsitive?",
+            a: "Click the report button on the content you want to flag and fill out the form. Our moderation team will review the report and take appropriate action."
+        },
+    ];
 
     return (
         <>
@@ -255,6 +313,7 @@ export default function Home() {
                             </p>
                         </motion.div>
 
+                        {/* Community Highlights */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                             {/* Community Preview Cards */}
                             <motion.div 
@@ -262,20 +321,21 @@ export default function Home() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true, margin: "-100px" }}
                                 transition={{ duration: 0.5, delay: 0.1 }}
-                                className="bg-white rounded-2xl p-6 shadow-md">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center shrink-0">
-                                        <Icon icon="mdi:account-group" className="w-6 h-6 text-green-700" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1">First Time Adopter Tips</h3>
-                                        <p className="text-xs md:text-sm text-gray-500 mb-1 md:mb-2">Posted by Sarah M. • 2 hours ago</p>
-                                        <p className="text-sm md:text-base text-gray-700 mb-2 md:mb-3">Just brought home my first rescue dog! Here are some tips that helped me prepare...</p>
-                                        <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
-                                            <span className="flex items-center gap-1"><Icon icon="message-circle" className="w-4 h-4" /> 24 replies</span>
-                                            <span className="flex items-center gap-1"><Icon icon="thumb-up" className="w-4 h-4" /> 156 likes</span>
-                                        </div>
-                                    </div>
+                                className="bg-white rounded-2xl p-6 shadow-md flex items-start gap-4"
+                            >
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                                    <Icon icon="mdi:forum-outline" className="w-6 h-6 text-green-700" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1">A Space to Share & Learn</h3>
+                                    <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                                        Our community forums are open to all ask questions, share adoption tips,
+                                        or post a milestone. Whether you're preparing to adopt or already a proud
+                                        pet parent, there's a place for you here.
+                                    </p>
+                                    <Link href="/explore/communities" className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors">
+                                        Explore Forums <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                                    </Link>
                                 </div>
                             </motion.div>
 
@@ -284,20 +344,21 @@ export default function Home() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true, margin: "-100px" }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
-                                className="bg-white rounded-2xl p-6 shadow-md">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center shrink-0">
-                                        <Icon icon="mdi:share" className="w-6 h-6 text-orange-700" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1">Success Stories</h3>
-                                        <p className="text-xs md:text-sm text-gray-500 mb-1 md:mb-2">Posted by Mike R. • 5 hours ago</p>
-                                        <p className="text-sm md:text-base text-gray-700 mb-2 md:mb-3">One year ago today, I adopted Luna. She has completely changed my life for the better...</p>
-                                        <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
-                                            <span className="flex items-center gap-1"><Icon icon="message-circle" className="w-4 h-4" /> 48 replies</span>
-                                            <span className="flex items-center gap-1"><Icon icon="thumb-up" className="w-4 h-4" /> 320 likes</span>
-                                        </div>
-                                    </div>
+                                className="bg-white rounded-2xl p-6 shadow-md flex items-start gap-4"
+                            >
+                                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
+                                    <Icon icon="mdi:heart-outline" className="w-6 h-6 text-orange-600" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-base md:text-lg text-gray-900 mb-1">Every Adoption Has a Story</h3>
+                                    <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                                        The community is built on real experiences from the nervous first day
+                                        to the moment it clicks. Share your journey and inspire the next
+                                        person who's still deciding.
+                                    </p>
+                                    <Link href="/explore/posts" className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors">
+                                        Share Your Story <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                                    </Link>
                                 </div>
                             </motion.div>
                         </div>
@@ -378,6 +439,87 @@ export default function Home() {
                                 </motion.div>
                             )
                         }
+                    </div>
+                </section>
+
+                {/* FAQ Section */}
+                <section id="faq" className="py-16 md:py-24 px-6 bg-white">
+                    <div className="container mx-auto max-w-4xl">
+
+                        {/* Header */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-100px" }}
+                            transition={{ duration: 0.6 }}
+                            className="text-center mb-12">
+                            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-2 md:mb-4">
+                                Frequently Asked Questions
+                            </h2>
+                            <p className="text-base md:text-lg text-gray-600">
+                                Everything you need to know about adopting with Pawsitive
+                            </p>
+                        </motion.div>
+
+                        {/* FAQ Items */}
+                        <div className="space-y-3">
+                            <Accordion type="single" collapsible className="w-full">
+                                {faqData.map((item, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.05 }}
+                                    >
+                                        <AccordionItem
+                                            value={`item-${i}`}
+                                            className="bg-gray-50 rounded-2xl px-6 mb-3 border-none hover:bg-gray-100 transition-all"
+                                        >
+                                            <AccordionTrigger className="font-semibold text-base md:text-lg text-gray-900 hover:no-underline py-5">
+                                                {item.q}
+                                            </AccordionTrigger>
+                                            <AccordionContent className="text-sm md:text-base text-gray-600 leading-relaxed pb-5">
+                                                {item.a}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </motion.div>
+                                ))}
+                            </Accordion>
+                        </div>
+
+                        {/* CTA */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true, margin: "-100px" }}
+                            transition={{ duration: 0.5 }}
+                            className="text-center mt-12 bg-green-50 rounded-3xl p-8 border border-green-200"
+                        >
+                            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+                                Still have questions?
+                            </h3>
+                            <p className="text-sm md:text-base text-gray-600 mb-6">
+                                Explore the community or contact our support team anytime.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <Button
+                                    className="bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full px-6 py-5"
+                                    asChild
+                                >
+                                    <Link href="/explore/communities">Visit Community</Link>
+                                </Button>
+                                <Button
+                                    className="bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-full px-6 py-5 border-2 border-gray-300"
+                                    asChild
+                                >
+                                    <Link href="mailto:pawsitivehub.site@gmail.com?subject=Pawsitive%20Support&body=Hello%20Pawsitive%20Team,">
+                                        Contact Support
+                                    </Link>
+                                </Button>
+                            </div>
+                        </motion.div>
+
                     </div>
                 </section>
 

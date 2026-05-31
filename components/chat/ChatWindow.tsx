@@ -505,7 +505,7 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
         setPendingPetShare(petShare);
         clearPetShareParams();
 
-    }, [chat.id, chat.users, chat.user_ids, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
+    }, [chat.id, (chat.users?.map(u => String(u.id)) ?? []).join(','), (chat.user_ids ?? []).join(','), clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
         return (

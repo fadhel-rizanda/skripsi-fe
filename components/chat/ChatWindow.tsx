@@ -1,25 +1,25 @@
 "use client";
 
-import {useEffect, useState, useRef, useCallback, memo} from "react";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {Button} from "@/components/ui/button";
-import {Icon} from "@iconify/react";
-import {chatService} from "@/services/chatServices";
-import {Chat, Message} from "@/types/chat";
-import {Skeleton} from "@/components/ui/skeleton";
-import {Input} from "@/components/ui/input";
-import {toast} from "sonner";
-import {SendMessageSchema} from "@/schemas/chat.schema";
-import {useSession} from "next-auth/react";
-import {clsx} from "clsx";
+import { useEffect, useState, useRef, useCallback, memo } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@iconify/react";
+import { chatService } from "@/services/chatServices";
+import { Chat, Message } from "@/types/chat";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { SendMessageSchema } from "@/schemas/chat.schema";
+import { useSession } from "next-auth/react";
+import { clsx } from "clsx";
 import Image from "next/image";
-import {isValidUrl} from "@/lib/utils";
-import {Attachment} from "@/types/attachment";
-import {getEcho} from "@/lib/echo";
-import {downloadAttachment, uploadAttachment} from "@/lib/attachment-helpers";
-import {AxiosError} from "axios";
-import {ErrorResponse} from "@/types";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import { isValidUrl } from "@/lib/utils";
+import { Attachment } from "@/types/attachment";
+import { getEcho } from "@/lib/echo";
+import { downloadAttachment, uploadAttachment } from "@/lib/attachment-helpers";
+import { AxiosError } from "axios";
+import { ErrorResponse } from "@/types";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
     Dialog,
     DialogContent,
@@ -28,14 +28,14 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
-import {ActionDialog} from "@/components/dialog/ActionDialog";
-import {useChatStore} from "@/store/useChatStore";
+import { ActionDialog } from "@/components/dialog/ActionDialog";
+import { useChatStore } from "@/store/useChatStore";
 import ChatFormDialog from "@/components/dialog/ChatFormDialog";
 import Link from "next/link";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import {createPetShareMessage, parsePetShareMessage} from "@/lib/chat-pet-share";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { createPetShareMessage, parsePetShareMessage } from "@/lib/chat-pet-share";
 
-function MessageContent({content}: { content: string }) {
+function MessageContent({ content }: { content: string }) {
     const petShare = parsePetShareMessage(content);
 
     if (!petShare) {
@@ -109,10 +109,10 @@ function MessageContent({content}: { content: string }) {
     );
 }
 
-function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
+function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
-    const {data: session} = useSession();
+    const { data: session } = useSession();
     const currentUser = session?.user;
 
     const [cursor, setCursor] = useState<string | null>(null);
@@ -122,7 +122,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
     const [content, setContent] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
-    const [pendingPetShare, setPendingPetShare] = useState<{petId: string; petName: string; petImageUrl?: string; petShareToken?: string} | null>(null);
+    const [pendingPetShare, setPendingPetShare] = useState<{ petId: string; petName: string; petImageUrl?: string; petShareToken?: string } | null>(null);
 
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState<string>("");
@@ -144,6 +144,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         const petName = searchParams.get("pet_name")?.trim();
         const petImageUrl = searchParams.get("pet_image")?.trim();
         const petShareToken = searchParams.get("pet_share_token")?.trim();
+        const petOwnerId = searchParams.get("pet_owner_id")?.trim();
 
         if (!petId || !petName) {
             return null;
@@ -154,6 +155,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
             petName,
             petImageUrl: petImageUrl || undefined,
             petShareToken: petShareToken || undefined,
+            petOwnerId: petOwnerId || undefined,
         };
     }, [searchParams]);
 
@@ -163,9 +165,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         params.delete("pet_name");
         params.delete("pet_image");
         params.delete("pet_share_token");
+        params.delete("pet_owner_id");
 
         const nextQuery = params.toString();
-        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {scroll: false});
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
     }, [pathname, router, searchParams]);
     const isDirectPrivate = chat.type === "private" && chat.users[0].name === chat.name;
 
@@ -424,7 +427,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                     type?: string;
                     data?: Record<string, unknown>;
                 };
-                const {type, data} = event;
+                const { type, data } = event;
 
                 switch (type) {
                     case 'message.sent':
@@ -482,40 +485,63 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
         const petShare = petShareFromQuery();
         if (!petShare || isChatDisabled || loading) return;
 
+        // Validasi: petShare hanya ditampilkan ke chat dengan provider pemilik hewan
+        if (petShare.petOwnerId) {
+            // Kumpulkan semua member IDs dari berbagai sumber (API bisa berbeda strukturnya)
+            const fromUsers = chat.users?.map(u => String(u.id)) ?? [];
+            const fromUserIds = (chat.user_ids ?? []).map(String);
+            const fromCreatedBy = typeof chat.created_by === "object" && chat.created_by !== null
+                ? [String((chat.created_by as { id?: string | number }).id ?? "")].filter(Boolean)
+                : typeof chat.created_by === "string" || typeof chat.created_by === "number"
+                    ? [String(chat.created_by)]
+                    : [];
+            const allMemberIds = [...new Set([...fromUsers, ...fromUserIds, ...fromCreatedBy])];
+            const petOwnerIdStr = String(petShare.petOwnerId);
+
+            console.debug("[PetShare] chat.id:", chat.id, "| petOwnerId:", petOwnerIdStr, "| memberIds:", allMemberIds);
+
+            const isOwnerInChat = allMemberIds.includes(petOwnerIdStr);
+            if (!isOwnerInChat) {
+                console.debug("[PetShare] Owner not in chat — skipping petShare");
+                clearPetShareParams();
+                return;
+            }
+        }
+
         const processKey = `${chat.id}:${petShare.petId}:${petShare.petShareToken ?? "default"}`;
         if (processedPetShareKeyRef.current === processKey) {
             return;
         }
 
         processedPetShareKeyRef.current = processKey;
-        
+
         setPendingPetShare(petShare);
         clearPetShareParams();
 
-    }, [chat.id, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
+    }, [chat.id, chat.users, chat.user_ids, chat.created_by, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
         return (
             <div className="flex flex-col h-full bg-[#F9FAFB]">
                 <div className="bg-white border-b px-3 md:px-6 py-3 md:py-4 flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full"/>
-                    <Skeleton className="h-4 w-32"/>
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
                 </div>
                 <div className="flex-1 p-3 md:p-6 space-y-5 md:space-y-6 overflow-y-auto">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i} className={`flex gap-3 ${i % 2 === 0 ? "justify-end" : "justify-start"}`}>
-                            {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full shrink-0"/>}
+                            {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full shrink-0" />}
                             <div className="flex flex-col space-y-2 w-full max-w-[60%]">
                                 <Skeleton
-                                    className={`h-16 w-full rounded-2xl ${i % 2 === 0 ? "rounded-tr-none" : "rounded-tl-none"}`}/>
-                                <Skeleton className={`h-3 w-12 ${i % 2 === 0 ? "self-end" : "self-start"}`}/>
+                                    className={`h-16 w-full rounded-2xl ${i % 2 === 0 ? "rounded-tr-none" : "rounded-tl-none"}`} />
+                                <Skeleton className={`h-3 w-12 ${i % 2 === 0 ? "self-end" : "self-start"}`} />
                             </div>
                         </div>
                     ))}
                 </div>
                 <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex gap-2">
-                    <Skeleton className="h-10 flex-1 rounded-2xl"/>
-                    <Skeleton className="h-10 w-10 rounded-full"/>
+                    <Skeleton className="h-10 flex-1 rounded-2xl" />
+                    <Skeleton className="h-10 w-10 rounded-full" />
                 </div>
             </div>
         );
@@ -537,7 +563,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                 onClick={onBack}
                                 aria-label="Back to chat list"
                             >
-                                <Icon icon="ph:arrow-left" className="w-5 h-5"/>
+                                <Icon icon="ph:arrow-left" className="w-5 h-5" />
                             </Button>
                         )}
                         <ChatFormDialog
@@ -609,15 +635,15 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                 {/* Header: Name & Time */}
                                 <div
                                     className={`flex items-center gap-2 mb-1 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                                <span className="text-xs font-semibold text-gray-700">
-                                    {isMe ? "You" : m.sender.name}
-                                </span>
+                                    <span className="text-xs font-semibold text-gray-700">
+                                        {isMe ? "You" : m.sender.name}
+                                    </span>
                                     <span className="text-[11px] text-gray-500">
-                                    {new Date(m.created_at).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </span>
+                                        {new Date(m.created_at).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </span>
                                     {m.created_at !== m.updated_at && (
                                         <span
                                             className="text-[11px] text-gray-400 italic">(edited)</span>
@@ -654,23 +680,23 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                             // Edit Mode
                                             <div
                                                 className="px-4 py-2.5 rounded-2xl shadow-sm border-2 border-emerald-500 bg-white">
-                                            <textarea
-                                                value={editContent}
-                                                onChange={(e) => setEditContent(e.target.value)}
-                                                className="w-full text-sm resize-none border-none focus:outline-none focus:ring-0 p-0 bg-transparent text-gray-800"
-                                                rows={3}
-                                                autoFocus
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                        e.preventDefault();
-                                                        handleEditMessage(m.id);
-                                                    }
-                                                    if (e.key === 'Escape') {
-                                                        setEditingMessageId(null);
-                                                        setEditContent("");
-                                                    }
-                                                }}
-                                            />
+                                                <textarea
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    className="w-full text-sm resize-none border-none focus:outline-none focus:ring-0 p-0 bg-transparent text-gray-800"
+                                                    rows={3}
+                                                    autoFocus
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            handleEditMessage(m.id);
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            setEditingMessageId(null);
+                                                            setEditContent("");
+                                                        }
+                                                    }}
+                                                />
                                                 <div className="flex gap-2 mt-2 justify-end">
                                                     <Button
                                                         size="sm"
@@ -717,10 +743,10 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                         )}
                                                         onClick={() => handleDownload(m.attachment as Attachment)}
                                                     >
-                                                        <Icon icon="ph:file-arrow-down" className="w-4 h-4 shrink-0"/>
+                                                        <Icon icon="ph:file-arrow-down" className="w-4 h-4 shrink-0" />
                                                         <span className="truncate text-xs font-medium">
-                                                        {m.attachment.filename}
-                                                    </span>
+                                                            {m.attachment.filename}
+                                                        </span>
                                                     </Button>
                                                 )}
                                             </div>
@@ -736,7 +762,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                     size="icon"
                                                     className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
                                                 >
-                                                    <Icon icon="lucide:more-vertical" className="h-4 w-4"/>
+                                                    <Icon icon="lucide:more-vertical" className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-40">
@@ -744,7 +770,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                     m.content?.trim() &&
                                                     <DropdownMenuItem
                                                         onClick={() => navigator.clipboard.writeText(m.content)}>
-                                                        <Icon icon="lucide:copy" className="h-4 w-4 mr-2"/>
+                                                        <Icon icon="lucide:copy" className="h-4 w-4 mr-2" />
                                                         Copy text
                                                     </DropdownMenuItem>
                                                 }
@@ -756,7 +782,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                             setEditingMessageId(m.id);
                                                             setEditContent(m.content);
                                                         }}
-                                                    ><Icon icon="lucide:pencil" className="h-4 w-4 mr-2"/>
+                                                    ><Icon icon="lucide:pencil" className="h-4 w-4 mr-2" />
                                                         Edit
                                                     </DropdownMenuItem>
                                                 }
@@ -769,7 +795,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                                             setDeleteDialogOpen(true);
                                                         }}
                                                     >
-                                                        <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2"/>
+                                                        <Icon icon="lucide:trash-2" className="h-4 w-4 mr-2" />
                                                         Delete
                                                     </DropdownMenuItem>
                                                 }
@@ -794,14 +820,14 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                         <div
                             className="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg flex items-center justify-between border border-emerald-200">
                             <div className="flex items-center gap-2">
-                                <Icon icon="ph:paperclip" className="w-4 h-4"/>
+                                <Icon icon="ph:paperclip" className="w-4 h-4" />
                                 <span className="font-medium truncate">{file.name}</span>
                             </div>
                             <button
                                 onClick={() => setFile(null)}
                                 className="text-red-500 hover:text-red-700 font-bold ml-2"
                             >
-                                <Icon icon="ph:x" className="w-4 h-4"/>
+                                <Icon icon="ph:x" className="w-4 h-4" />
                             </button>
                         </div>
                     )}
@@ -814,7 +840,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                                 onClick={() => setPendingPetShare(null)}
                                 className="absolute -top-2 -right-2 bg-red-100 text-red-500 rounded-full p-1 hover:bg-red-200 transition-colors shadow-sm"
                             >
-                                <Icon icon="ph:x" className="w-3.5 h-3.5"/>
+                                <Icon icon="ph:x" className="w-3.5 h-3.5" />
                             </button>
                             {pendingPetShare.petImageUrl && (
                                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-gray-50 flex-shrink-0 relative overflow-hidden border">
@@ -870,7 +896,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                             disabled={isSending || isChatDisabled}
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            <Icon icon="ph:paperclip" className="w-5 h-5"/>
+                            <Icon icon="ph:paperclip" className="w-5 h-5" />
                         </Button>
 
                         <Button
@@ -879,7 +905,7 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                             className="rounded-full bg-emerald-500 hover:bg-emerald-600 px-4 md:px-6"
                         >
                             <span className="hidden sm:inline">Send</span>
-                            <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4"/>
+                            <Icon icon="ph:paper-plane-right" className="sm:ml-2 w-4 h-4" />
                         </Button>
                     </div>
                 </div>
@@ -930,10 +956,9 @@ function ChatWindow({chat, onBack}: { chat: Chat; onBack?: () => void; }) {
                 description={
                     isChatDisabled
                         ? "The other member is no longer here. Delete this chat record? You won't be able to access ini these messages anymore."
-                        : `Deactivate this chat? It will be removed from your inbox${
-                            isDirectPrivate
-                                ? ", but can be reactivated if there’s a new message—unless the other member deletes it permanently."
-                                : "."
+                        : `Deactivate this chat? It will be removed from your inbox${isDirectPrivate
+                            ? ", but can be reactivated if there’s a new message—unless the other member deletes it permanently."
+                            : "."
                         }`
                 }
                 successTitle={isChatDisabled ? "Chat Deleted" : "Chat Deactivated"}

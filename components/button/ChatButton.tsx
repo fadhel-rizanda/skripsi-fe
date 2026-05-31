@@ -6,10 +6,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { chatService } from "@/services/chatServices";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { ErrorResponse } from "@/types";
-import {useChatStore} from "@/store/useChatStore";
+import { useChatStore } from "@/store/useChatStore";
 
 interface ChatButtonPetShare {
     petId: string;
@@ -67,6 +67,7 @@ export default function ChatButton({
                 params.set("pet_id", petShare.petId);
                 params.set("pet_name", petShare.petName);
                 params.set("pet_share_token", shareToken);
+                params.set("pet_owner_id", targetUserId);
 
                 if (petShare.petImageUrl) {
                     params.set("pet_image", petShare.petImageUrl);
@@ -79,7 +80,9 @@ export default function ChatButton({
 
             setChats((prev) => {
                 const exists = prev.find((c) => c.id === chat.data.id);
-                if (exists) return prev;
+                if (exists) {
+                    return prev.map((c) => c.id === chat.data.id ? { ...c, ...chat.data } : c);
+                }
                 return [chat.data, ...prev];
             });
 

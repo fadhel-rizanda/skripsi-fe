@@ -28,7 +28,7 @@ export default function ChatLayout({children}: { children: React.ReactNode; }) {
                 <main className="flex-1 min-w-0 bg-[hsl(var(--chat-bg))]">
                     {chatId ? (
                         activeChat ? (
-                            <ChatWindow chat={activeChat} onBack={() => router.push("/chat")}/>
+                            <ChatWindow key={chatId} chat={activeChat} onBack={() => router.push("/chat")}/>
                         ) : (
                             <div className="h-full flex items-center justify-center text-muted-foreground px-4 text-center">
                                 Chat not found.

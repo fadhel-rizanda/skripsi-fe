@@ -485,40 +485,27 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
         const petShare = petShareFromQuery();
         if (!petShare || isChatDisabled || loading) return;
 
-        // Validasi: petShare hanya ditampilkan ke chat dengan provider pemilik hewan
+        // Hanya tampilkan petShare ke chat dengan provider pemilik hewan
         if (petShare.petOwnerId) {
-            // Kumpulkan semua member IDs dari berbagai sumber (API bisa berbeda strukturnya)
-            const fromUsers = chat.users?.map(u => String(u.id)) ?? [];
-            const fromUserIds = (chat.user_ids ?? []).map(String);
-            const fromCreatedBy = typeof chat.created_by === "object" && chat.created_by !== null
-                ? [String((chat.created_by as { id?: string | number }).id ?? "")].filter(Boolean)
-                : typeof chat.created_by === "string" || typeof chat.created_by === "number"
-                    ? [String(chat.created_by)]
-                    : [];
-            const allMemberIds = [...new Set([...fromUsers, ...fromUserIds, ...fromCreatedBy])];
-            const petOwnerIdStr = String(petShare.petOwnerId);
-
-            console.debug("[PetShare] chat.id:", chat.id, "| petOwnerId:", petOwnerIdStr, "| memberIds:", allMemberIds);
-
-            const isOwnerInChat = allMemberIds.includes(petOwnerIdStr);
+            const memberIds = [
+                ...(chat.users?.map(u => String(u.id)) ?? []),
+                ...(chat.user_ids ?? []).map(String),
+            ];
+            const isOwnerInChat = memberIds.includes(String(petShare.petOwnerId));
             if (!isOwnerInChat) {
-                console.debug("[PetShare] Owner not in chat — skipping petShare");
                 clearPetShareParams();
                 return;
             }
         }
 
         const processKey = `${chat.id}:${petShare.petId}:${petShare.petShareToken ?? "default"}`;
-        if (processedPetShareKeyRef.current === processKey) {
-            return;
-        }
+        if (processedPetShareKeyRef.current === processKey) return;
 
         processedPetShareKeyRef.current = processKey;
-
         setPendingPetShare(petShare);
         clearPetShareParams();
 
-    }, [chat.id, chat.users, chat.user_ids, chat.created_by, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
+    }, [chat.id, chat.users, chat.user_ids, clearPetShareParams, isChatDisabled, loading, petShareFromQuery]);
 
     if (loading) {
         return (

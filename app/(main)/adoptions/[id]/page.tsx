@@ -12,6 +12,7 @@ import {useCallback, useEffect, useState} from "react";
 import {toast} from "sonner";
 import {useSession} from "next-auth/react";
 import {useAdoptionStore} from "@/store/useAdoptionStore";
+import {Icon} from "@iconify/react";
 
 export default function AdoptionDetailPage() {
     const params = useParams();
@@ -46,15 +47,27 @@ export default function AdoptionDetailPage() {
         }
     }, [refreshTicket]);
 
+    const isPartyDeactivated = !!adoption && (adoption.provider?.is_active === false || adoption.adopter?.is_active === false);
+
     return (
         <>
             <div className="w-full flex flex-col items-center justify-start gap-4 sm:gap-6 bg-[#E8F5E9] min-h-screen px-4 sm:px-6 pt-4 sm:pt-6 pb-10">
                 <AdoptionHeader stage={adoption?.stage_tag.name} petName={adoption?.pet.name}/>
-                <SubmittedCollapsible currentUser={session?.user} adoption={adoption} />
+                
+                {isPartyDeactivated && (
+                    <div className="w-full max-w-4xl px-4 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-3 shadow-sm">
+                        <Icon icon="ph:warning-circle" className="w-5 h-5 shrink-0 text-amber-600" />
+                        <div className="text-sm font-medium text-left">
+                            Notice: One of the users involved in this adoption has deactivated their account. Further progress and interactions are disabled.
+                        </div>
+                    </div>
+                )}
 
-                <MeetNGreetCollapsible currentUser={session?.user} adoption={adoption}/>
-                <ReviewedCollapsible currentUser={session?.user} adoption={adoption}/>
-                <HandoverCollapsible currentUser={session?.user} adoption={adoption}/>
+                <SubmittedCollapsible currentUser={session?.user} adoption={adoption} isPartyDeactivated={isPartyDeactivated} />
+
+                <MeetNGreetCollapsible currentUser={session?.user} adoption={adoption} isPartyDeactivated={isPartyDeactivated} />
+                <ReviewedCollapsible currentUser={session?.user} adoption={adoption} isPartyDeactivated={isPartyDeactivated} />
+                <HandoverCollapsible currentUser={session?.user} adoption={adoption} isPartyDeactivated={isPartyDeactivated} />
             </div>
         </>
     );

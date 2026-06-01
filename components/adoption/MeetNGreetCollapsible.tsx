@@ -17,11 +17,13 @@ import {CalendarClock} from "lucide-react";
 interface MeetNGreetCollapsibleProps {
     currentUser?: UserProfile;
     adoption?: Adoption | null;
+    isPartyDeactivated?: boolean;
 }
 
 export default function MeetNGreetCollapsible({
                                                   currentUser,
                                                   adoption,
+                                                  isPartyDeactivated = false,
                                               }: MeetNGreetCollapsibleProps) {
     const [meetNGreet, setMeetNGreet] = useState<MeetNGreet | null>(null);
     const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function MeetNGreetCollapsible({
     const stageState = getStageState(adoption, "Meet & Greet");
     const dotColor = getDotColor(stageState);
     const headerBadge = getHeaderBadge(stageState, adoption);
-    const isReadOnly = stageState === "done" || stageState === "inactive";
+    const isReadOnly = stageState === "done" || stageState === "inactive" || isPartyDeactivated;
 
     useEffect(() => {
         if (!adoption?.id) return;

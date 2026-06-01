@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ThumbsUp, MessageSquare, X } from "lucide-react";
+import clsx from "clsx";
 import { Post } from "@/types/post";
 import { useSession } from "next-auth/react";
 import { ReportDialog } from "@/components/dialog/ReportDialog";
@@ -72,23 +73,45 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
 
                 {/* ── Profile Row ── full width, avatar sejajar dengan nama & waktu */}
                 <div className="flex items-center justify-between gap-2">
-                    <Link
-                        href={authorProfileHref}
-                        className="flex items-center gap-2.5 group min-w-0"
-                    >
-                        <Avatar className="h-9 w-9 shrink-0 border border-gray-200 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
-                            <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
-                            <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate group-hover:underline">
-                                {post.created_by.name}
-                            </span>
-                            <span className="text-[11px] text-gray-400 leading-tight">
-                                {formatRelativeTime(post.created_at)}
-                            </span>
+                    {!post.created_by.is_active ? (
+                        <div className="flex items-center gap-2.5 min-w-0 opacity-75">
+                            <Avatar className="h-9 w-9 shrink-0 border border-gray-200 grayscale">
+                                <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
+                                <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0 text-left">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-gray-500 text-xs sm:text-sm leading-tight truncate italic">
+                                        {post.created_by.name}
+                                    </span>
+                                    <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 text-[10px] px-1.5 py-0 leading-none h-4">
+                                        Deactivated
+                                    </Badge>
+                                </div>
+                                <span className="text-[11px] text-gray-400 leading-tight">
+                                    {formatRelativeTime(post.created_at)}
+                                </span>
+                            </div>
                         </div>
-                    </Link>
+                    ) : (
+                        <Link
+                            href={authorProfileHref}
+                            className="flex items-center gap-2.5 group min-w-0"
+                        >
+                            <Avatar className="h-9 w-9 shrink-0 border border-gray-200 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                                <AvatarImage src={post.created_by.avatar || undefined} alt={post.created_by.name} />
+                                <AvatarFallback>{post.created_by.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0 text-left">
+                                <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate group-hover:underline">
+                                    {post.created_by.name}
+                                </span>
+                                <span className="text-[11px] text-gray-400 leading-tight">
+                                    {formatRelativeTime(post.created_at)}
+                                </span>
+                            </div>
+                        </Link>
+                    )}
 
                     {post.created_by.id === session?.user.id && (
                         <>
@@ -189,8 +212,13 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     <Button
                         variant="ghost"
                         size="sm"
-                        className={`text-gray-600 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 h-8 ${post.is_liked ? 'text-green-600 bg-green-50' : ''}`}
-                        onClick={handleLikeClick}
+                        className={clsx(
+                            "text-gray-600 hover:text-green-600 hover:bg-green-50 gap-1.5 px-2 -ml-2 h-8",
+                            post.is_liked ? 'text-green-600 bg-green-50' : '',
+                            !post.created_by.is_active && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-gray-600"
+                        )}
+                        onClick={!post.created_by.is_active ? undefined : handleLikeClick}
+                        disabled={!post.created_by.is_active}
                     >
                         <ThumbsUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         <span className="text-xs font-medium">
@@ -200,8 +228,12 @@ export function PostCard({ post, onLike, onRefresh, formatRelativeTime }: PostCa
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2 h-8"
-                        onClick={handleCommentClick}
+                        className={clsx(
+                            "text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5 px-2 h-8",
+                            !post.created_by.is_active && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-gray-600"
+                        )}
+                        onClick={!post.created_by.is_active ? undefined : handleCommentClick}
+                        disabled={!post.created_by.is_active}
                     >
                         <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         <span className="text-xs font-medium">{post.comments_count} Comments</span>

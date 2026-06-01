@@ -160,14 +160,14 @@ export default function SetRequirementForm({ adoptionId, onSuccess, onCancel }: 
                         type="button"
                         variant="outline"
                         onClick={onCancel}
-                        className="flex-1 rounded-xl h-9 sm:h-10 text-xs sm:text-sm font-bold gap-1.5 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        className="flex-1 rounded-xl h-9 sm:h-10 text-xs sm:text-sm gap-1.5 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
                     >
                         <XCircle className="w-4 h-4" />
                         Cancel
                     </Button>
                     <Button
                         type="submit"
-                        className="flex-1 bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-9 sm:h-10 text-xs sm:text-sm font-bold gap-1.5"
+                        className="flex-1 bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-9 sm:h-10 text-xs sm:text-sm gap-1.5"
                     >
                         <Save className="w-4 h-4" />
                         Save Requirements

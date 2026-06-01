@@ -19,4 +19,9 @@ export interface Community {
     is_member: boolean;
     is_admin: boolean;
     is_active: boolean;
+    created_by?: {
+        id: string;
+        name: string;
+        is_active?: boolean;
+    };
 }

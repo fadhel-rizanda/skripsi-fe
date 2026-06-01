@@ -121,66 +121,70 @@ export default function ChatSidebar() {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-                {chats.map((chat) => (
-                    <Link key={chat.id} href={`/chat/${chat.id}`} onClick={() => (chat.unread_count > 0) && handleMarkAsRead(chat.id)}>
-                        <div className={clsx(
-                            "flex gap-3 px-3 md:px-4 py-4 cursor-pointer transition relative border-l-4",
-                            activeId === chat.id
-                                ? "bg-emerald-50 border-emerald-500"
-                                : "hover:bg-gray-50 border-transparent"
-                        )}>
-                            <div className="relative h-12 w-12 shrink-0">
-                                <Avatar className="h-12 w-12">
-                                    {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
-                                        <Image
-                                            src={chat.users[0].avatar}
-                                            alt={chat.name || "Chat Avatar"}
-                                            fill
-                                            priority
-                                            className="rounded-full object-cover"
-                                            sizes="48px"
-                                            onError={(e) => {
-                                                console.error("Image failed to load:", chat.users[0].avatar);
-                                            }}
-                                        />
-                                    ) : (
-                                        <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
-                                            {chat?.name?.[0] || "U"}
-                                        </AvatarFallback>
-                                    )}
-                                </Avatar>
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className="font-semibold text-sm truncate text-gray-900">
-                                        {chat.name}
-                                    </h3>
-                                    {chat?.last_message && (
-                                        <span className="text-[10px] text-gray-500 shrink-0 ml-1">
-                                            {new Date(chat.last_message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    )}
+                {chats.map((chat) => {
+                    const isDeactivatedChat = chat.type === "private" && chat.users[0]?.is_active === false;
+                    return (
+                        <Link key={chat.id} href={`/chat/${chat.id}`} onClick={() => (chat.unread_count > 0) && handleMarkAsRead(chat.id)}>
+                            <div className={clsx(
+                                "flex gap-3 px-3 md:px-4 py-4 cursor-pointer transition relative border-l-4",
+                                activeId === chat.id
+                                    ? "bg-emerald-50 border-emerald-500"
+                                    : "hover:bg-gray-50 border-transparent",
+                                isDeactivatedChat && "opacity-75"
+                            )}>
+                                <div className={clsx("relative h-12 w-12 shrink-0", isDeactivatedChat && "grayscale")}>
+                                    <Avatar className="h-12 w-12">
+                                        {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
+                                            <Image
+                                                src={chat.users[0].avatar}
+                                                alt={chat.name || "Chat Avatar"}
+                                                fill
+                                                priority
+                                                className="rounded-full object-cover"
+                                                sizes="48px"
+                                                onError={(e) => {
+                                                    console.error("Image failed to load:", chat.users[0].avatar);
+                                                }}
+                                            />
+                                        ) : (
+                                            <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold">
+                                                {chat?.name?.[0] || "U"}
+                                            </AvatarFallback>
+                                        )}
+                                    </Avatar>
                                 </div>
 
-                                <div className="flex items-center justify-between">
-                                    <p className={clsx(
-                                        "text-xs truncate flex-1 pr-2",
-                                        chat.unread_count > 0 ? "text-gray-900 font-bold" : "text-gray-500"
-                                    )}>
-                                        {getChatPreview(chat.last_message?.content)}
-                                    </p>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <h3 className={clsx("font-semibold text-sm truncate", isDeactivatedChat ? "text-gray-500 italic" : "text-gray-900")}>
+                                            {chat.name}
+                                        </h3>
+                                        {chat?.last_message && (
+                                            <span className="text-[10px] text-gray-500 shrink-0 ml-1">
+                                                {new Date(chat.last_message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        )}
+                                    </div>
 
-                                    {chat.unread_count > 0 && (
-                                        <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4.5 text-center">
-                                            {chat.unread_count > 99 ? '99+' : chat.unread_count}
-                                        </span>
-                                    )}
+                                    <div className="flex items-center justify-between">
+                                        <p className={clsx(
+                                            "text-xs truncate flex-1 pr-2",
+                                            chat.unread_count > 0 ? "text-gray-900 font-bold" : "text-gray-500"
+                                        )}>
+                                            {getChatPreview(chat.last_message?.content)}
+                                        </p>
+
+                                        {chat.unread_count > 0 && (
+                                            <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4.5 text-center">
+                                                {chat.unread_count > 99 ? '99+' : chat.unread_count}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    );
+                })}
             </div>
         </aside>
     );

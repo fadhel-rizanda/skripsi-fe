@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Edit3 } from "lucide-react"
 import UpdateRequirementForm from "@/components/form/UpdateRequirementForm";
 import { Requirement } from "@/types/adoption";
+import {Icon} from "@iconify/react";
 
 type Props = {
     adoptionId: string
@@ -35,8 +36,14 @@ export default function UpdateRequirementDialog({
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto rounded-2xl p-5 sm:p-6">
-                <DialogHeader className="text-center sm:text-center border-b pb-4 mb-4 sm:mb-5">
+                <DialogHeader className="text-center sm:text-center border-b pb-6">
                     <DialogTitle className="text-center text-lg sm:text-xl font-bold">Update Requirement</DialogTitle>
+                    <div className="w-full max-w-4xl px-4 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-3 shadow-sm">
+                        <Icon icon="ph:warning-circle" className="w-5 h-5 shrink-0 text-amber-600" />
+                        <div className="text-sm font-medium text-left">
+                            Please do not provide or fill in highly sensitive private data (such as KTP, KK, NPWP, etc.) unless it is absolutely necessary.
+                        </div>
+                    </div>
                 </DialogHeader>
                 <div className="py-2">
                     <UpdateRequirementForm

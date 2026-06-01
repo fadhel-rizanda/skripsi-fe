@@ -38,4 +38,7 @@ export const userService = {
         return response.data;
     },
 
+    deactivateOwnAccount: async (password: string): Promise<void> => {
+        await api.patch("/api/v1/profile/deactivate", { password });
+    },
 };

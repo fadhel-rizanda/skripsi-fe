@@ -13,9 +13,11 @@ import AdoptionTerminateButton from "@/components/button/AdoptionTerminateButton
 export default function SubmittedCollapsible({
                                                  adoption,
                                                  currentUser,
+                                                 isPartyDeactivated = false,
                                              }: {
     adoption?: Adoption | null;
     currentUser?: UserProfile | null;
+    isPartyDeactivated?: boolean;
 }) {
     const router = useRouter();
     const date = adoption?.created_at
@@ -102,20 +104,20 @@ export default function SubmittedCollapsible({
                             />
                             <DetailItem
                                 label="Applicant Name"
-                                value={adoption.adopter?.name || "Unknown Adopter"}
-                                directUrl={`/profile/${adoption.adopter?.id}`}
+                                value={adoption.adopter?.is_active === false ? `${adoption.adopter?.name} (Deactivated User)` : (adoption.adopter?.name || "Unknown Adopter")}
+                                directUrl={adoption.adopter?.is_active === false ? undefined : `/profile/${adoption.adopter?.id}`}
                             />
                             <DetailItem
                                 label="Provider Name"
-                                value={adoption.provider.name || "Unknown Provider"}
-                                directUrl={`/profile/${adoption.provider.id}`}
+                                value={adoption.provider?.is_active === false ? `${adoption.provider?.name} (Deactivated User)` : (adoption.provider?.name || "Unknown Provider")}
+                                directUrl={adoption.provider?.is_active === false ? undefined : `/profile/${adoption.provider?.id}`}
                             />
                         </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2 mt-4">
                         {
-                            isActive &&
+                            isActive && !isPartyDeactivated &&
                             (
                                 <AdoptionTerminateButton
                                     adoption={adoption}
@@ -129,6 +131,7 @@ export default function SubmittedCollapsible({
                             <ChatButton
                                 targetUserId={otherUserId}
                                 label={`Chat ${role}`}
+                                disabled={isPartyDeactivated}
                             />
                         )}
                     </div>

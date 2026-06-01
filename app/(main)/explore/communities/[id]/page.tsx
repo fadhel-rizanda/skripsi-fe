@@ -329,6 +329,13 @@ export default function CommunityDetailPage() {
           {community.members_count.toLocaleString()} Members
         </p>
 
+        {community.created_by?.is_active === false && (
+          <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 text-xs mt-3.5 flex items-center gap-1.5 px-2.5 py-0.5 w-fit">
+            <Icon icon="ph:warning-circle" className="w-3.5 h-3.5 shrink-0" />
+            <span>Creator Inactive</span>
+          </Badge>
+        )}
+
         <p className="text-sm text-gray-600 mt-4 leading-relaxed max-w-72 md:max-w-xl lg:max-w-3xl xl:max-w-52 wrap-break-word whitespace-pre-line">
           {community.description}
         </p>

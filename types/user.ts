@@ -35,6 +35,7 @@ export interface UserDetail {
     open_to_special_needs: boolean
     created_at: string
     updated_at: string
+    is_active?: boolean
 }
 
 export interface Role {

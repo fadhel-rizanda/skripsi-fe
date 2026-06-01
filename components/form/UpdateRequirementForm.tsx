@@ -115,14 +115,14 @@ export default function UpdateRequirementForm({ adoptionId, requirement, onSucce
                         type="button"
                         variant="outline"
                         onClick={onCancel}
-                        className="flex-1 rounded-xl h-9 text-xs font-bold gap-1.5 border-red-200 text-red-500 hover:bg-red-50"
+                        className="flex-1 rounded-xl h-9 text-xs gap-1.5 border-red-200 text-red-500 hover:bg-red-50"
                     >
                         <XCircle className="w-4 h-4" />
                         Cancel
                     </Button>
                     <Button
                         type="submit"
-                        className="flex-1 bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-9 text-xs font-bold gap-1.5"
+                        className="flex-1 bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-9 text-xs gap-1.5"
                     >
                         <Save className="w-4 h-4" />
                         Update Requirement

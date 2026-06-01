@@ -28,6 +28,15 @@ import {
 } from "@/components/ui/form";
 import { SearchableCombobox } from "@/components/combobox/SearchableCombobox";
 import { TagBadge } from "@/components/badge/TagBadge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ActionDialog } from "@/components/dialog/ActionDialog";
 
 import { PetCard } from "@/components/card/PetCard";
 import { PaginationBar } from "@/components/pagination/PaginationBar";
@@ -58,6 +67,11 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
   const [profile, setProfile] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Deactivate account state
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
+  const [deactivatePassword, setDeactivatePassword] = useState("");
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
 
   // Avatar upload state
   const [avatarFile, setAvatarFile] = useState<File | undefined>();
@@ -291,6 +305,15 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
     setAvatarFile(file);
   }
 
+  const handleConfirmPassword = () => {
+    if (!deactivatePassword) {
+      toast.error("Password is required to deactivate account.");
+      return;
+    }
+    setIsDeactivateDialogOpen(false);
+    setIsActionDialogOpen(true);
+  };
+
   if (isLoading)
     return (
       <div className="p-10 text-center">
@@ -307,9 +330,19 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
 
   const joinedYear = new Date(profile.created_at).getFullYear();
 
+  const isDeactivated = profile.is_active === false;
+
   return (
     <div className="min-h-screen bg-green-50 py-6 sm:py-10 px-3 sm:px-4 md:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
+        {isDeactivated && (
+          <div className="w-full px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-xl flex items-center gap-3 shadow-sm text-left">
+            <Icon icon="ph:warning-circle" className="w-5 h-5 shrink-0 text-red-600" />
+            <div className="text-sm font-semibold">
+              Notice: This user profile is deactivated.
+            </div>
+          </div>
+        )}
         {/* Single unified card: header + all form sections */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Profile Header */}
@@ -341,7 +374,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                   )}
                 </button>
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                <div className={`w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center ${isDeactivated ? "grayscale opacity-75" : ""}`}>
                   {avatarPreviewUrl ? (
                     <img
                       src={avatarPreviewUrl}
@@ -390,10 +423,20 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 shrink-0 w-full sm:w-auto mt-4 sm:mt-0">
               {isOwnProfile && !isEditing && (
-                <Button variant="outline" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => setIsEditing(true)}>
-                  <Icon icon="ph:pencil" className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-                  Edit Profile
-                </Button>
+                <>
+                  <Button variant="outline" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => setIsEditing(true)}>
+                    <Icon icon="ph:pencil" className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                    Edit Profile
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => setIsDeactivateDialogOpen(true)}
+                  >
+                    <Icon icon="ph:user-minus" className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                    Deactivate Account
+                  </Button>
+                </>
               )}
               {isOwnProfile && (
                 <Button variant="destructive" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11" onClick={() => signOut()}>
@@ -401,7 +444,7 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
                 </Button>
               )}
               {!isOwnProfile && (
-                  <ChatButton targetUserId={userId} label="Chat" className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11 bg-[#19E619] hover:bg-green-500 text-black px-4 font-bold gap-1.5"/>
+                  <ChatButton targetUserId={userId} label="Chat" disabled={isDeactivated} className="w-full sm:w-auto flex-1 text-sm sm:text-base h-10 sm:h-11 bg-[#19E619] hover:bg-green-500 text-black px-4 font-bold gap-1.5"/>
               )}
             </div>
           </div>
@@ -949,6 +992,79 @@ export default function UserProfileDashboard({ userId }: { userId: string }) {
 
         <div className="pb-8" />
       </div>
+
+      <Dialog open={isDeactivateDialogOpen} onOpenChange={setIsDeactivateDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Icon icon="ph:warning" className="w-6 h-6 text-red-600" />
+              Deactivate Account
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-sm mt-2">
+              Are you sure you want to deactivate your account?
+              Please enter your password to confirm deactivation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="deactivate-password-input" className="text-sm font-semibold text-gray-700">
+                Password
+              </label>
+              <Input
+                id="deactivate-password-input"
+                type="password"
+                placeholder="Enter your password"
+                value={deactivatePassword}
+                onChange={(e) => setDeactivatePassword(e.target.value)}
+                className="w-full text-sm h-10 border-gray-300 focus:border-red-500 focus:ring-red-500"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeactivateDialogOpen(false);
+                setDeactivatePassword("");
+              }}
+              className="w-full sm:w-auto text-sm h-10 border-gray-200 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmPassword}
+              disabled={!deactivatePassword}
+              className="w-full sm:w-auto text-sm h-10 bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center"
+            >
+              Deactivate Account
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ActionDialog
+        open={isActionDialogOpen}
+        onOpenChange={setIsActionDialogOpen}
+        onConfirm={async () => {
+          await userService.deactivateOwnAccount(deactivatePassword);
+        }}
+        onContinue={() => {
+          setDeactivatePassword("");
+          signOut({ callbackUrl: "/login" });
+        }}
+        title="Confirm Account Deactivation"
+        description="Are you sure you want to deactivate your account? This action cannot be undone and you will be signed out of all sessions."
+        confirmText="Deactivate"
+        cancelText="Cancel"
+        confirmVariant="destructive"
+        successTitle="Account Deactivated"
+        successDescription="Your account has been deactivated successfully. You will be signed out now."
+        errorTitle="Deactivation Failed"
+        errorDescription="Could not deactivate your account. Please make sure your password is correct."
+      />
     </div>
   );
 }

@@ -18,11 +18,13 @@ import {CalendarClock} from "lucide-react";
 interface HandoverCollapsibleProps {
     currentUser?: UserProfile;
     adoption?: Adoption | null;
+    isPartyDeactivated?: boolean;
 }
 
 export default function HandoverCollapsible({
                                                 currentUser,
                                                 adoption,
+                                                isPartyDeactivated = false,
                                             }: HandoverCollapsibleProps) {
     const [handover, setHandover] = useState<Handover | null>(null);
     const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function HandoverCollapsible({
     const stageState = getStageState(adoption, "Handover");
     const dotColor = getDotColor(stageState);
     const headerBadge = getHeaderBadge(stageState, adoption);
-    const isReadOnly = stageState === "done" || stageState === "inactive";
+    const isReadOnly = stageState === "done" || stageState === "inactive" || isPartyDeactivated;
 
     const meetNGreet = handover?.meet_n_greet;
     const hasSchedule = !!meetNGreet?.schedule;
@@ -196,6 +198,7 @@ export default function HandoverCollapsible({
                                                 triggerHandoverRefresh();
                                                 triggerAdoptionRefresh();
                                             }}
+                                            isDisabled={isPartyDeactivated}
                                         />
                                     ) : (
                                         <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">

@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
 
 import { Card } from "@/components/ui/card";
+import clsx from "clsx";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -427,28 +428,53 @@ export default function PostDetailPage() {
         <Card className="rounded-2xl border-0 shadow-sm overflow-hidden px-4 pt-4 pb-3 flex flex-col gap-3">
 
           <div className="flex items-center justify-between gap-2">
-            <Link
-              href={`/profile/${post.created_by.id}`}
-              className="flex items-center gap-2.5 group min-w-0"
-            >
-              <Avatar className="h-9 w-9 shrink-0 border border-gray-200 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
-                <AvatarImage
-                  src={post.created_by.avatar || undefined}
-                  alt={post.created_by.name}
-                />
-                <AvatarFallback>
-                  {post.created_by.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate group-hover:underline">
-                  {post.created_by.name}
-                </span>
-                <span className="text-[11px] text-gray-400 leading-tight">
-                  {formatRelativeTime(post.created_at)}
-                </span>
+            {!post.created_by.is_active ? (
+              <div className="flex items-center gap-2.5 min-w-0 opacity-75">
+                <Avatar className="h-9 w-9 shrink-0 border border-gray-200 grayscale">
+                  <AvatarImage
+                    src={post.created_by.avatar || undefined}
+                    alt="Deactivated User"
+                  />
+                  <AvatarFallback>D</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-gray-500 text-xs sm:text-sm leading-tight truncate italic">
+                      Deactivated User
+                    </span>
+                    <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 text-[10px] px-1.5 py-0 leading-none h-4">
+                      Deactivated
+                    </Badge>
+                  </div>
+                  <span className="text-[11px] text-gray-400 leading-tight">
+                    {formatRelativeTime(post.created_at)}
+                  </span>
+                </div>
               </div>
-            </Link>
+            ) : (
+              <Link
+                href={`/profile/${post.created_by.id}`}
+                className="flex items-center gap-2.5 group min-w-0"
+              >
+                <Avatar className="h-9 w-9 shrink-0 border border-gray-200 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                  <AvatarImage
+                    src={post.created_by.avatar || undefined}
+                    alt={post.created_by.name}
+                  />
+                  <AvatarFallback>
+                    {post.created_by.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 text-left">
+                  <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate group-hover:underline">
+                    {post.created_by.name}
+                  </span>
+                  <span className="text-[11px] text-gray-400 leading-tight">
+                    {formatRelativeTime(post.created_at)}
+                  </span>
+                </div>
+              </Link>
+            )}
 
             {post.created_by.id === session?.user?.id && (
               <>
@@ -551,8 +577,13 @@ export default function PostDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              className={`justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-green-600 hover:bg-green-50 ${post.is_liked ? "text-green-600 bg-green-50" : ""}`}
-              onClick={handleLike}
+              className={clsx(
+                "justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-green-600 hover:bg-green-50",
+                post.is_liked ? "text-green-600 bg-green-50" : "",
+                !post.created_by.is_active && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-gray-600"
+              )}
+              onClick={!post.created_by.is_active ? undefined : handleLike}
+              disabled={!post.created_by.is_active}
             >
               <Icon icon="lucide:thumbs-up" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
               <span className="text-xs font-medium truncate">
@@ -562,8 +593,12 @@ export default function PostDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-              onClick={handleAddCommentClick}
+              className={clsx(
+                "justify-center gap-1.5 px-2 h-8 text-gray-600 hover:text-blue-600 hover:bg-blue-50",
+                !post.created_by.is_active && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-gray-600"
+              )}
+              onClick={!post.created_by.is_active ? undefined : handleAddCommentClick}
+              disabled={!post.created_by.is_active}
             >
               <Icon icon="lucide:message-square" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
               <span className="text-xs font-medium truncate">{commentsPagination.total} Comments</span>
@@ -599,18 +634,31 @@ export default function PostDetailPage() {
           ref={commentsSectionRef}
           className="bg-transparent shadow-none border-0"
         >
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm sm:text-lg font-bold text-gray-900">
-              Comments ({commentsPagination.total})
-            </h2>
-            <Button
-              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 sm:px-5 py-2 sm:py-3 h-auto"
-              onClick={handleAddCommentClick}
-            >
-              <Icon icon="lucide:plus" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Add a comment</span>
-              <span className="sm:hidden">Comment</span>
-            </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm sm:text-lg font-bold text-gray-900">
+                Comments ({commentsPagination.total})
+              </h2>
+              <Button
+                className={clsx(
+                  "bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 sm:px-5 py-2 sm:py-3 h-auto",
+                  !post.created_by.is_active && "opacity-50 cursor-not-allowed bg-green-400 hover:bg-green-400"
+                )}
+                onClick={!post.created_by.is_active ? undefined : handleAddCommentClick}
+                disabled={!post.created_by.is_active}
+              >
+                <Icon icon="lucide:plus" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Add a comment</span>
+                <span className="sm:hidden">Comment</span>
+              </Button>
+            </div>
+            
+            {!post.created_by.is_active && (
+              <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg mb-4 text-left">
+                <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0 text-amber-600" />
+                <span>This post was created by a deactivated user. Likes and comments are disabled.</span>
+              </div>
+            )}
           </div>
 
           {/* Add Comment */}
@@ -671,31 +719,54 @@ export default function PostDetailPage() {
                   <div key={comment.id} className="space-y-2">
                     {/* Comment row */}
                     <div className="flex gap-2 sm:gap-3">
-                      <Link
-                        href={`/profile/${comment.created_by.id}`}
-                        className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
-                      >
-                        <Avatar className="h-7 w-7 sm:h-9 sm:w-9 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
-                          <AvatarImage
-                            src={comment.created_by.avatar || undefined}
-                            alt={comment.created_by.name}
-                          />
-                          <AvatarFallback>
-                            {comment.created_by.name
-                              .substring(0, 2)
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div className="flex-1 bg-white border border-gray-100 rounded-xl px-2.5 sm:px-4 py-2 sm:py-3">
+                      {!comment.created_by.is_active ? (
+                        <div className="shrink-0 rounded-full opacity-75 grayscale">
+                          <Avatar className="h-7 w-7 sm:h-9 sm:w-9 border border-gray-300 shrink-0">
+                            <AvatarImage
+                              src={comment.created_by.avatar || undefined}
+                              alt="Deactivated User"
+                            />
+                            <AvatarFallback>D</AvatarFallback>
+                          </Avatar>
+                        </div>
+                      ) : (
+                        <Link
+                          href={`/profile/${comment.created_by.id}`}
+                          className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                        >
+                          <Avatar className="h-7 w-7 sm:h-9 sm:w-9 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                            <AvatarImage
+                              src={comment.created_by.avatar || undefined}
+                              alt={comment.created_by.name}
+                            />
+                            <AvatarFallback>
+                              {comment.created_by.name
+                                .substring(0, 2)
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Link>
+                      )}
+                      <div className="flex-1 bg-white border border-gray-100 rounded-xl px-2.5 sm:px-4 py-2 sm:py-3 text-left">
                         <div className="flex items-start justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <Link
-                              href={`/profile/${comment.created_by.id}`}
-                              className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
-                            >
-                              {comment.created_by.name}
-                            </Link>
+                            {!comment.created_by.is_active ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-gray-500 text-xs sm:text-sm italic">
+                                  Deactivated User
+                                </span>
+                                <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 text-[10px] px-1.5 py-0 leading-none h-4">
+                                  Deactivated
+                                </Badge>
+                              </div>
+                            ) : (
+                              <Link
+                                href={`/profile/${comment.created_by.id}`}
+                                className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline max-w-32 sm:max-w-48 md:max-w-xl truncate"
+                              >
+                                {comment.created_by.name}
+                              </Link>
+                            )}
                             <span className="text-[10px] sm:text-xs text-gray-400">
                               • {formatRelativeTime(comment.created_at)}
                             </span>
@@ -713,7 +784,7 @@ export default function PostDetailPage() {
                           {comment.content}
                         </p>
                         <div className="mt-2 flex items-center gap-3">
-                          {session?.user?.id ? (
+                          {session?.user?.id && comment.created_by.is_active && post.created_by.is_active ? (
                             <CommentFormDialog
                               postId={post.id}
                               parentId={comment.id}
@@ -778,31 +849,54 @@ export default function PostDetailPage() {
                         )}
                         {repState.replies.map((reply) => (
                           <div key={reply.id} className="flex gap-2 sm:gap-3">
-                            <Link
-                              href={`/profile/${reply.created_by.id}`}
-                              className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
-                            >
-                              <Avatar className="h-6 w-6 sm:h-8 sm:w-8 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
-                                <AvatarImage
-                                  src={reply.created_by.avatar || undefined}
-                                  alt={reply.created_by.name}
-                                />
-                                <AvatarFallback>
-                                  {reply.created_by.name
-                                    .substring(0, 2)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                            </Link>
-                            <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                            {!reply.created_by.is_active ? (
+                              <div className="shrink-0 rounded-full opacity-75 grayscale">
+                                <Avatar className="h-6 w-6 sm:h-8 sm:w-8 border border-gray-300 shrink-0">
+                                  <AvatarImage
+                                    src={reply.created_by.avatar || undefined}
+                                    alt="Deactivated User"
+                                  />
+                                  <AvatarFallback>D</AvatarFallback>
+                                </Avatar>
+                              </div>
+                            ) : (
+                              <Link
+                                href={`/profile/${reply.created_by.id}`}
+                                className="group shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                              >
+                                <Avatar className="h-6 w-6 sm:h-8 sm:w-8 border border-gray-300 shrink-0 transition-shadow duration-200 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-1">
+                                  <AvatarImage
+                                    src={reply.created_by.avatar || undefined}
+                                    alt={reply.created_by.name}
+                                  />
+                                  <AvatarFallback>
+                                    {reply.created_by.name
+                                      .substring(0, 2)
+                                      .toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </Link>
+                            )}
+                            <div className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-left">
                               <div className="flex items-start justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                  <Link
-                                    href={`/profile/${reply.created_by.id}`}
-                                    className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline"
-                                  >
-                                    {reply.created_by.name}
-                                  </Link>
+                                  {!reply.created_by.is_active ? (
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-semibold text-gray-500 text-xs sm:text-sm italic">
+                                        Deactivated User
+                                      </span>
+                                      <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200 text-[10px] px-1.5 py-0 leading-none h-4">
+                                        Deactivated
+                                      </Badge>
+                                    </div>
+                                  ) : (
+                                    <Link
+                                      href={`/profile/${reply.created_by.id}`}
+                                      className="font-semibold text-gray-900 text-xs sm:text-sm hover:underline"
+                                    >
+                                      {reply.created_by.name}
+                                    </Link>
+                                  )}
                                   <span className="text-[10px] sm:text-xs text-gray-400">
                                     • {formatRelativeTime(reply.created_at)}
                                   </span>

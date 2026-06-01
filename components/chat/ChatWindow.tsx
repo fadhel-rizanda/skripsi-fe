@@ -133,6 +133,7 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
     const processedPetShareKeyRef = useRef<string | null>(null);
+    const isOtherMemberDeactivated = chat.type === "private" && chat.users[0]?.is_active === false;
     const isChatDisabled = chat.active_member_count < 2;
     const { triggerRefresh } = useChatStore();
     const searchParams = useSearchParams();
@@ -561,9 +562,12 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
                             trigger={
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-80 transition-opacity"
+                                    className={clsx(
+                                        "flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-80 transition-opacity",
+                                        isOtherMemberDeactivated && "opacity-75"
+                                    )}
                                 >
-                                    <Avatar className="h-8 w-8">
+                                    <Avatar className={clsx("h-8 w-8", isOtherMemberDeactivated && "grayscale")}>
                                         {chat.users[0]?.avatar && isValidUrl(chat.users[0].avatar) ? (
                                             <Image
                                                 src={chat.users[0].avatar}
@@ -579,7 +583,9 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
                                             </AvatarFallback>
                                         )}
                                     </Avatar>
-                                    <span className="truncate">{chat.name}</span>
+                                    <span className={clsx("truncate", isOtherMemberDeactivated && "text-gray-500 italic")}>
+                                        {chat.name}
+                                    </span>
                                 </button>
                             }
                         />
@@ -797,12 +803,17 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
 
                 {/* Input Area */}
                 <div className="bg-white border-t px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2">
-                    {isChatDisabled && (
+                    {isOtherMemberDeactivated ? (
+                        <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
+                            <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
+                            <span>This conversation is inactive because the user has deactivated their account.</span>
+                        </div>
+                    ) : isChatDisabled ? (
                         <div className="flex items-center gap-2 px-3 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
                             <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0" />
                             <span>This conversation is no longer active because the other member has left. Please start a new conversation{isDirectPrivate && ` or reactivate by click "Chat" button in their profile`}.</span>
                         </div>
-                    )}
+                    ) : null}
                     {file && (
                         <div
                             className="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg flex items-center justify-between border border-emerald-200">

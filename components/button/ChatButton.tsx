@@ -24,6 +24,7 @@ interface ChatButtonProps {
     size?: "default" | "sm" | "lg" | "icon";
     iconClassName?: string;
     petShare?: ChatButtonPetShare;
+    disabled?: boolean;
 }
 
 export default function ChatButton({
@@ -33,6 +34,7 @@ export default function ChatButton({
     size,
     iconClassName,
     petShare,
+    disabled = false,
 }: ChatButtonProps) {
     const router = useRouter();
     const { data: session } = useSession();
@@ -103,7 +105,7 @@ export default function ChatButton({
     return (
         <Button
             onClick={handleChat}
-            disabled={isLoading || !targetUserId}
+            disabled={isLoading || !targetUserId || disabled}
             size={size}
             className={
                 className ??

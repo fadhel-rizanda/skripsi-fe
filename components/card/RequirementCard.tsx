@@ -48,6 +48,7 @@ export default function RequirementCard({
                                             onApproveAction,
                                             onRejectAction,
                                             onDeleteAction,
+                                            isDisabled = false,
                                         }: {
     requirement: Requirement;
     adoptionId: string;
@@ -55,6 +56,7 @@ export default function RequirementCard({
     onApproveAction?: (req: Requirement) => void;
     onRejectAction?: (req: Requirement) => void;
     onDeleteAction?: (req: Requirement) => void;
+    isDisabled?: boolean;
 }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -170,7 +172,7 @@ export default function RequirementCard({
                             <Button
                                 className="bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-8 px-3 text-xs font-bold gap-1.5"
                                 onClick={triggerFileInput}
-                                disabled={uploading}
+                                disabled={uploading || isDisabled}
                             >
                                 {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Reupload"}
@@ -188,7 +190,7 @@ export default function RequirementCard({
                             <Button
                                 className="bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-8 px-3 text-xs font-bold gap-1.5"
                                 onClick={triggerFileInput}
-                                disabled={uploading}
+                                disabled={uploading || isDisabled}
                             >
                                 {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Upload"}
@@ -222,7 +224,7 @@ export default function RequirementCard({
                             <ThumbsDown className="h-4 w-4"/>
                         </button>
 
-                        {!isCompleted && (
+                        {!isCompleted && !isDisabled && (
                             <UpdateRequirementDialog
                                 adoptionId={adoptionId}
                                 requirement={requirement}
@@ -235,7 +237,7 @@ export default function RequirementCard({
                             />
                         )}
 
-                        {!isCompleted && !hasFile && (
+                        {!isCompleted && !hasFile && !isDisabled && (
                             <button
                                 onClick={() => onDeleteAction?.(requirement)}
                                 title="Delete requirement"

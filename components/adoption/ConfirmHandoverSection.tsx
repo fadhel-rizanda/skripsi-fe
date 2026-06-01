@@ -18,6 +18,7 @@ interface ConfirmHandoverSectionProps {
     handover: Handover;
     role?: string;
     onConfirmChange?: () => void;
+    isDisabled?: boolean;
 }
 
 export default function ConfirmHandoverSection({
@@ -26,6 +27,7 @@ export default function ConfirmHandoverSection({
                                                    handover,
                                                    role,
                                                    onConfirmChange,
+                                                   isDisabled = false,
                                                }: ConfirmHandoverSectionProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -166,7 +168,7 @@ export default function ConfirmHandoverSection({
                                 variant="outline"
                                 className="rounded-xl h-8 px-3 text-xs font-bold gap-1.5 border-slate-300 mt-1"
                                 onClick={() => fileInputRef.current?.click()}
-                                disabled={uploading}
+                                disabled={uploading || isDisabled}
                             >
                                 {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                                 {uploading ? "Uploading..." : "Add / Replace Files"}
@@ -182,7 +184,7 @@ export default function ConfirmHandoverSection({
                         <Button
                             className="bg-[#19E619] hover:bg-green-500 text-black rounded-xl h-8 px-4 text-xs font-bold gap-1.5"
                             onClick={() => fileInputRef.current?.click()}
-                            disabled={uploading}
+                            disabled={uploading || isDisabled}
                         >
                             {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Upload className="h-3.5 w-3.5"/>}
                             {uploading ? "Uploading..." : "Browse Files"}
@@ -195,12 +197,12 @@ export default function ConfirmHandoverSection({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Adopter Confirmation</span>
-                    <label className={`flex items-start gap-2 ${role === "adopter" && hasEvidence && !adopterFinalized ? "cursor-pointer" : "cursor-default"}`}>
+                    <label className={`flex items-start gap-2 ${role === "adopter" && hasEvidence && !adopterFinalized && !isDisabled ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={adopterFinalized}
-                            disabled={role !== "adopter" || !hasMyEvidence || adopterFinalized}
-                            onChange={role === "adopter" && !adopterFinalized ? () => setDialogOpen(true) : undefined}
+                            disabled={role !== "adopter" || !hasMyEvidence || adopterFinalized || isDisabled}
+                            onChange={role === "adopter" && !adopterFinalized && !isDisabled ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>
@@ -209,12 +211,12 @@ export default function ConfirmHandoverSection({
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Provider Confirmation</span>
-                    <label className={`flex items-start gap-2 ${role === "provider" && hasEvidence && !providerFinalized ? "cursor-pointer" : "cursor-default"}`}>
+                    <label className={`flex items-start gap-2 ${role === "provider" && hasEvidence && !providerFinalized && !isDisabled ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={providerFinalized}
-                            disabled={role !== "provider" || !hasMyEvidence || providerFinalized}
-                            onChange={role === "provider" && !providerFinalized ? () => setDialogOpen(true) : undefined}
+                            disabled={role !== "provider" || !hasMyEvidence || providerFinalized || isDisabled}
+                            onChange={role === "provider" && !providerFinalized && !isDisabled ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>
@@ -223,12 +225,12 @@ export default function ConfirmHandoverSection({
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 flex flex-col gap-2">
                     <span className="text-xs font-bold text-slate-900">Admin Confirmation</span>
-                    <label className={`flex items-start gap-2 ${currentUser?.role?.name === "admin" && hasEvidence && !handover.admin_finalized ? "cursor-pointer" : "cursor-default"}`}>
+                    <label className={`flex items-start gap-2 ${currentUser?.role?.name === "admin" && hasEvidence && !handover.admin_finalized && !isDisabled ? "cursor-pointer" : "cursor-default"}`}>
                         <input
                             type="checkbox"
                             checked={handover.admin_finalized}
-                            disabled={currentUser?.role?.name !== "admin" || !hasEvidence || handover.admin_finalized}
-                            onChange={currentUser?.role?.name === "admin" && !handover.admin_finalized ? () => setDialogOpen(true) : undefined}
+                            disabled={currentUser?.role?.name !== "admin" || !hasEvidence || handover.admin_finalized || isDisabled}
+                            onChange={currentUser?.role?.name === "admin" && !handover.admin_finalized && !isDisabled ? () => setDialogOpen(true) : undefined}
                             className="mt-0.5 accent-[#19E619] h-3.5 w-3.5 shrink-0"
                         />
                         <span className="text-xs text-slate-600">I confirm the handover is complete.</span>

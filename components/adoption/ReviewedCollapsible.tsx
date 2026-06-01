@@ -14,14 +14,16 @@ import {useAdoptionStore} from "@/store/useAdoptionStore";
 import {ActionDialog} from "@/components/dialog/ActionDialog";
 import {RejectDialog} from "@/components/dialog/RejectDialog";
 import {RejectInput} from "@/schemas/adoption.schema";
+import {Icon} from "@iconify/react";
 
 interface ReviewedCollapsibleProps {
     currentUser?: UserProfile;
     adoption?: Adoption | null;
     onUpload?: (req: Requirement) => void;
+    isPartyDeactivated?: boolean;
 }
 
-export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCollapsibleProps) {
+export default function ReviewedCollapsible({currentUser, adoption, isPartyDeactivated = false}: ReviewedCollapsibleProps) {
     const [requirements, setRequirements] = useState<Requirement[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -34,7 +36,7 @@ export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCol
     const stageState = getStageState(adoption, "Requirement");
     const dotColor = getDotColor(stageState);
     const headerBadge = getHeaderBadge(stageState, adoption);
-    const isReadOnly = stageState === "done" || stageState === "inactive";
+    const isReadOnly = stageState === "done" || stageState === "inactive" || isPartyDeactivated;
 
     useEffect(() => {
         if (!adoption?.id) return;
@@ -211,10 +213,17 @@ export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCol
                     </AccordionTrigger>
 
                     <AccordionContent className="pt-0 pb-3 sm:pb-4 text-xs sm:text-sm">
-                        <p className="text-slate-500 mb-4">
+                        <p className="text-slate-500 mb-3">
                             Our team has reviewed your initial application. To proceed, we require some
                             additional documents. Please upload the following items for our review.
                         </p>
+
+                        <div className="w-full max-w-4xl p-3 mb-4  bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-3 shadow-sm">
+                            <Icon icon="ph:warning-circle" className="w-5 h-5 shrink-0 text-amber-600" />
+                            <div className="text-sm font-medium text-left">
+                                Please do not provide or fill in highly sensitive private data (such as KTP, KK, NPWP, etc.) unless it is absolutely necessary.
+                            </div>
+                        </div>
 
                         {/* Both roles can set requirements + finalize their own */}
                         {!isReadOnly && (
@@ -261,6 +270,7 @@ export default function ReviewedCollapsible({currentUser, adoption}: ReviewedCol
                                             onApproveAction={isReadOnly ? undefined : handleApprove}
                                             onRejectAction={isReadOnly ? undefined : handleReject}
                                             onDeleteAction={isReadOnly ? undefined : handleDelete}
+                                            isDisabled={isPartyDeactivated}
                                         />
                                     ))}
                                 </div>

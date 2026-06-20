@@ -633,6 +633,9 @@ function ChatWindow({ chat, onBack }: { chat: Chat; onBack?: () => void; }) {
                                     </span>
                                     <span className="text-[11px] text-gray-500">
                                         {new Date(m.created_at).toLocaleTimeString([], {
+                                            month: "2-digit",
+                                            day: "2-digit",
+                                            year: "2-digit",
                                             hour: '2-digit',
                                             minute: '2-digit'
                                         })}

@@ -24,7 +24,7 @@ export default function AdoptionTerminateButton({
                                                     currentUser,
                                                     onSuccess,
                                                     className,
-                                                    isCanceled,
+                                                    isCanceled = false,
                                                 }: AdoptionTerminateButtonProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);

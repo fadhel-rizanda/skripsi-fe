@@ -45,7 +45,7 @@ export default function SubmittedCollapsible({
         adoption?.stage_tag.name.toLowerCase() !== "completed" &&
         adoption?.stage_tag.name.toLowerCase() !== "rejected";
 
-    const isCanceled = adoption?.stage_tag.name === 'Cancelled';
+    const isCanceled = adoption?.stage_tag?.name?.toLowerCase() === 'cancelled';
 
     if (!adoption) {
         return (

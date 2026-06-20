@@ -161,7 +161,13 @@ export default function ChatSidebar() {
                                         </h3>
                                         {chat?.last_message && (
                                             <span className="text-[10px] text-gray-500 shrink-0 ml-1">
-                                                {new Date(chat.last_message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {new Date(chat.last_message.created_at).toLocaleString([], {
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    year: "2-digit",
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
                                             </span>
                                         )}
                                     </div>

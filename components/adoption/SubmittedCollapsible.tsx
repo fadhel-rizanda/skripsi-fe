@@ -45,6 +45,8 @@ export default function SubmittedCollapsible({
         adoption?.stage_tag.name.toLowerCase() !== "completed" &&
         adoption?.stage_tag.name.toLowerCase() !== "rejected";
 
+    const isCanceled = adoption?.stage_tag?.name?.toLowerCase() === 'cancelled';
+
     if (!adoption) {
         return (
         <div className="w-full max-w-4xl border rounded-xl sm:rounded-2xl px-3 sm:px-4 py-3 sm:py-4 bg-white animate-pulse">
@@ -122,6 +124,7 @@ export default function SubmittedCollapsible({
                                 <AdoptionTerminateButton
                                     adoption={adoption}
                                     currentUser={currentUser}
+                                    isCanceled={isCanceled}
                                     onSuccess={() => router.push("/adoptions")}
                                 />
                             )

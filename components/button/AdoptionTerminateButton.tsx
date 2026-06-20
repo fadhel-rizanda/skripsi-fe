@@ -16,6 +16,7 @@ interface AdoptionTerminateButtonProps {
     currentUser?: UserProfile | null;
     onSuccess?: () => void;
     className?: string;
+    isCanceled?: boolean;
 }
 
 export default function AdoptionTerminateButton({
@@ -23,6 +24,7 @@ export default function AdoptionTerminateButton({
                                                     currentUser,
                                                     onSuccess,
                                                     className,
+                                                    isCanceled = false,
                                                 }: AdoptionTerminateButtonProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +76,7 @@ export default function AdoptionTerminateButton({
         <>
             <Button
                 onClick={() => setIsDialogOpen(true)}
-                disabled={isLoading}
+                disabled={isLoading || isCanceled}
                 variant="destructive"
                 className={
                     className ??

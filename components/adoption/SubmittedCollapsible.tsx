@@ -9,6 +9,9 @@ import {UserProfile} from "@/types";
 import ChatButton from "@/components/button/ChatButton";
 import {useRouter} from "next/navigation";
 import AdoptionTerminateButton from "@/components/button/AdoptionTerminateButton";
+import {Button} from "@/components/ui/button";
+import {Icon} from "@iconify/react";
+import {ReportDialog} from "@/components/dialog/ReportDialog";
 
 export default function SubmittedCollapsible({
                                                  adoption,
@@ -117,26 +120,38 @@ export default function SubmittedCollapsible({
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        {
-                            isActive && !isPartyDeactivated &&
-                            (
-                                <AdoptionTerminateButton
-                                    adoption={adoption}
-                                    currentUser={currentUser}
-                                    isCanceled={isCanceled}
-                                    onSuccess={() => router.push("/adoptions")}
-                                />
-                            )
-                        }
+                    <div className="flex flex-wrap gap-2 mt-4 justify-between">
+                        <div className="flex flex-wrap gap-2">
+                            {
+                                isActive && !isPartyDeactivated &&
+                                (
+                                    <AdoptionTerminateButton
+                                        adoption={adoption}
+                                        currentUser={currentUser}
+                                        isCanceled={isCanceled}
+                                        onSuccess={() => router.push("/adoptions")}
+                                    />
+                                )
+                            }
 
-                        {otherUserId && (
-                            <ChatButton
-                                targetUserId={otherUserId}
-                                label={`Chat ${role}`}
-                                disabled={isPartyDeactivated}
-                            />
-                        )}
+                            {otherUserId && (
+                                <ChatButton
+                                    targetUserId={otherUserId}
+                                    label={`Chat ${role}`}
+                                    disabled={isPartyDeactivated}
+                                />
+                            )}
+                        </div>
+                        <ReportDialog
+                            referenceType="adoption"
+                            referenceId={adoption.id}
+                            trigger={
+                                <Button variant="ghost" size="sm" className="bg-amber-500 hover:bg-amber-600 rounded-2xl px-4 h-8 text-xs font-bold gap-1.5 text-white hover:text-white">
+                                    <Icon icon="lucide:flag" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="text-xs font-medium">Report</span>
+                                </Button>
+                            }
+                        />
                     </div>
                 </AccordionContent>
             </AccordionItem>

@@ -56,6 +56,7 @@ function getReferenceHref(referenceType: string, referenceId: string) {
         case "POST":      return `/posts/${referenceId}`;
         case "COMMUNITY": return `/explore/communities/${referenceId}`;
         case "PETS":      return `/pets/${referenceId}`;
+        case "ADOPTION":      return `/adoptions/${referenceId}`;
         default:          return null;
     }
 }

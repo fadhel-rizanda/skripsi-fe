@@ -218,9 +218,9 @@ export default function ReviewedCollapsible({currentUser, adoption, isPartyDeact
                             additional documents. Please upload the following items for our review.
                         </p>
 
-                        <div className="w-full max-w-4xl p-3 mb-4  bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-3 shadow-sm">
-                            <Icon icon="ph:warning-circle" className="w-5 h-5 shrink-0 text-amber-600" />
-                            <div className="text-sm font-medium text-left">
+                        <div className="w-full max-w-4xl px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-center gap-3 shadow-sm">
+                            <Icon icon="ph:warning-circle" className="w-4 h-4 shrink-0 text-amber-600" />
+                            <div className="text-xs font-medium text-left">
                                 Please do not provide or fill in highly sensitive private data (such as KTP, KK, NPWP, etc.) unless it is absolutely necessary.
                             </div>
                         </div>
